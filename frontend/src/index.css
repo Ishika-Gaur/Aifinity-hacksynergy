@@ -7,70 +7,74 @@
    values. Change a size here once, it updates everywhere.
    ========================================================================== */
 @theme {
-  --text-xs:   0.8125rem;  /* 13px — was 12px */
-  --text-xs--line-height: 1.25rem;
+  --text-xs:   0.875rem;   /* 14px */
+  --text-xs--line-height: 1.3rem;
 
-  --text-sm:   0.9375rem;  /* 15px — was 14px */
-  --text-sm--line-height: 1.4rem;
+  --text-sm:   1rem;       /* 16px */
+  --text-sm--line-height: 1.5rem;
 
-  --text-base: 1.0625rem;  /* 17px — was 16px */
-  --text-base--line-height: 1.65rem;
+  --text-base: 1.125rem;   /* 18px */
+  --text-base--line-height: 1.75rem;
 
-  --text-lg:   1.1875rem;  /* 19px — was 18px */
-  --text-lg--line-height: 1.75rem;
+  --text-lg:   1.25rem;    /* 20px */
+  --text-lg--line-height: 1.85rem;
 
-  --text-xl:   1.375rem;   /* 22px — was 20px */
-  --text-xl--line-height: 1.85rem;
+  --text-xl:   1.4375rem;  /* 23px */
+  --text-xl--line-height: 1.95rem;
 
-  --text-2xl:  1.625rem;   /* 26px — was 24px */
-  --text-2xl--line-height: 2rem;
+  --text-2xl:  1.6875rem;  /* 27px */
+  --text-2xl--line-height: 2.1rem;
 
-  --text-3xl:  2rem;       /* 32px — was 30px */
-  --text-3xl--line-height: 2.3rem;
+  --text-3xl:  2.0625rem;  /* 33px */
+  --text-3xl--line-height: 2.4rem;
 
-  --text-4xl:  2.5rem;     /* 40px — was 36px */
-  --text-4xl--line-height: 2.7rem;
+  --text-4xl:  2.5625rem;  /* 41px */
+  --text-4xl--line-height: 2.8rem;
 
-  --text-5xl:  3.25rem;    /* 52px — was 48px */
+  --text-5xl:  3.3125rem;  /* 53px */
   --text-5xl--line-height: 1.1;
 
-  --text-6xl:  4rem;       /* 64px — was 60px */
+  --text-6xl:  4.0625rem;  /* 65px */
   --text-6xl--line-height: 1.05;
 }
 
 /* ==========================================================================
-   Color Palette — Blue & White Theme
+   Color Palette — Navy / Indigo / Cyan Theme
    Use these CSS variables wherever a raw hex would otherwise be hardcoded,
    so the whole design system stays consistent and easy to re-theme later.
    ========================================================================== */
 :root {
-  /* Primary blues — buttons, links, active states, highlights */
-  --color-primary-50:  #eff6ff;
-  --color-primary-100: #dbeafe;
-  --color-primary-200: #bfdbfe;
-  --color-primary-300: #93c5fd;
-  --color-primary-400: #60a5fa;
-  --color-primary-500: #3b82f6;  /* main brand blue */
-  --color-primary-600: #2563eb;  /* primary button / hover */
-  --color-primary-700: #1d4ed8;  /* active / pressed */
-  --color-primary-800: #1e40af;
-  --color-primary-900: #1e3a8a;
+  /* Primary — indigo scale — buttons, links, active states, highlights */
+  --color-primary-50:  #eef2ff;
+  --color-primary-100: #e0e7ff;
+  --color-primary-200: #c7d2fe;
+  --color-primary-300: #a5b4fc;
+  --color-primary-400: #818cf8;
+  --color-primary-500: #6366f1;
+  --color-primary-600: #4F46E5;  /* main brand indigo */
+  --color-primary-700: #4338ca;  /* primary button hover / active */
+  --color-primary-800: #3730a3;
+  --color-primary-900: #312e81;
 
-  /* Accent — used sparingly for CTAs, badges, highlights */
-  --color-accent: #0ea5e9;
-  --color-accent-hover: #0284c7;
+  /* Deep navy — headings, dark sections, strongest text */
+  --color-navy: #0F172A;
+
+  /* Accent — cyan/teal — AI-generated content or active states */
+  --color-accent: #06B6D4;
+  --color-accent-hover: #0891b2;
 
   /* Neutrals — text, borders, backgrounds */
   --color-white:      #ffffff;
-  --color-bg:         #f8fafc;  /* page background */
-  --color-surface:    #ffffff;  /* card / navbar background */
-  --color-border:     #e2e8f0;
-  --color-border-strong: #cbd5e1;
+  --color-bg:         #F8FAFC;  /* page background */
+  --color-surface:    #FFFFFF;  /* card / navbar background */
+  --color-surface-secondary: #F1F5F9; /* secondary surface / muted sections */
+  --color-border:     #E2E8F0;
+  --color-border-strong: #CBD5E1;
 
-  --color-text-h:     #0f172a;  /* headings */
-  --color-text-body:  #334155;  /* paragraph text */
-  --color-text-muted: #64748b;  /* secondary/subtitle text */
-  --color-text-light: #94a3b8;  /* placeholders, disabled */
+  --color-text-h:     #0F172A;  /* headings — deep navy */
+  --color-text-body:  #0F172A;  /* primary text — deep navy */
+  --color-text-muted: #64748B;  /* secondary/subtitle text */
+  --color-text-light: #94A3B8;  /* placeholders, disabled */
 
   /* Status colors — optional, for alerts/badges if needed later */
   --color-success: #16a34a;
@@ -115,7 +119,7 @@ body {
   width: 100%;
   min-height: 100vh;
   background: #ffffff;
-  color: #111111;
+  color: #0F172A;
 }
 
 .skillgap-container {
@@ -127,7 +131,7 @@ body {
 
 .skillgap-hero {
   padding: 110px 0 90px;
-  background: #f7f7f5;
+  background: #F1F5F9;
   text-align: center;
 }
 
@@ -142,35 +146,37 @@ body {
   align-items: center;
   gap: 8px;
   padding: 9px 16px;
-  border: 1px solid #dedede;
+  border: 1px solid #E2E8F0;
   border-radius: 100px;
   background: #ffffff;
-  font-size: 12px;
+  color: #06B6D4;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 1.2px;
 }
 
 .skillgap-badge span {
-  font-size: 15px;
+  font-size: 16px;
 }
 
 .skillgap-hero h1 {
   margin: 28px 0 20px;
-  font-size: clamp(48px, 7vw, 82px);
+  font-size: clamp(50px, 7vw, 84px);
   line-height: 0.98;
   letter-spacing: -4px;
   font-weight: 800;
+  color: #0F172A;
 }
 
 .skillgap-hero h1 span {
-  color: #777777;
+  color: #4F46E5;
 }
 
 .skillgap-hero p {
   max-width: 680px;
   margin: auto;
-  color: #666666;
-  font-size: 18px;
+  color: #64748B;
+  font-size: 19px;
   line-height: 1.7;
 }
 
@@ -189,19 +195,20 @@ body {
 }
 
 .skillgap-hero-stats strong {
-  font-size: 25px;
+  font-size: 26px;
+  color: #0F172A;
 }
 
 .skillgap-hero-stats span {
-  color: #777777;
-  font-size: 12px;
+  color: #64748B;
+  font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
 .stat-arrow {
-  color: #aaaaaa;
-  font-size: 22px;
+  color: #94A3B8;
+  font-size: 23px;
 }
 
 
@@ -220,27 +227,28 @@ body {
 
 .skillgap-section-heading > span,
 .small-label {
-  color: #888888;
-  font-size: 11px;
+  color: #4F46E5;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 1.5px;
 }
 
 .skillgap-section-heading h2 {
   margin: 12px 0;
-  font-size: clamp(32px, 5vw, 50px);
+  font-size: clamp(33px, 5vw, 51px);
   line-height: 1.05;
   letter-spacing: -2px;
+  color: #0F172A;
 }
 
 .skillgap-section-heading p {
-  color: #777777;
+  color: #64748B;
   line-height: 1.7;
-  font-size: 16px;
+  font-size: 17px;
 }
 
 .skillgap-section-heading p strong {
-  color: #111111;
+  color: #0F172A;
 }
 
 
@@ -255,10 +263,10 @@ body {
   align-items: center;
   gap: 22px;
   padding: 25px;
-  border: 1px solid #dddddd;
+  border: 1px solid #E2E8F0;
   border-radius: 20px;
   background: #ffffff;
-  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 15px 45px rgba(15, 23, 42, 0.08);
 }
 
 .career-card-icon {
@@ -268,8 +276,8 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 15px;
-  background: #111111;
-  font-size: 25px;
+  background: #4F46E5;
+  font-size: 26px;
   flex-shrink: 0;
 }
 
@@ -280,8 +288,8 @@ body {
 .career-card-content label {
   display: block;
   margin-bottom: 7px;
-  color: #777777;
-  font-size: 11px;
+  color: #64748B;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -292,8 +300,8 @@ body {
   border: none;
   outline: none;
   background: transparent;
-  color: #111111;
-  font-size: 19px;
+  color: #0F172A;
+  font-size: 20px;
   font-weight: 700;
   cursor: pointer;
 }
@@ -308,9 +316,9 @@ body {
   padding: 16px 23px;
   border: none;
   border-radius: 10px;
-  background: #111111;
+  background: #4F46E5;
   color: #ffffff;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   cursor: pointer;
   transition: 0.25s ease;
@@ -318,16 +326,15 @@ body {
 }
 
 .analyze-button:hover,
-.cta-button:hover,
 .contact-submit:hover {
   transform: translateY(-2px);
-  background: #333333;
+  background: #4338ca;
 }
 
 .analyze-button span,
 .cta-button span,
 .contact-submit span {
-  font-size: 20px;
+  font-size: 21px;
 }
 
 
@@ -340,14 +347,15 @@ body {
   gap: 30px;
   margin-top: 35px;
   padding: 28px;
-  border: 1px solid #e5e5e5;
+  border: 1px solid #E2E8F0;
   border-radius: 18px;
-  background: #fafafa;
+  background: #F8FAFC;
 }
 
 .current-skills-box h3 {
   margin: 8px 0 0;
-  font-size: 18px;
+  font-size: 19px;
+  color: #0F172A;
 }
 
 .skills-list {
@@ -360,11 +368,11 @@ body {
 .skills-list span,
 .roadmap-topics span {
   padding: 8px 12px;
-  border: 1px solid #dddddd;
+  border: 1px solid #E2E8F0;
   border-radius: 100px;
   background: #ffffff;
-  color: #555555;
-  font-size: 12px;
+  color: #4F46E5;
+  font-size: 13px;
 }
 
 
@@ -372,7 +380,7 @@ body {
 
 .skill-analysis-section {
   padding: 110px 0;
-  background: #f7f7f5;
+  background: #F1F5F9;
 }
 
 .readiness-card {
@@ -380,7 +388,7 @@ body {
   align-items: center;
   gap: 70px;
   padding: 45px;
-  border: 1px solid #dddddd;
+  border: 1px solid #E2E8F0;
   border-radius: 22px;
   background: #ffffff;
 }
@@ -398,8 +406,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 10px solid #222222;
-  border-right-color: #dddddd;
+  border: 10px solid #4F46E5;
+  border-right-color: #E2E8F0;
   border-radius: 50%;
   flex-shrink: 0;
   transform: rotate(-45deg);
@@ -411,24 +419,27 @@ body {
 }
 
 .score-circle strong {
-  font-size: 42px;
+  font-size: 43px;
   letter-spacing: -2px;
+  color: #0F172A;
 }
 
 .score-circle span {
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 700;
+  color: #64748B;
 }
 
 .readiness-left h3 {
   margin: 8px 0;
-  font-size: 24px;
+  font-size: 25px;
+  color: #0F172A;
 }
 
 .readiness-left p {
   margin: 0;
   max-width: 330px;
-  color: #777777;
+  color: #64748B;
   line-height: 1.6;
 }
 
@@ -445,13 +456,13 @@ body {
   display: flex;
   justify-content: space-between;
   margin-bottom: 8px;
-  color: #555555;
-  font-size: 13px;
+  color: #64748B;
+  font-size: 14px;
 }
 
 .progress-heading strong,
 .skill-level-heading strong {
-  color: #111111;
+  color: #0F172A;
 }
 
 .progress-track {
@@ -459,13 +470,13 @@ body {
   height: 7px;
   overflow: hidden;
   border-radius: 20px;
-  background: #e7e7e7;
+  background: #F1F5F9;
 }
 
 .progress-fill {
   height: 100%;
   border-radius: 20px;
-  background: #111111;
+  background: linear-gradient(90deg, #4F46E5, #06B6D4);
   transition: width 0.8s ease;
 }
 
@@ -481,7 +492,7 @@ body {
 
 .skill-card {
   padding: 25px;
-  border: 1px solid #dddddd;
+  border: 1px solid #E2E8F0;
   border-radius: 18px;
   background: #ffffff;
 }
@@ -499,33 +510,34 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 10px;
-  background: #f1f1f1;
-  font-size: 14px;
+  background: #F1F5F9;
+  font-size: 15px;
 }
 
 .skill-status {
   padding: 6px 10px;
   border-radius: 100px;
-  background: #f1f1f1;
-  color: #555555;
-  font-size: 10px;
+  background: #F1F5F9;
+  color: #64748B;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
 }
 
 .skill-status.strong {
-  background: #111111;
+  background: #06B6D4;
   color: #ffffff;
 }
 
 .skill-status.needs-work {
-  background: #e9e9e9;
-  color: #111111;
+  background: #e9e9ec;
+  color: #0F172A;
 }
 
 .skill-card h3 {
   margin: 22px 0;
-  font-size: 18px;
+  font-size: 19px;
+  color: #0F172A;
 }
 
 
@@ -545,7 +557,7 @@ body {
   display: flex;
   gap: 20px;
   padding: 28px;
-  border: 1px solid #dddddd;
+  border: 1px solid #E2E8F0;
   border-radius: 18px;
   background: #ffffff;
 }
@@ -557,7 +569,7 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: #111111;
+  background: #4F46E5;
   color: #ffffff;
   font-weight: 800;
   flex-shrink: 0;
@@ -565,18 +577,19 @@ body {
 
 .gap-card h3 {
   margin: 8px 0;
-  font-size: 20px;
+  font-size: 21px;
+  color: #0F172A;
 }
 
 .gap-card p {
-  color: #777777;
+  color: #64748B;
   line-height: 1.6;
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .gap-label {
-  color: #888888;
-  font-size: 10px;
+  color: #4F46E5;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: 1.2px;
 }
@@ -585,8 +598,8 @@ body {
   display: flex;
   justify-content: space-between;
   margin-top: 25px;
-  color: #111111;
-  font-size: 13px;
+  color: #0F172A;
+  font-size: 14px;
   font-weight: 700;
 }
 
@@ -595,7 +608,7 @@ body {
 
 .roadmap-section {
   padding: 110px 0;
-  background: #f7f7f5;
+  background: #F1F5F9;
 }
 
 .roadmap-list {
@@ -608,7 +621,7 @@ body {
   align-items: center;
   gap: 25px;
   padding: 28px 0;
-  border-bottom: 1px solid #dddddd;
+  border-bottom: 1px solid #E2E8F0;
 }
 
 .roadmap-number {
@@ -617,10 +630,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #cccccc;
+  border: 1px solid #CBD5E1;
   border-radius: 50%;
   background: #ffffff;
-  font-size: 12px;
+  color: #4F46E5;
+  font-size: 13px;
   font-weight: 800;
   flex-shrink: 0;
 }
@@ -638,18 +652,19 @@ body {
 
 .roadmap-title-row h3 {
   margin: 0;
-  font-size: 20px;
+  font-size: 21px;
+  color: #0F172A;
 }
 
 .roadmap-title-row span {
-  color: #888888;
-  font-size: 12px;
+  color: #64748B;
+  font-size: 13px;
 }
 
 .roadmap-content p {
   max-width: 650px;
-  color: #777777;
-  font-size: 14px;
+  color: #64748B;
+  font-size: 15px;
   line-height: 1.6;
 }
 
@@ -662,10 +677,11 @@ body {
 .roadmap-arrow {
   width: 40px;
   height: 40px;
-  border: 1px solid #dddddd;
+  border: 1px solid #E2E8F0;
   border-radius: 50%;
   background: #ffffff;
-  font-size: 18px;
+  color: #4F46E5;
+  font-size: 19px;
   cursor: pointer;
 }
 
@@ -674,7 +690,7 @@ body {
 
 .skillgap-cta {
   padding: 120px 20px;
-  background: #111111;
+  background: #0F172A;
   color: #ffffff;
   text-align: center;
 }
@@ -685,23 +701,26 @@ body {
 }
 
 .skillgap-cta span {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 1.5px;
-  color: #999999;
+  color: #94A3B8;
 }
 
 .skillgap-cta h2 {
   margin: 20px 0 0;
-  font-size: clamp(40px, 6vw, 65px);
+  font-size: clamp(41px, 6vw, 67px);
   letter-spacing: -3px;
   line-height: 1;
 }
 
 .skillgap-cta h3 {
   margin: 5px 0 20px;
-  font-size: clamp(40px, 6vw, 65px);
-  color: #888888;
+  font-size: clamp(41px, 6vw, 67px);
+  background: linear-gradient(90deg, #4F46E5, #06B6D4);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
   letter-spacing: -3px;
   line-height: 1;
 }
@@ -709,17 +728,18 @@ body {
 .skillgap-cta p {
   max-width: 550px;
   margin: 0 auto 35px;
-  color: #aaaaaa;
+  color: #94A3B8;
   line-height: 1.7;
 }
 
 .cta-button {
   background: #ffffff;
-  color: #111111;
+  color: #0F172A;
 }
 
 .cta-button:hover {
-  background: #dddddd;
+  background: #E0E7FF;
+  color: #4338ca;
 }
 
 
@@ -730,7 +750,7 @@ body {
 .contact-page {
   min-height: 100vh;
   background: #ffffff;
-  color: #111111;
+  color: #0F172A;
 }
 
 .contact-container {
@@ -743,24 +763,25 @@ body {
 
 .contact-hero {
   padding: 110px 0 90px;
-  background: #f7f7f5;
+  background: #F1F5F9;
   text-align: center;
 }
 
 .contact-hero h1 {
   margin: 28px 0 20px;
-  font-size: clamp(50px, 7vw, 85px);
+  font-size: clamp(52px, 7vw, 87px);
   line-height: 0.95;
   letter-spacing: -4px;
+  color: #0F172A;
 }
 
 .contact-hero h1 span {
-  color: #777777;
+  color: #4F46E5;
 }
 
 .contact-hero p {
-  color: #777777;
-  font-size: 18px;
+  color: #64748B;
+  font-size: 19px;
   line-height: 1.7;
 }
 
@@ -780,13 +801,14 @@ body {
 
 .contact-info h2 {
   margin: 15px 0;
-  font-size: 42px;
+  font-size: 43px;
   letter-spacing: -2px;
+  color: #0F172A;
 }
 
 .contact-info > p {
   max-width: 450px;
-  color: #777777;
+  color: #64748B;
   line-height: 1.8;
 }
 
@@ -804,7 +826,7 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 12px;
-  background: #111111;
+  background: #4F46E5;
   color: #ffffff;
 }
 
@@ -815,8 +837,8 @@ body {
 }
 
 .contact-info-card span {
-  color: #888888;
-  font-size: 11px;
+  color: #64748B;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -824,8 +846,8 @@ body {
 
 .contact-info-card a,
 .contact-info-card strong {
-  color: #111111;
-  font-size: 14px;
+  color: #0F172A;
+  font-size: 15px;
   text-decoration: none;
 }
 
@@ -834,8 +856,8 @@ body {
 }
 
 .contact-social > span {
-  color: #888888;
-  font-size: 10px;
+  color: #64748B;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: 1.2px;
 }
@@ -852,17 +874,18 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #dddddd;
+  border: 1px solid #E2E8F0;
   border-radius: 50%;
-  color: #111111;
+  color: #0F172A;
   text-decoration: none;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
   transition: 0.2s;
 }
 
 .social-links a:hover {
-  background: #111111;
+  background: #4F46E5;
+  border-color: #4F46E5;
   color: #ffffff;
 }
 
@@ -871,9 +894,9 @@ body {
 
 .contact-form-wrapper {
   padding: 40px;
-  border: 1px solid #dddddd;
+  border: 1px solid #E2E8F0;
   border-radius: 22px;
-  background: #fafafa;
+  background: #F8FAFC;
 }
 
 .contact-form {
@@ -895,8 +918,8 @@ body {
 }
 
 .form-group label {
-  color: #333333;
-  font-size: 12px;
+  color: #0F172A;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -905,25 +928,25 @@ body {
   width: 100%;
   box-sizing: border-box;
   padding: 15px 16px;
-  border: 1px solid #dddddd;
+  border: 1px solid #E2E8F0;
   border-radius: 10px;
   outline: none;
   background: #ffffff;
-  color: #111111;
+  color: #0F172A;
   font-family: inherit;
-  font-size: 14px;
+  font-size: 15px;
   resize: vertical;
   transition: 0.2s;
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
-  border-color: #111111;
+  border-color: #4F46E5;
 }
 
 .form-group input::placeholder,
 .form-group textarea::placeholder {
-  color: #aaaaaa;
+  color: #94A3B8;
 }
 
 .contact-submit {
@@ -937,7 +960,7 @@ body {
   gap: 15px;
   margin-bottom: 25px;
   padding: 15px;
-  border: 1px solid #cccccc;
+  border: 1px solid #CBD5E1;
   border-radius: 12px;
   background: #ffffff;
 }
@@ -949,19 +972,20 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: #111111;
+  background: #06B6D4;
   color: #ffffff;
   font-weight: 800;
 }
 
 .success-message strong {
-  font-size: 14px;
+  font-size: 15px;
+  color: #0F172A;
 }
 
 .success-message p {
   margin: 4px 0 0;
-  color: #777777;
-  font-size: 12px;
+  color: #64748B;
+  font-size: 13px;
 }
 
 
@@ -969,7 +993,7 @@ body {
 
 .contact-bottom {
   padding: 100px 0;
-  background: #f7f7f5;
+  background: #F1F5F9;
 }
 
 .contact-bottom-heading {
@@ -978,16 +1002,17 @@ body {
 }
 
 .contact-bottom-heading > span {
-  color: #888888;
-  font-size: 11px;
+  color: #4F46E5;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 1.4px;
 }
 
 .contact-bottom-heading h2 {
   margin-top: 12px;
-  font-size: 38px;
+  font-size: 39px;
   letter-spacing: -1.5px;
+  color: #0F172A;
 }
 
 .contact-quick-grid {
@@ -998,26 +1023,27 @@ body {
 
 .contact-quick-card {
   padding: 30px;
-  border: 1px solid #dddddd;
+  border: 1px solid #E2E8F0;
   border-radius: 18px;
   background: #ffffff;
 }
 
 .contact-quick-card > span {
-  color: #999999;
-  font-size: 12px;
+  color: #4F46E5;
+  font-size: 13px;
   font-weight: 800;
 }
 
 .contact-quick-card h3 {
   margin: 25px 0 10px;
-  font-size: 19px;
+  font-size: 20px;
+  color: #0F172A;
 }
 
 .contact-quick-card p {
-  color: #777777;
+  color: #64748B;
   line-height: 1.6;
-  font-size: 14px;
+  font-size: 15px;
 }
 
 
@@ -1073,7 +1099,7 @@ body {
 
   .skillgap-hero p,
   .contact-hero p {
-    font-size: 15px;
+    font-size: 16px;
   }
 
   .skillgap-hero-stats {
@@ -1081,7 +1107,7 @@ body {
   }
 
   .stat-arrow {
-    font-size: 16px;
+    font-size: 17px;
   }
 
   .skillgap-input-section,
@@ -1133,7 +1159,7 @@ body {
   }
 
   .contact-info h2 {
-    font-size: 34px;
+    font-size: 35px;
   }
 
   .skillgap-cta {

@@ -3,9 +3,9 @@ import Container from "./Container";
 
 
 const BACKGROUND_CLASSES = {
-  white: "bg-white",
-  tint: "bg-blue-50/60",
-  dark: "bg-slate-900 text-white",
+  white: "bg-[var(--color-surface)]",
+  tint: "bg-[var(--color-primary-50)]",
+  dark: "bg-[var(--color-navy)] text-white",
 };
 
 export default function Section({
