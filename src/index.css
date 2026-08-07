@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   Typography Scale — overrides Tailwind's default text-* sizes
+   Every text-xs / text-sm / text-base / text-lg ... class used anywhere in
+   the app (any page, any component) will automatically pick up these
+   values. Change a size here once, it updates everywhere.
+   ========================================================================== */
+@theme {
+  --text-xs:   0.8125rem;  /* 13px — was 12px */
+  --text-xs--line-height: 1.25rem;
+
+  --text-sm:   0.9375rem;  /* 15px — was 14px */
+  --text-sm--line-height: 1.4rem;
+
+  --text-base: 1.0625rem;  /* 17px — was 16px */
+  --text-base--line-height: 1.65rem;
+
+  --text-lg:   1.1875rem;  /* 19px — was 18px */
+  --text-lg--line-height: 1.75rem;
+
+  --text-xl:   1.375rem;   /* 22px — was 20px */
+  --text-xl--line-height: 1.85rem;
+
+  --text-2xl:  1.625rem;   /* 26px — was 24px */
+  --text-2xl--line-height: 2rem;
+
+  --text-3xl:  2rem;       /* 32px — was 30px */
+  --text-3xl--line-height: 2.3rem;
+
+  --text-4xl:  2.5rem;     /* 40px — was 36px */
+  --text-4xl--line-height: 2.7rem;
+
+  --text-5xl:  3.25rem;    /* 52px — was 48px */
+  --text-5xl--line-height: 1.1;
+
+  --text-6xl:  4rem;       /* 64px — was 60px */
+  --text-6xl--line-height: 1.05;
+}
+
+/* ==========================================================================
+   Color Palette — Blue & White Theme
+   Use these CSS variables wherever a raw hex would otherwise be hardcoded,
+   so the whole design system stays consistent and easy to re-theme later.
+   ========================================================================== */
+:root {
+  /* Primary blues — buttons, links, active states, highlights */
+  --color-primary-50:  #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-200: #bfdbfe;
+  --color-primary-300: #93c5fd;
+  --color-primary-400: #60a5fa;
+  --color-primary-500: #3b82f6;  /* main brand blue */
+  --color-primary-600: #2563eb;  /* primary button / hover */
+  --color-primary-700: #1d4ed8;  /* active / pressed */
+  --color-primary-800: #1e40af;
+  --color-primary-900: #1e3a8a;
+
+  /* Accent — used sparingly for CTAs, badges, highlights */
+  --color-accent: #0ea5e9;
+  --color-accent-hover: #0284c7;
+
+  /* Neutrals — text, borders, backgrounds */
+  --color-white:      #ffffff;
+  --color-bg:         #f8fafc;  /* page background */
+  --color-surface:    #ffffff;  /* card / navbar background */
+  --color-border:     #e2e8f0;
+  --color-border-strong: #cbd5e1;
+
+  --color-text-h:     #0f172a;  /* headings */
+  --color-text-body:  #334155;  /* paragraph text */
+  --color-text-muted: #64748b;  /* secondary/subtitle text */
+  --color-text-light: #94a3b8;  /* placeholders, disabled */
+
+  /* Status colors — optional, for alerts/badges if needed later */
+  --color-success: #16a34a;
+  --color-warning: #f59e0b;
+  --color-error:   #dc2626;
+
+  /* Shadows */
+  --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-card-hover: 0 8px 20px rgba(15, 23, 42, 0.10), 0 2px 6px rgba(15, 23, 42, 0.06);
+}
+
+/* Minimal base reset — everything else is handled via Tailwind utility
+   classes inside components, so no global element overrides here. */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color-scheme: light;
+  background-color: var(--color-bg);
+  color: var(--color-text-body);
+}
+
+#root {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
