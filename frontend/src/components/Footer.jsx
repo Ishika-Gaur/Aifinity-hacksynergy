@@ -29,16 +29,16 @@ const FOOTER_COLUMNS = [
 
 export default function Footer() {
   return (
-    <footer className="border-t border-slate-200 bg-slate-900 text-slate-300">
+  <footer className="border-t border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-navy)_100%,white)] text-slate-300">
       <Container>
         <div className="grid grid-cols-2 gap-10 py-14 sm:grid-cols-4">
           <div className="col-span-2 flex flex-col gap-3 sm:col-span-1">
             <a href="/" className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-md bg-blue-600 text-sm font-bold text-white">
+              <span className="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--color-primary-600)] text-sm font-bold text-white">
                 L
               </span>
               <span className="text-lg font-semibold text-white">
-                Logo<span className="text-blue-400">.</span>
+                Logo<span className="text-[var(--color-accent)]">.</span>
               </span>
             </a>
             <p className="text-sm leading-relaxed text-slate-400">
@@ -57,7 +57,7 @@ export default function Footer() {
                   <li key={link.href}>
                     <a
                       href={link.href}
-                      className="text-sm text-slate-400 transition-colors hover:text-blue-400"
+                      className="text-sm text-slate-400 transition-colors hover:text-[var(--color-accent)]"
                     >
                       {link.label}
                     </a>
@@ -73,10 +73,10 @@ export default function Footer() {
             © {new Date().getFullYear()} Logo. All rights reserved.
           </p>
           <div className="flex gap-4 text-xs text-slate-500">
-            <a href="/privacy" className="hover:text-blue-400">
+            <a href="/privacy" className="hover:text-[var(--color-accent)]">
               Privacy Policy
             </a>
-            <a href="/terms" className="hover:text-blue-400">
+            <a href="/terms" className="hover:text-[var(--color-accent)]">
               Terms of Service
             </a>
           </div>

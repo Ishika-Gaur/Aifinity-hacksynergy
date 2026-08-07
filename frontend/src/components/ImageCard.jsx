@@ -17,12 +17,12 @@ export default function ImageCard({
     <Wrapper
       {...wrapperProps}
       className={[
-        "group flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white",
-        "transition-all duration-200 hover:border-blue-300 hover:shadow-[0_4px_20px_-4px_rgba(30,64,175,0.15)]",
+        "group flex flex-col overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]",
+        "transition-all duration-200 hover:border-[var(--color-primary-300)] hover:shadow-[var(--shadow-card-hover)]",
         className,
       ].join(" ")}
     >
-      <div className="relative aspect-[16/10] w-full overflow-hidden bg-blue-50">
+      <div className="relative aspect-[16/10] w-full overflow-hidden bg-[var(--color-primary-50)]">
         {image ? (
           <img
             src={image}
@@ -30,12 +30,12 @@ export default function ImageCard({
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-blue-300 text-sm">
+          <div className="flex h-full w-full items-center justify-center text-[var(--color-primary-300)] text-sm">
             No image
           </div>
         )}
         {tag && (
-          <span className="absolute left-3 top-3 rounded-full border border-blue-100 bg-white/95 px-2.5 py-1 text-xs font-medium text-blue-700 backdrop-blur">
+          <span className="absolute left-3 top-3 rounded-full border border-[var(--color-primary-100)] bg-white/95 px-2.5 py-1 text-xs font-medium text-[var(--color-primary-600)] backdrop-blur">
             {tag}
           </span>
         )}
@@ -43,12 +43,12 @@ export default function ImageCard({
 
       <div className="flex flex-1 flex-col gap-2 p-5">
         {title && (
-          <h3 className="text-base font-semibold text-slate-900 group-hover:text-blue-700 transition-colors">
+          <h3 className="text-base font-semibold text-[var(--color-text-h)] group-hover:text-[var(--color-primary-600)] transition-colors">
             {title}
           </h3>
         )}
         {description && (
-          <p className="text-sm leading-relaxed text-slate-600">
+          <p className="text-sm leading-relaxed text-[var(--color-text-muted)]">
             {description}
           </p>
         )}
