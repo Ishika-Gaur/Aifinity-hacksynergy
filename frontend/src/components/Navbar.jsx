@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { label: "Concept Root", href: "/concept-root" },
   { label: "Mistake Map", href: "/mistake-map" },
   { label: "Skill Gap", href: "/skill-gap" },
+  { label: "Roadmap", href: "/roadmap" },
   { label: "Contact", href: "/contact" },
 ];
 
