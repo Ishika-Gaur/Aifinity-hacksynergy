@@ -26,6 +26,7 @@ function App() {
             <Route path="/assessment" element={<Assessment />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/concept-root" element={<ConceptRoot />} />
+            <Route path="/conceptroot" element={<ConceptRoot />} />
             <Route path="/mistake-map" element={<MistakeMap />} />
             <Route path="/skill-gap" element={<SkillGap />} />
             <Route path="/roadmap" element={<Roadmap />} />
