@@ -237,12 +237,6 @@ These features should be considered **future scope unless they have already been
 * **Ishika Gaur**
 * **Faiz Anwer**
 
-**Institution:**
-Kothiwal Institute of Technology and Professional Studies
-
-**Event:**
-HackSynergy 2026
-
 ---
 
 ## 📌 Project Vision
