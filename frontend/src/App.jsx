@@ -13,6 +13,8 @@ import Contact from './pages/Contact';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import NotFound from './pages/NotFound';
+import OnboardingPage from './pages/OnboardingPage';
+import ForgotPassword from './pages/ForgotPassword';
 
 function App() {
   return (
@@ -33,6 +35,8 @@ function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path='/onboardingpage'element={<OnboardingPage/>}/>
+            <Route path="/forgot-password"element={<ForgotPassword/>}/>
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

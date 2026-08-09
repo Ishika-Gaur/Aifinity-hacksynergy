@@ -20,6 +20,7 @@ import { useState } from "react";
 import Container from "../components/Container";
 import Section from "../components/Section";
 import Button from "../components/Button";
+import CtaBanner from "../components/CtaBanner";
 
 /*
 |--------------------------------------------------------------------------
@@ -840,47 +841,15 @@ export default function Roadmap() {
         </Container>
       </section>
 
-      {/* DYNAMIC ROADMAP MESSAGE */}
-      <section className="bg-[#0F172A]">
-        <Container size="wide">
-          <div className="py-14 text-center sm:py-16">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-xl text-cyan-400">
-              ✦
-            </div>
-
-            <h2 className="mx-auto mt-5 max-w-2xl text-2xl font-bold text-white sm:text-3xl">
-              Your roadmap is not fixed.
-            </h2>
-
-            <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-slate-400 sm:text-base">
-              Every question you ask gives Cognify more information about
-              what you know, where you struggle, and where you can improve.
-              Your learning path evolves with you.
-            </p>
-
-            <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
-              <Button
-                as="a"
+      {/* CTA */}
+            <Section background="white">
+              <CtaBanner
+                eyebrow="Ready to begin?"
+                title="Your skill gap is waiting for you."
+                buttonLabel="Start Free Assessment"
                 href="/assessment"
-                size="lg"
-                className="!border-indigo-500 !bg-indigo-600 hover:!bg-indigo-500"
-              >
-                Take an Assessment
-              </Button>
-
-              <Button
-                as="a"
-                href="/skill-gap"
-                variant="outline"
-                size="lg"
-                className="!border-slate-600 !bg-transparent !text-white hover:!bg-white/10 hover:!text-white"
-              >
-                Explore Skill Gap
-              </Button>
-            </div>
-          </div>
-        </Container>
-      </section>
+              />
+            </Section>
     </div>
   );
 }

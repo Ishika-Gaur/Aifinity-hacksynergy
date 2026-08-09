@@ -4,6 +4,7 @@ import Button from "../components/Button";
 import Container from "../components/Container";
 import Section from "../components/Section";
 import SectionHeading from "../components/SectionHeading";
+import CtaBanner from "../components/CtaBanner";
 
 /* =========================================================
    DOMAIN DATA
@@ -1161,52 +1162,15 @@ export default function SkillGap() {
         </div>
       </Section>
 
-      {/* =====================================================
-          FINAL CTA
-      ===================================================== */}
-      <section className="bg-[#0F172A]">
-        <Container>
-          <div className="relative overflow-hidden py-20 text-center sm:py-24">
-            <div className="absolute left-1/2 top-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#4F46E5]/20 blur-3xl" />
-
-            <div className="relative mx-auto max-w-3xl">
-              <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#06B6D4]">
-                Your growth starts with evidence
-              </span>
-
-              <h2 className="mt-5 text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
-                Don't guess your skill gap.
-                <br />
-                <span className="text-[#7C3AED]">
-                  Discover it.
-                </span>
-              </h2>
-
-              <p className="mx-auto mt-5 max-w-xl text-sm leading-6 text-slate-300 sm:text-base">
-                The more you demonstrate, the more Cognify understands your
-                abilities and the more personalized your learning path becomes.
-              </p>
-
-              <div className="mt-8 flex justify-center">
-                <Button
-                  size="lg"
-                  className="border-[#4F46E5] bg-[#4F46E5] text-white shadow-lg shadow-indigo-600/20 hover:border-[#4338CA] hover:bg-[#4338CA]"
-                  onClick={() => {
-                    document
-                      .getElementById("assessment")
-                      ?.scrollIntoView({
-                        behavior: "smooth",
-                      });
-                  }}
-                >
-                  Start Skill Assessment
-                  <span>→</span>
-                </Button>
-              </div>
-            </div>
-          </div>
-        </Container>
-      </section>
+     {/* CTA */}
+           <Section background="white">
+             <CtaBanner
+               eyebrow="Ready to begin?"
+               title="Your skill gap is waiting for you."
+               buttonLabel="Start Free Assessment"
+               href="/assessment"
+             />
+           </Section>
     </div>
   );
 }
