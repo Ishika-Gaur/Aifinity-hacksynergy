@@ -4,59 +4,111 @@ import Button from "../components/Button";
 import Container from "../components/Container";
 import Section from "../components/Section";
 import SectionHeading from "../components/SectionHeading";
+import CtaBanner from "../components/CtaBanner";
 
 /* =========================================================
-   DOMAIN DATA
+   REUSABLE SVG ICONS
 ========================================================= */
+function SparklesIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+    </svg>
+  );
+}
 
+function CheckIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+    </svg>
+  );
+}
+
+function ArrowRightIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+    </svg>
+  );
+}
+
+function SpinnerIcon({ className = "w-5 h-5 animate-spin" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+    </svg>
+  );
+}
+
+/* =========================================================
+   STATIC CONFIG & DATA
+========================================================= */
 const DOMAINS = [
   {
     id: "technology",
     label: "Technology",
     icon: "⌘",
-    examples: "Programming, AI, Web Development",
+    examples: "Programming, AI, Web Dev",
+    sampleQuestion: "Explain how a REST API differs from GraphQL.",
+    sampleAnswer: "REST APIs use standard HTTP verbs (GET, POST, PUT, DELETE) with fixed endpoints returning predefined data structures. GraphQL uses a single endpoint where clients specify exact query fields needed, avoiding over-fetching or under-fetching.",
   },
   {
     id: "mathematics",
     label: "Mathematics",
     icon: "∑",
-    examples: "Algebra, Calculus, Statistics",
+    examples: "Algebra, Calculus, Stats",
+    sampleQuestion: "Explain the intuition behind the Central Limit Theorem.",
+    sampleAnswer: "The Central Limit Theorem states that as sample size increases, the distribution of sample means approaches a normal distribution, regardless of the population's original shape, provided samples are independent.",
   },
   {
     id: "science",
     label: "Science",
     icon: "⚛",
-    examples: "Physics, Chemistry, Biology",
+    examples: "Physics, Chemistry, Bio",
+    sampleQuestion: "How do enzymes lower activation energy in chemical reactions?",
+    sampleAnswer: "Enzymes act as biological catalysts by binding substrates at active sites. They stabilize transition states, align reactants, and weaken chemical bonds, thereby lowering the required activation energy.",
   },
   {
     id: "business",
     label: "Business",
     icon: "◫",
     examples: "Strategy, Management, Marketing",
+    sampleQuestion: "What is the difference between cost leadership and differentiation?",
+    sampleAnswer: "Cost leadership focuses on achieving lower operational costs to offer competitive low prices. Differentiation focuses on creating unique product features or brand value that command premium prices.",
   },
   {
     id: "finance",
     label: "Finance",
     icon: "₹",
-    examples: "Investing, Accounting, Economics",
+    examples: "Investing, Accounting, Econ",
+    sampleQuestion: "Explain why raising interest rates helps control inflation.",
+    sampleAnswer: "Raising interest rates increases borrowing costs for consumers and businesses. This reduces spending and investments, slowing aggregate demand and cooling price inflation across the economy.",
   },
   {
     id: "communication",
     label: "Communication",
     icon: "Aa",
-    examples: "Writing, Speaking, Presentation",
+    examples: "Writing, Speaking, Pitching",
+    sampleQuestion: "How do you structure an executive elevator pitch?",
+    sampleAnswer: "Start with the core problem statement, follow with your concise solution, highlight unique value proposition with key metrics, and close with a clear call to action.",
   },
   {
     id: "design",
     label: "Design",
     icon: "◇",
-    examples: "UI/UX, Visual Design, Creativity",
+    examples: "UI/UX, Visual, Research",
+    sampleQuestion: "Explain visual hierarchy in user interface design.",
+    sampleAnswer: "Visual hierarchy guides user focus through contrast, typography scale, spacing, color highlights, and alignment to ensure key actions are clear and intuitive.",
   },
   {
     id: "other",
     label: "Other",
     icon: "＋",
-    examples: "Any subject or professional skill",
+    examples: "General Professional Skills",
+    sampleQuestion: "How do you prioritize competing project deadlines?",
+    sampleAnswer: "I use an Eisenhower Matrix framework evaluating urgency and impact, communicate with stakeholders to align expectations, and break tasks into milestone deliverables.",
   },
 ];
 
@@ -65,416 +117,204 @@ const GOALS = [
     id: "software",
     title: "Software Engineer",
     category: "Technology",
-    requiredSkills: [
-      "Problem Solving",
-      "Programming",
-      "Data Structures",
-      "System Design",
-    ],
+    requiredSkills: ["Problem Solving", "Programming", "Data Structures", "System Design"],
   },
   {
     id: "data",
     title: "Data Scientist",
     category: "Technology",
-    requiredSkills: [
-      "Statistics",
-      "Python",
-      "Data Analysis",
-      "Machine Learning",
-    ],
+    requiredSkills: ["Statistics", "Python", "Data Analysis", "Machine Learning"],
   },
   {
     id: "manager",
     title: "Business Manager",
     category: "Business",
-    requiredSkills: [
-      "Decision Making",
-      "Communication",
-      "Leadership",
-      "Business Strategy",
-    ],
+    requiredSkills: ["Decision Making", "Communication", "Leadership", "Business Strategy"],
   },
   {
     id: "finance",
     title: "Financial Analyst",
     category: "Finance",
-    requiredSkills: [
-      "Financial Analysis",
-      "Statistics",
-      "Decision Making",
-      "Communication",
-    ],
+    requiredSkills: ["Financial Analysis", "Statistics", "Decision Making", "Communication"],
   },
   {
     id: "designer",
     title: "UI/UX Designer",
     category: "Design",
-    requiredSkills: [
-      "Visual Design",
-      "User Research",
-      "Problem Solving",
-      "Communication",
-    ],
+    requiredSkills: ["Visual Design", "User Research", "Problem Solving", "Communication"],
   },
   {
     id: "research",
     title: "Researcher",
     category: "Science",
-    requiredSkills: [
-      "Critical Thinking",
-      "Research",
-      "Analysis",
-      "Communication",
-    ],
+    requiredSkills: ["Critical Thinking", "Research", "Analysis", "Communication"],
   },
 ];
 
 /* =========================================================
-   MOCK AI ANALYSIS
-   This will later be replaced by the backend API.
+   ANALYSIS ENGINE (SIMULATED AI)
 ========================================================= */
-
 function generateAnalysis(question, answer, domain, goal) {
   const text = `${question} ${answer}`.toLowerCase();
-
   const wordCount = answer.trim().split(/\s+/).filter(Boolean).length;
 
-  let baseScore = 58;
+  let baseScore = 60;
+  if (wordCount >= 25) baseScore += 8;
+  if (wordCount >= 50) baseScore += 7;
+  if (answer.includes("=")) baseScore += 3;
+  if (text.includes("because") || text.includes("since")) baseScore += 4;
+  if (text.includes("therefore") || text.includes("thus")) baseScore += 3;
+  if (text.includes("example") || text.includes("such as")) baseScore += 4;
+  if (text.includes("however") || text.includes("whereas")) baseScore += 3;
 
-  if (wordCount >= 30) baseScore += 8;
-  if (wordCount >= 60) baseScore += 7;
-  if (answer.includes("=")) baseScore += 4;
-  if (text.includes("because")) baseScore += 4;
-  if (text.includes("therefore")) baseScore += 3;
-  if (text.includes("example")) baseScore += 3;
-  if (text.includes("however")) baseScore += 2;
-
-  const score = Math.min(baseScore, 91);
+  const score = Math.min(baseScore, 92);
 
   const strengthsByDomain = {
-    technology: [
-      "Problem decomposition",
-      "Technical reasoning",
-      "Logical thinking",
-    ],
-    mathematics: [
-      "Analytical reasoning",
-      "Pattern recognition",
-      "Quantitative thinking",
-    ],
-    science: [
-      "Conceptual understanding",
-      "Scientific reasoning",
-      "Cause-effect analysis",
-    ],
-    business: [
-      "Decision reasoning",
-      "Strategic thinking",
-      "Business awareness",
-    ],
-    finance: [
-      "Quantitative reasoning",
-      "Risk awareness",
-      "Decision making",
-    ],
-    communication: [
-      "Expression",
-      "Clarity of thought",
-      "Structured communication",
-    ],
-    design: [
-      "Creative reasoning",
-      "User perspective",
-      "Visual thinking",
-    ],
-    other: [
-      "Reasoning",
-      "Conceptual understanding",
-      "Problem solving",
-    ],
+    technology: ["Problem decomposition", "Technical reasoning", "Modular thinking"],
+    mathematics: ["Analytical reasoning", "Pattern recognition", "Quantitative rigor"],
+    science: ["Conceptual depth", "Cause-and-effect reasoning", "Evidence analysis"],
+    business: ["Strategic alignment", "Decision trade-offs", "Commercial awareness"],
+    finance: ["Financial logic", "Risk awareness", "Quantitative interpretation"],
+    communication: ["Clarity of thought", "Structured expression", "Audience orientation"],
+    design: ["User-centric reasoning", "Visual hierarchy", "Contextual empathy"],
+    other: ["Critical thinking", "Structured decomposition", "Practical application"],
   };
 
   const gapsByDomain = {
     technology: [
       {
-        name: "Advanced Problem Solving",
-        current: 64,
-        target: 85,
+        name: "System Architecture",
+        current: Math.min(95, 60 + Math.floor((score - 60) / 3)),
+        target: 88,
         priority: "High",
-        description:
-          "Your reasoning is developing, but complex problems require more structured decomposition.",
+        description: "Practice connecting isolated code modules into scalable end-to-end architectures.",
       },
       {
-        name: "Technical Depth",
-        current: 52,
-        target: 80,
-        priority: "Medium",
-        description:
-          "Strengthen the underlying concepts rather than relying only on surface-level solutions.",
-      },
-      {
-        name: "System Thinking",
-        current: 44,
-        target: 75,
-        priority: "Medium",
-        description:
-          "Practice connecting individual concepts into larger systems.",
-      },
-    ],
-    mathematics: [
-      {
-        name: "Mathematical Reasoning",
-        current: 61,
-        target: 86,
-        priority: "High",
-        description:
-          "Work on explaining why a solution works, not just reaching the final result.",
-      },
-      {
-        name: "Problem Decomposition",
-        current: 55,
+        name: "Algorithm Efficiency",
+        current: Math.min(95, 54 + Math.floor((score - 60) / 4)),
         target: 82,
         priority: "Medium",
-        description:
-          "Break complex problems into smaller mathematical relationships.",
+        description: "Focus on time and space complexity trade-offs under high-scale scenarios.",
       },
       {
-        name: "Proof & Explanation",
-        current: 48,
-        target: 76,
-        priority: "Medium",
-        description:
-          "Develop stronger written reasoning and step-by-step justification.",
-      },
-    ],
-    science: [
-      {
-        name: "Conceptual Depth",
-        current: 63,
-        target: 86,
-        priority: "High",
-        description:
-          "Strengthen the underlying concepts and relationships between them.",
-      },
-      {
-        name: "Scientific Reasoning",
-        current: 57,
-        target: 82,
-        priority: "Medium",
-        description:
-          "Practice forming explanations from evidence and observations.",
-      },
-      {
-        name: "Application",
-        current: 49,
+        name: "Testing & Resilience",
+        current: Math.min(95, 48 + Math.floor((score - 60) / 4)),
         target: 78,
         priority: "Medium",
-        description:
-          "Connect theoretical concepts with real-world situations.",
-      },
-    ],
-    business: [
-      {
-        name: "Strategic Thinking",
-        current: 62,
-        target: 87,
-        priority: "High",
-        description:
-          "Improve your ability to connect individual decisions with larger business outcomes.",
-      },
-      {
-        name: "Decision Making",
-        current: 58,
-        target: 82,
-        priority: "Medium",
-        description:
-          "Evaluate alternatives, constraints and trade-offs more systematically.",
-      },
-      {
-        name: "Business Communication",
-        current: 66,
-        target: 84,
-        priority: "Medium",
-        description:
-          "Practice communicating decisions with clear reasoning and evidence.",
+        description: "Build robust error handling, automated tests, and edge case coverage.",
       },
     ],
     finance: [
       {
-        name: "Financial Reasoning",
-        current: 60,
-        target: 88,
+        name: "Valuation Frameworks",
+        current: Math.min(95, 58 + Math.floor((score - 60) / 3)),
+        target: 87,
         priority: "High",
-        description:
-          "Strengthen your ability to interpret financial information and implications.",
+        description: "Connect financial statements to discounted cash flow (DCF) models.",
       },
       {
-        name: "Quantitative Analysis",
-        current: 57,
-        target: 83,
-        priority: "Medium",
-        description:
-          "Improve numerical reasoning and interpretation of financial data.",
-      },
-      {
-        name: "Risk Assessment",
-        current: 51,
-        target: 80,
-        priority: "Medium",
-        description:
-          "Develop stronger frameworks for evaluating uncertainty and risk.",
-      },
-    ],
-    communication: [
-      {
-        name: "Clarity",
-        current: 69,
-        target: 90,
-        priority: "High",
-        description:
-          "Your ideas are developing, but stronger structure will make your communication more effective.",
-      },
-      {
-        name: "Persuasion",
-        current: 55,
+        name: "Risk Sensitivity",
+        current: Math.min(95, 52 + Math.floor((score - 60) / 4)),
         target: 82,
         priority: "Medium",
-        description:
-          "Learn to support ideas with evidence, examples and clear reasoning.",
+        description: "Evaluate macroeconomic shifts and scenario modeling for portfolio safety.",
       },
       {
-        name: "Structured Expression",
-        current: 62,
-        target: 86,
+        name: "Capital Allocation",
+        current: Math.min(95, 46 + Math.floor((score - 60) / 4)),
+        target: 76,
         priority: "Medium",
-        description:
-          "Practice organizing complex ideas into a simple and logical flow.",
-      },
-    ],
-    design: [
-      {
-        name: "Design Reasoning",
-        current: 61,
-        target: 86,
-        priority: "High",
-        description:
-          "Strengthen the reasoning behind design decisions and trade-offs.",
-      },
-      {
-        name: "User Understanding",
-        current: 55,
-        target: 84,
-        priority: "Medium",
-        description:
-          "Develop stronger understanding of user needs and behavior.",
-      },
-      {
-        name: "Visual Communication",
-        current: 64,
-        target: 82,
-        priority: "Medium",
-        description:
-          "Practice communicating complex ideas through clear visual systems.",
-      },
-    ],
-    other: [
-      {
-        name: "Critical Thinking",
-        current: 62,
-        target: 85,
-        priority: "High",
-        description:
-          "Strengthen your ability to evaluate information and assumptions.",
-      },
-      {
-        name: "Problem Solving",
-        current: 58,
-        target: 82,
-        priority: "Medium",
-        description:
-          "Practice breaking unfamiliar problems into manageable parts.",
-      },
-      {
-        name: "Conceptual Depth",
-        current: 54,
-        target: 78,
-        priority: "Medium",
-        description:
-          "Move beyond surface understanding by connecting related concepts.",
+        description: "Analyze debt vs equity financing decisions for corporate growth.",
       },
     ],
   };
 
-  const gaps = gapsByDomain[domain] || gapsByDomain.other;
-
-  const adjustedGaps = gaps.map((gap) => ({
-    ...gap,
-    current: Math.min(95, gap.current + Math.floor((score - 58) / 4)),
-  }));
+  const gaps = gapsByDomain[domain] || [
+    {
+      name: "Advanced Critical Reasoning",
+      current: Math.min(95, 56 + Math.floor((score - 60) / 3)),
+      target: 86,
+      priority: "High",
+      description: "Strengthen written justifications and step-by-step logic proof.",
+    },
+    {
+      name: "Domain Synthesis",
+      current: Math.min(95, 52 + Math.floor((score - 60) / 4)),
+      target: 80,
+      priority: "Medium",
+      description: "Apply theoretical principles to multi-faceted real-world cases.",
+    },
+    {
+      name: "Structured Execution",
+      current: Math.min(95, 47 + Math.floor((score - 60) / 4)),
+      target: 75,
+      priority: "Medium",
+      description: "Improve execution speed while maintaining high quality standards.",
+    },
+  ];
 
   const strengths = strengthsByDomain[domain] || strengthsByDomain.other;
-
   const averageGap = Math.round(
-    adjustedGaps.reduce(
-      (sum, gap) => sum + Math.max(gap.target - gap.current, 0),
-      0
-    ) / adjustedGaps.length
+    gaps.reduce((sum, gap) => sum + Math.max(gap.target - gap.current, 0), 0) / gaps.length
   );
 
-  return {
-    score,
-    averageGap,
-    strengths,
-    gaps: adjustedGaps,
-    goal,
-    domain,
-    question,
-    answer,
-  };
+  return { score, averageGap, strengths, gaps, goal, domain, question, answer };
 }
 
 /* =========================================================
-   SMALL COMPONENTS
+   SUB-COMPONENTS FOR DRY & HOVER Polish
 ========================================================= */
-
 function ScoreRing({ score }) {
-  const radius = 48;
+  const radius = 46;
   const circumference = 2 * Math.PI * radius;
   const progress = circumference - (score / 100) * circumference;
 
   return (
-    <div className="relative h-36 w-36 shrink-0">
+    <div className="relative h-36 w-36 shrink-0 transition-transform duration-300 hover:scale-105">
       <svg
         className="h-full w-full -rotate-90"
         viewBox="0 0 120 120"
-        aria-hidden="true"
+        role="progressbar"
+        aria-valuenow={score}
+        aria-valuemin={0}
+        aria-valuemax={100}
       >
+        <circle cx="60" cy="60" r={radius} fill="none" stroke="#F1F5F9" strokeWidth="10" />
         <circle
           cx="60"
           cy="60"
           r={radius}
           fill="none"
-          stroke="#F1F5F9"
-          strokeWidth="10"
-        />
-
-        <circle
-          cx="60"
-          cy="60"
-          r={radius}
-          fill="none"
-          stroke="#4F46E5"
+          stroke="url(#scoreGradient)"
           strokeWidth="10"
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={progress}
+          className="transition-all duration-1000 ease-out"
         />
+        <defs>
+          <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#4F46E5" />
+            <stop offset="100%" stopColor="#06B6D4" />
+          </linearGradient>
+        </defs>
       </svg>
 
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-3xl font-bold text-[#0F172A]">{score}</span>
-        <span className="text-xs font-medium text-[#64748B]">/ 100</span>
+        <span className="text-3xl font-bold text-slate-900">{score}</span>
+        <span className="text-xs font-medium text-slate-500">/ 100</span>
       </div>
+    </div>
+  );
+}
+
+function ProgressBar({ value, className = "" }) {
+  return (
+    <div className={`h-2.5 w-full overflow-hidden rounded-full bg-slate-100 ${className}`}>
+      <div
+        className="h-full rounded-full bg-gradient-to-r from-indigo-600 via-violet-600 to-cyan-500 transition-all duration-700 ease-out"
+        style={{ width: `${Math.min(Math.max(value, 0), 100)}%` }}
+      />
     </div>
   );
 }
@@ -482,32 +322,90 @@ function ScoreRing({ score }) {
 function GapBar({ current, target }) {
   return (
     <div className="space-y-2">
-      <div className="relative h-3 overflow-hidden rounded-full bg-[#F1F5F9]">
+      <div className="relative h-3 overflow-hidden rounded-full bg-slate-100">
         <div
-          className="absolute inset-y-0 left-0 rounded-full bg-[#4F46E5]"
+          className="absolute inset-y-0 left-0 rounded-full bg-indigo-600 transition-all duration-700"
           style={{ width: `${current}%` }}
         />
-
         <div
-          className="absolute inset-y-0 w-1 rounded-full bg-[#06B6D4]"
+          className="absolute inset-y-0 w-1.5 rounded-full bg-cyan-500 shadow-sm"
           style={{ left: `${target}%` }}
         />
       </div>
 
-      <div className="flex justify-between text-xs text-[#64748B]">
-        <span>Current {current}%</span>
-        <span className="font-medium text-[#06B6D4]">
-          Target {target}%
-        </span>
+      <div className="flex justify-between text-xs text-slate-500 font-medium">
+        <span>Current: {current}%</span>
+        <span className="text-cyan-600 font-bold">Target: {target}%</span>
       </div>
     </div>
   );
 }
 
-/* =========================================================
-   MAIN PAGE
-========================================================= */
+function DomainTile({ item, active, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={() => onClick(item.id)}
+      className={`group rounded-xl border p-4 text-left transition-all duration-300 ${
+        active
+          ? "border-indigo-600 bg-indigo-50/60 shadow-lg shadow-indigo-500/10 ring-2 ring-indigo-600/20 scale-[1.02]"
+          : "border-slate-200 bg-white hover:-translate-y-1 hover:border-indigo-300 hover:shadow-xl active:scale-95"
+      }`}
+    >
+      <div
+        className={`flex h-10 w-10 items-center justify-center rounded-lg text-lg font-bold transition-all duration-300 ${
+          active
+            ? "bg-indigo-600 text-white scale-110"
+            : "bg-slate-100 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white group-hover:scale-110"
+        }`}
+      >
+        {item.icon}
+      </div>
+      <h4 className="mt-3 text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{item.label}</h4>
+      <p className="mt-0.5 text-xs text-slate-500 truncate">{item.examples}</p>
+    </button>
+  );
+}
 
+function GoalCard({ item, active, isRecommended, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={() => onClick(item.title)}
+      className={`group flex items-center justify-between rounded-xl border p-4 text-left transition-all duration-300 ${
+        active
+          ? "border-violet-600 bg-violet-50/60 shadow-lg shadow-violet-500/10 ring-2 ring-violet-600/20 scale-[1.01]"
+          : "border-slate-200 bg-white hover:-translate-y-1 hover:border-violet-300 hover:shadow-xl active:scale-95"
+      }`}
+    >
+      <div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-medium text-slate-500">{item.category}</span>
+          {isRecommended && (
+            <span className="rounded bg-cyan-100 px-1.5 py-0.5 text-[10px] font-bold text-cyan-800 animate-pulse">
+              Recommended
+            </span>
+          )}
+        </div>
+        <h4 className="mt-1 font-bold text-slate-900 text-sm group-hover:text-violet-700 transition-colors">{item.title}</h4>
+      </div>
+
+      <div
+        className={`flex h-7 w-7 items-center justify-center rounded-full border text-xs transition-all duration-300 ${
+          active
+            ? "border-violet-600 bg-violet-600 text-white scale-110"
+            : "border-slate-200 text-slate-400 group-hover:border-violet-400 group-hover:text-violet-600 group-hover:scale-110"
+        }`}
+      >
+        {active ? <CheckIcon className="w-3.5 h-3.5" /> : <ArrowRightIcon className="w-3.5 h-3.5" />}
+      </div>
+    </button>
+  );
+}
+
+/* =========================================================
+   MAIN SKILL GAP COMPONENT
+========================================================= */
 export default function SkillGap() {
   const [domain, setDomain] = useState("technology");
   const [goal, setGoal] = useState("Software Engineer");
@@ -515,6 +413,7 @@ export default function SkillGap() {
   const [answer, setAnswer] = useState("");
   const [analysis, setAnalysis] = useState(null);
   const [activeGap, setActiveGap] = useState(null);
+  const [priorityFilter, setPriorityFilter] = useState("All");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const selectedGoal = useMemo(
@@ -527,39 +426,40 @@ export default function SkillGap() {
     [domain]
   );
 
-  const canAnalyze =
-    question.trim().length >= 8 && answer.trim().length >= 10;
+  const domainFilteredGoals = useMemo(() => {
+    const matched = GOALS.filter((g) => g.category.toLowerCase() === selectedDomain.label.toLowerCase());
+    return matched.length > 0 ? matched : GOALS;
+  }, [selectedDomain]);
+
+  const canAnalyze = question.trim().length >= 8 && answer.trim().length >= 10;
+  const wordCount = answer.trim().split(/\s+/).filter(Boolean).length;
 
   const handleAnalyze = () => {
     if (!canAnalyze) return;
-
     setIsAnalyzing(true);
 
     setTimeout(() => {
-      const result = generateAnalysis(
-        question,
-        answer,
-        domain,
-        selectedGoal.title
-      );
-
+      const result = generateAnalysis(question, answer, domain, selectedGoal.title);
       setAnalysis(result);
       setIsAnalyzing(false);
 
       setTimeout(() => {
-        document
-          .getElementById("analysis-result")
-          ?.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-      }, 100);
-    }, 900);
+        document.getElementById("analysis-result")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 150);
+    }, 850);
   };
 
   const handleDomainChange = (id) => {
     setDomain(id);
     setAnalysis(null);
+    const targetDomainObj = DOMAINS.find((d) => d.id === id);
+    if (targetDomainObj) {
+      const matchedGoal = GOALS.find((g) => g.category.toLowerCase() === targetDomainObj.label.toLowerCase());
+      if (matchedGoal) setGoal(matchedGoal.title);
+    }
   };
 
   const handleGoalChange = (value) => {
@@ -567,67 +467,62 @@ export default function SkillGap() {
     setAnalysis(null);
   };
 
+  const handleLoadPreset = () => {
+    setQuestion(selectedDomain.sampleQuestion);
+    setAnswer(selectedDomain.sampleAnswer);
+  };
+
   const resetAssessment = () => {
     setAnalysis(null);
     setQuestion("");
     setAnswer("");
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const filteredGaps = useMemo(() => {
+    if (!analysis || !analysis.gaps) return [];
+    if (priorityFilter === "All") return analysis.gaps;
+    return analysis.gaps.filter((g) => g.priority === priorityFilter);
+  }, [analysis, priorityFilter]);
+
   return (
-    <div className="bg-[#F8FAFC] text-[#0F172A]">
-      {/* =====================================================
-          HERO
-      ===================================================== */}
-      <section className="relative overflow-hidden bg-[#0F172A]">
-        <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-[#4F46E5]/20 blur-3xl" />
-        <div className="absolute -bottom-40 left-1/4 h-96 w-96 rounded-full bg-[#06B6D4]/10 blur-3xl" />
+    <div className="bg-[var(--color-surface)] text-slate-900 min-h-screen">
+      {/* HERO SECTION */}
+      <section className="relative overflow-hidden border-b border-slate-200 bg-white">
+        <div className="pointer-events-none absolute -right-40 -top-40 h-96 w-96 rounded-full bg-indigo-100/50 blur-3xl" />
+        <div className="pointer-events-none absolute -left-40 bottom-0 h-80 w-80 rounded-full bg-cyan-100/40 blur-3xl" />
 
         <Container>
-          <div className="relative mx-auto max-w-4xl py-20 text-center sm:py-24 lg:py-28">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-300 backdrop-blur">
-              <span className="text-[#06B6D4]">✦</span>
-              Cognify AI · Skill Intelligence
+          <div className="relative mx-auto max-w-4xl py-14 sm:py-18 lg:py-20 text-center">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-indigo-700 shadow-xs">
+              <SparklesIcon className="w-4 h-4 text-cyan-500" />
+              Afinity AI · Skill Intelligence Engine
             </div>
 
-            <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
-              Measure what you know.
-              <br />
-              <span className="bg-gradient-to-r from-[#4F46E5] via-[#7C3AED] to-[#06B6D4] bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
+              Measure what you know.{" "}
+              <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-cyan-500 bg-clip-text text-transparent">
                 Discover what you're missing.
               </span>
             </h1>
 
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
-              Don't just tell us your skills. Show us what you know.
-              Cognify analyzes your answers, identifies demonstrated
-              capabilities, and measures the distance between your current
-              level and your career goal.
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
+              Show us what you know. Afinity evaluates your logic, reasoning, and answers to map the exact distance between your current level and career goals.
             </p>
 
-            <div className="mt-10 grid gap-3 text-left sm:grid-cols-3">
+            <div className="mt-10 grid gap-4 text-left sm:grid-cols-3">
               {[
-                ["01", "Ask", "Answer a real question"],
-                ["02", "Analyze", "AI evaluates your performance"],
-                ["03", "Map", "See your career skill gap"],
+                ["01", "Demonstrate", "Answer a question or explain a concept"],
+                ["02", "Evaluate", "AI analyzes reasoning and depth"],
+                ["03", "Map Gap", "Get custom career skill gap analysis"],
               ].map(([number, title, description]) => (
                 <div
                   key={number}
-                  className="rounded-xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur transition hover:border-[#06B6D4]/40 hover:bg-white/[0.07]"
+                  className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all duration-300 hover:border-indigo-300 hover:shadow-lg hover:-translate-y-1"
                 >
-                  <span className="text-xs font-bold text-[#06B6D4]">
-                    {number}
-                  </span>
-
-                  <h3 className="mt-2 font-semibold text-white">{title}</h3>
-
-                  <p className="mt-1 text-xs leading-5 text-slate-400">
-                    {description}
-                  </p>
+                  <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">{number}</span>
+                  <h3 className="mt-1.5 font-bold text-slate-900 text-sm">{title}</h3>
+                  <p className="mt-1 text-xs leading-5 text-slate-500">{description}</p>
                 </div>
               ))}
             </div>
@@ -635,578 +530,339 @@ export default function SkillGap() {
         </Container>
       </section>
 
-      {/* =====================================================
-          ASSESSMENT
-      ===================================================== */}
+      {/* ASSESSMENT SECTION */}
       <Section background="white" id="assessment">
-        <div className="mx-auto max-w-6xl">
-          <SectionHeading
-            title="Start with what you actually know."
-            subtitle="Choose a field, set a goal, and answer a question. Your performance becomes the evidence Cognify uses to understand your capabilities."
-          />
-
-          {/* DOMAIN */}
-          <div className="mb-12">
-            <div className="mb-5 flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
-              <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-[#4F46E5]">
-                  Step 01
-                </span>
-
-                <h3 className="mt-1 text-xl font-semibold text-[#0F172A]">
-                  What are you learning?
-                </h3>
-              </div>
-
-              <span className="text-sm text-[#64748B]">
-                Any field. Any subject.
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {DOMAINS.map((item) => {
-                const active = domain === item.id;
-
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => handleDomainChange(item.id)}
-                    className={[
-                      "group rounded-xl border p-4 text-left transition-all duration-200",
-                      active
-                        ? "border-[#4F46E5] bg-indigo-50 shadow-md shadow-indigo-500/10"
-                        : "border-slate-200 bg-white hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-md",
-                    ].join(" ")}
-                  >
-                    <div
-                      className={[
-                        "flex h-10 w-10 items-center justify-center rounded-lg text-lg font-semibold transition",
-                        active
-                          ? "bg-[#4F46E5] text-white"
-                          : "bg-[#F1F5F9] text-[#4F46E5] group-hover:bg-indigo-50",
-                      ].join(" ")}
-                    >
-                      {item.icon}
-                    </div>
-
-                    <h4 className="mt-3 text-sm font-semibold text-[#0F172A]">
-                      {item.label}
-                    </h4>
-
-                    <p className="mt-1 text-xs leading-5 text-[#64748B]">
-                      {item.examples}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* CAREER */}
-          <div className="mb-12">
-            <div className="mb-5">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#4F46E5]">
-                Step 02
-              </span>
-
-              <h3 className="mt-1 text-xl font-semibold text-[#0F172A]">
-                Where do you want to go?
-              </h3>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {GOALS.map((item) => {
-                const active = goal === item.title;
-
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => handleGoalChange(item.title)}
-                    className={[
-                      "group flex items-center justify-between rounded-xl border p-5 text-left transition-all duration-200",
-                      active
-                        ? "border-[#7C3AED] bg-violet-50 shadow-md shadow-violet-500/10"
-                        : "border-slate-200 bg-white hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-md",
-                    ].join(" ")}
-                  >
-                    <div>
-                      <span className="text-xs font-medium text-[#64748B]">
-                        {item.category}
-                      </span>
-
-                      <h4 className="mt-1 font-semibold text-[#0F172A]">
-                        {item.title}
-                      </h4>
-                    </div>
-
-                    <div
-                      className={[
-                        "flex h-8 w-8 items-center justify-center rounded-full border text-sm transition",
-                        active
-                          ? "border-[#7C3AED] bg-[#7C3AED] text-white"
-                          : "border-slate-200 text-slate-400 group-hover:border-violet-300 group-hover:text-violet-600",
-                      ].join(" ")}
-                    >
-                      {active ? "✓" : "→"}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* QUESTION */}
-          <Card
-            hoverable={false}
-            className="border-slate-200 p-6 shadow-sm sm:p-8"
-          >
-            <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-[#4F46E5]">
-                  Step 03
-                </span>
-
-                <h3 className="mt-1 text-xl font-semibold text-[#0F172A]">
-                  Show us what you know.
-                </h3>
-
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-[#64748B]">
-                  Ask yourself a question, paste a problem you attempted, or
-                  explain a concept. It doesn't have to be technical.
-                </p>
-              </div>
-
-              <div className="flex shrink-0 items-center gap-2 rounded-full bg-cyan-50 px-3 py-1.5 text-xs font-semibold text-cyan-700">
-                <span className="h-2 w-2 rounded-full bg-[#06B6D4]" />
-                AI Assessment
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <div>
-                <label
-                  htmlFor="question"
-                  className="mb-2 block text-sm font-semibold text-[#0F172A]"
-                >
-                  The question or problem
-                </label>
-
-                <textarea
-                  id="question"
-                  value={question}
-                  onChange={(e) => setQuestion(e.target.value)}
-                  rows={4}
-                  placeholder={`Example: Explain why increasing interest rates can affect inflation...`}
-                  className="w-full resize-none rounded-xl border border-slate-200 bg-[#F8FAFC] px-4 py-3.5 text-sm text-[#0F172A] outline-none transition placeholder:text-slate-400 focus:border-[#4F46E5] focus:bg-white focus:ring-4 focus:ring-indigo-500/10"
-                />
-              </div>
-
-              <div>
-                <div className="mb-2 flex items-center justify-between">
-                  <label
-                    htmlFor="answer"
-                    className="block text-sm font-semibold text-[#0F172A]"
-                  >
-                    Your answer
-                  </label>
-
-                  <span className="text-xs text-[#64748B]">
-                    {answer.trim().split(/\s+/).filter(Boolean).length} words
-                  </span>
-                </div>
-
-                <textarea
-                  id="answer"
-                  value={answer}
-                  onChange={(e) => setAnswer(e.target.value)}
-                  rows={7}
-                  placeholder="Explain your reasoning in your own words. Cognify evaluates how you think, not just whether your final answer is correct."
-                  className="w-full resize-none rounded-xl border border-slate-200 bg-[#F8FAFC] px-4 py-3.5 text-sm leading-6 text-[#0F172A] outline-none transition placeholder:text-slate-400 focus:border-[#4F46E5] focus:bg-white focus:ring-4 focus:ring-indigo-500/10"
-                />
-              </div>
-
-              <div className="flex flex-col gap-4 rounded-xl border border-cyan-100 bg-cyan-50/60 p-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-[#06B6D4] shadow-sm">
-                    ✦
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-semibold text-[#0F172A]">
-                      How Cognify evaluates you
-                    </p>
-
-                    <p className="mt-1 text-xs leading-5 text-[#64748B]">
-                      Reasoning · Understanding · Application · Explanation
-                    </p>
-                  </div>
-                </div>
-
-                <Button
-                  size="lg"
-                  disabled={!canAnalyze || isAnalyzing}
-                  className="w-full border-[#4F46E5] bg-[#4F46E5] hover:border-[#4338CA] hover:bg-[#4338CA] sm:w-auto"
-                  onClick={handleAnalyze}
-                >
-                  {isAnalyzing ? "Analyzing..." : "Analyze My Skills"}
-                  {!isAnalyzing && <span>→</span>}
-                </Button>
-              </div>
-            </div>
-          </Card>
-        </div>
-      </Section>
-
-      {/* =====================================================
-          AI RESULT
-      ===================================================== */}
-      {analysis && (
-        <section
-          id="analysis-result"
-          className="scroll-mt-20 border-y border-slate-200 bg-[#F1F5F9] py-16 sm:py-20 lg:py-24"
-        >
-          <Container>
-            <div className="mb-10 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-              <div>
-                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1.5 text-xs font-semibold text-cyan-700">
-                  <span>✦</span>
-                  AI Analysis Complete
-                </div>
-
-                <h2 className="text-3xl font-bold tracking-tight text-[#0F172A] sm:text-4xl">
-                  Here's what we found.
-                </h2>
-
-                <p className="mt-3 max-w-2xl text-sm leading-6 text-[#64748B]">
-                  Based on your response in{" "}
-                  <strong className="text-[#0F172A]">
-                    {selectedDomain.label}
-                  </strong>
-                  , Cognify estimated your demonstrated capabilities against
-                  the requirements of{" "}
-                  <strong className="text-[#4F46E5]">{analysis.goal}</strong>.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={resetAssessment}
-                className="w-fit text-sm font-semibold text-[#4F46E5] transition hover:text-[#7C3AED]"
-              >
-                ← Ask another question
-              </button>
-            </div>
-
-            {/* OVERVIEW */}
-            <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-              <Card
-                hoverable
-                className="border-slate-200 shadow-sm"
-              >
-                <div className="flex flex-col items-center gap-7 sm:flex-row">
-                  <ScoreRing score={analysis.score} />
-
-                  <div>
-                    <span className="text-xs font-bold uppercase tracking-wider text-[#06B6D4]">
-                      Demonstrated capability
-                    </span>
-
-                    <h3 className="mt-2 text-2xl font-bold text-[#0F172A]">
-                      {analysis.score >= 75
-                        ? "Strong foundation"
-                        : analysis.score >= 60
-                        ? "Developing capability"
-                        : "Early-stage capability"}
-                    </h3>
-
-                    <p className="mt-3 text-sm leading-6 text-[#64748B]">
-                      This score reflects how effectively your response
-                      demonstrated understanding, reasoning and application.
-                      It is not simply a correctness score.
-                    </p>
-                  </div>
-                </div>
-              </Card>
-
-              <Card
-                hoverable
-                className="border-slate-200 shadow-sm"
-              >
-                <span className="text-xs font-bold uppercase tracking-wider text-[#7C3AED]">
-                  Career gap
-                </span>
-
-                <div className="mt-4 flex items-end gap-2">
-                  <span className="text-5xl font-bold text-[#0F172A]">
-                    {analysis.averageGap}
-                  </span>
-
-                  <span className="mb-2 text-sm text-[#64748B]">
-                    points average gap
-                  </span>
-                </div>
-
-                <div className="mt-5 h-2 overflow-hidden rounded-full bg-slate-100">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-[#4F46E5] to-[#7C3AED]"
-                    style={{
-                      width: `${Math.min(
-                        analysis.averageGap * 2.5,
-                        100
-                      )}%`,
-                    }}
-                  />
-                </div>
-
-                <p className="mt-4 text-sm leading-6 text-[#64748B]">
-                  The smaller this number becomes, the closer your demonstrated
-                  abilities are to your target career requirements.
-                </p>
-              </Card>
-            </div>
-
-            {/* STRENGTHS */}
-            <div className="mt-8">
-              <Card
-                hoverable={false}
-                className="border-cyan-100 bg-white shadow-sm"
-              >
-                <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-cyan-50 text-lg text-[#06B6D4]">
-                    ✓
-                  </div>
-
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-[#0F172A]">
-                      Capabilities you demonstrated
-                    </h3>
-
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {analysis.strengths.map((strength) => (
-                        <span
-                          key={strength}
-                          className="rounded-full border border-cyan-100 bg-cyan-50 px-3 py-1.5 text-xs font-medium text-cyan-700"
-                        >
-                          {strength}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </div>
-
-            {/* GAPS */}
-            <div className="mt-12">
-              <SectionHeading
-                title="Your skill gaps"
-                subtitle="These are the areas where your demonstrated ability is furthest from your target career level."
-                className="mb-8"
-              />
-
-              <div className="grid gap-5 lg:grid-cols-3">
-                {analysis.gaps.map((gap, index) => {
-                  const expanded = activeGap === index;
-
-                  return (
-                    <button
-                      key={gap.name}
-                      type="button"
-                      onClick={() =>
-                        setActiveGap(expanded ? null : index)
-                      }
-                      className="text-left"
-                    >
-                      <Card
-                        hoverable
-                        className={[
-                          "h-full transition-all",
-                          expanded
-                            ? "border-[#7C3AED] shadow-lg shadow-violet-500/10"
-                            : "",
-                        ].join(" ")}
-                      >
-                        <div className="flex items-start justify-between gap-4">
-                          <div
-                            className={[
-                              "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-sm font-bold",
-                              gap.priority === "High"
-                                ? "bg-violet-50 text-[#7C3AED]"
-                                : "bg-indigo-50 text-[#4F46E5]",
-                            ].join(" ")}
-                          >
-                            {String(index + 1).padStart(2, "0")}
-                          </div>
-
-                          <span
-                            className={[
-                              "rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide",
-                              gap.priority === "High"
-                                ? "border-violet-100 bg-violet-50 text-violet-700"
-                                : "border-indigo-100 bg-indigo-50 text-indigo-700",
-                            ].join(" ")}
-                          >
-                            {gap.priority}
-                          </span>
-                        </div>
-
-                        <h3 className="mt-5 text-lg font-semibold text-[#0F172A]">
-                          {gap.name}
-                        </h3>
-
-                        <p className="mt-2 text-sm leading-6 text-[#64748B]">
-                          {gap.description}
-                        </p>
-
-                        <div className="mt-6">
-                          <GapBar
-                            current={gap.current}
-                            target={gap.target}
-                          />
-                        </div>
-
-                        <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
-                          <span className="text-xs font-medium text-[#64748B]">
-                            {expanded ? "Hide details" : "View details"}
-                          </span>
-
-                          <span
-                            className={[
-                              "text-[#4F46E5] transition-transform",
-                              expanded ? "rotate-90" : "",
-                            ].join(" ")}
-                          >
-                            →
-                          </span>
-                        </div>
-
-                        {expanded && (
-                          <div className="mt-4 rounded-lg bg-[#F8FAFC] p-4">
-                            <p className="text-xs font-semibold text-[#0F172A]">
-                              Recommended focus
-                            </p>
-
-                            <p className="mt-1 text-xs leading-5 text-[#64748B]">
-                              Practice this capability through progressively
-                              harder problems and real-world applications.
-                            </p>
-                          </div>
-                        )}
-                      </Card>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </Container>
-        </section>
-      )}
-
-      {/* =====================================================
-          HOW IT WORKS
-      ===================================================== */}
-      <Section background="white">
         <SectionHeading
-          title="Skill Gap is not a checklist."
-          subtitle="Your capabilities are inferred from evidence, not simply from the technologies you claim to know."
+          eyebrow="STEP-BY-STEP ASSESSMENT"
+          title="Start with what you actually know"
+          subtitle="Select a domain, target goal, and answer a question. Afinity uses empirical evidence to measure capability."
         />
 
-        <div className="grid gap-5 md:grid-cols-3">
-          {[
-            {
-              number: "01",
-              title: "Demonstrate",
-              text: "Answer questions, solve problems or explain concepts from any field.",
-              icon: "◈",
-            },
-            {
-              number: "02",
-              title: "Understand",
-              text: "Cognify analyzes your reasoning, understanding, application and explanation.",
-              icon: "✦",
-            },
-            {
-              number: "03",
-              title: "Measure",
-              text: "Your demonstrated capabilities are compared with the requirements of your goal.",
-              icon: "◎",
-            },
-          ].map((item) => (
-            <Card
-              key={item.number}
-              hoverable
-              className="group h-full"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#4F46E5]">
-                  {item.number}
-                </span>
-
-                <span className="text-xl text-[#06B6D4] transition-transform duration-200 group-hover:scale-110">
-                  {item.icon}
-                </span>
-              </div>
-
-              <h3 className="mt-6 text-xl font-semibold text-[#0F172A]">
-                {item.title}
-              </h3>
-
-              <p className="mt-2 text-sm leading-6 text-[#64748B]">
-                {item.text}
-              </p>
-            </Card>
-          ))}
-        </div>
-      </Section>
-
-      {/* =====================================================
-          FINAL CTA
-      ===================================================== */}
-      <section className="bg-[#0F172A]">
-        <Container>
-          <div className="relative overflow-hidden py-20 text-center sm:py-24">
-            <div className="absolute left-1/2 top-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#4F46E5]/20 blur-3xl" />
-
-            <div className="relative mx-auto max-w-3xl">
-              <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#06B6D4]">
-                Your growth starts with evidence
+        {/* Step 1: Select Domain */}
+        <div className="mb-12">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">
+                Step 01
               </span>
+              <h3 className="mt-0.5 text-lg font-bold text-slate-900">What field are you learning?</h3>
+            </div>
+            <span className="text-xs text-slate-500 font-medium">8 Supported Domains</span>
+          </div>
 
-              <h2 className="mt-5 text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
-                Don't guess your skill gap.
-                <br />
-                <span className="text-[#7C3AED]">
-                  Discover it.
-                </span>
-              </h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {DOMAINS.map((item) => (
+              <DomainTile
+                key={item.id}
+                item={item}
+                active={domain === item.id}
+                onClick={handleDomainChange}
+              />
+            ))}
+          </div>
+        </div>
 
-              <p className="mx-auto mt-5 max-w-xl text-sm leading-6 text-slate-300 sm:text-base">
-                The more you demonstrate, the more Cognify understands your
-                abilities and the more personalized your learning path becomes.
+        {/* Step 2: Select Goal */}
+        <div className="mb-12">
+          <div className="mb-4">
+            <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">
+              Step 02
+            </span>
+            <h3 className="mt-0.5 text-lg font-bold text-slate-900">What is your target career role?</h3>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {domainFilteredGoals.map((item) => {
+              const active = goal === item.title;
+              const isRecommended = item.category.toLowerCase() === selectedDomain.label.toLowerCase();
+              return (
+                <GoalCard
+                  key={item.id}
+                  item={item}
+                  active={active}
+                  isRecommended={isRecommended}
+                  onClick={handleGoalChange}
+                />
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Step 3: Question & Answer Submission Card */}
+        <Card hoverable={false} className="border-slate-200 p-6 shadow-sm sm:p-8 transition-all duration-300 hover:shadow-xl">
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">
+                Step 03
+              </span>
+              <h3 className="mt-0.5 text-xl font-bold text-slate-900">Show us your knowledge</h3>
+              <p className="mt-1 text-sm text-slate-500">
+                Ask a question and explain your answer. Or click the preset button below to test instantly.
               </p>
+            </div>
 
-              <div className="mt-8 flex justify-center">
-                <Button
-                  size="lg"
-                  className="border-[#4F46E5] bg-[#4F46E5] text-white shadow-lg shadow-indigo-600/20 hover:border-[#4338CA] hover:bg-[#4338CA]"
-                  onClick={() => {
-                    document
-                      .getElementById("assessment")
-                      ?.scrollIntoView({
-                        behavior: "smooth",
-                      });
-                  }}
-                >
-                  Start Skill Assessment
-                  <span>→</span>
-                </Button>
+            <Button
+              size="sm"
+              variant="subtle"
+              onClick={handleLoadPreset}
+              icon={<SparklesIcon className="w-4 h-4 text-indigo-600" />}
+              iconPosition="left"
+              className="transition-all duration-200 hover:scale-105 active:scale-95"
+            >
+              Load {selectedDomain.label} Sample
+            </Button>
+          </div>
+
+          <div className="space-y-5">
+            <div>
+              <label htmlFor="question" className="mb-1.5 block text-sm font-semibold text-slate-900">
+                The Question or Problem
+              </label>
+              <textarea
+                id="question"
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                rows={3}
+                placeholder={`e.g. ${selectedDomain.sampleQuestion}`}
+                className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition-all duration-200 placeholder:text-slate-400 focus:border-indigo-600 focus:bg-white focus:ring-4 focus:ring-indigo-600/10"
+              />
+            </div>
+
+            <div>
+              <div className="mb-1.5 flex items-center justify-between">
+                <label htmlFor="answer" className="block text-sm font-semibold text-slate-900">
+                  Your Reasoning & Explanation
+                </label>
+                <span className="text-xs font-medium text-slate-500">{wordCount} words</span>
               </div>
+
+              <textarea
+                id="answer"
+                value={answer}
+                onChange={(e) => setAnswer(e.target.value)}
+                rows={6}
+                placeholder="Explain your thought process. Afinity evaluates logic, concepts, and depth..."
+                className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-900 outline-none transition-all duration-200 placeholder:text-slate-400 focus:border-indigo-600 focus:bg-white focus:ring-4 focus:ring-indigo-600/10"
+              />
+            </div>
+
+            <div className="flex flex-col gap-4 rounded-xl border border-cyan-100 bg-cyan-50/50 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-cyan-600 shadow-xs">
+                  <SparklesIcon className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-900">AI Evaluation Criteria</p>
+                  <p className="text-xs text-slate-600">Decomposition · Logic · Concepts · Application</p>
+                </div>
+              </div>
+
+              <Button
+                size="lg"
+                disabled={!canAnalyze || isAnalyzing}
+                icon={isAnalyzing ? <SpinnerIcon /> : <ArrowRightIcon />}
+                onClick={handleAnalyze}
+                className="w-full sm:w-auto transition-all duration-200 hover:scale-105 active:scale-95"
+              >
+                {isAnalyzing ? "Analyzing..." : "Analyze Skill Gap"}
+              </Button>
             </div>
           </div>
-        </Container>
-      </section>
+        </Card>
+      </Section>
+
+      {/* AI ANALYSIS RESULTS SECTION */}
+      {analysis && (
+        <Section background="tint" id="analysis-result" className="scroll-mt-20">
+          <div className="mb-10 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-700">
+                <SparklesIcon className="w-3.5 h-3.5" />
+                AI Skill Analysis Complete
+              </div>
+
+              <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+                Here's what we discovered
+              </h2>
+
+              <p className="mt-2 max-w-2xl text-sm text-slate-600">
+                Analysis based on response in <strong className="text-slate-900">{selectedDomain.label}</strong> evaluated against target role <strong className="text-indigo-600">{analysis.goal}</strong>.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={resetAssessment}
+              className="text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition"
+            >
+              ← Analyze another question
+            </button>
+          </div>
+
+          {/* Overview Cards */}
+          <div className="grid gap-6 lg:grid-cols-2">
+            <Card hoverable={false} className="bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-xl">
+              <div className="flex flex-col items-center gap-6 sm:flex-row">
+                <ScoreRing score={analysis.score} />
+
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-cyan-600">
+                    Demonstrated Capability
+                  </span>
+
+                  <h3 className="mt-1 text-2xl font-bold text-slate-900">
+                    {analysis.score >= 75
+                      ? "Strong Capability Foundation"
+                      : analysis.score >= 60
+                      ? "Developing Capability"
+                      : "Early Stage Capability"}
+                  </h3>
+
+                  <p className="mt-2 text-xs leading-5 text-slate-600">
+                    Reflects how effectively your reasoning demonstrated underlying concepts and application.
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            <Card hoverable={false} className="bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-xl">
+              <span className="text-xs font-bold uppercase tracking-wider text-violet-600">
+                Estimated Career Gap
+              </span>
+
+              <div className="mt-3 flex items-end gap-2">
+                <span className="text-4xl font-bold text-slate-900">{analysis.averageGap}</span>
+                <span className="mb-1 text-xs font-medium text-slate-500">points average skill gap</span>
+              </div>
+
+              <div className="mt-4">
+                <ProgressBar value={Math.min(analysis.averageGap * 2.5, 100)} />
+              </div>
+
+              <p className="mt-3 text-xs leading-5 text-slate-600">
+                The smaller this gap number, the closer your demonstrated abilities match your target role.
+              </p>
+            </Card>
+          </div>
+
+          {/* Strengths List */}
+          <div className="mt-6">
+            <Card hoverable={false} className="border-cyan-100 bg-white p-5 shadow-sm transition-all duration-300 hover:shadow-lg">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600">
+                  <CheckIcon className="w-5 h-5" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-sm font-bold text-slate-900">Demonstrated Strengths</h3>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {analysis.strengths.map((str) => (
+                      <span
+                        key={str}
+                        className="rounded-full border border-cyan-100 bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-700 transition-colors hover:bg-cyan-100"
+                      >
+                        ✓ {str}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          {/* Gaps List & Priority Filter */}
+          <div className="mt-10">
+            <div className="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+              <div>
+                <h3 className="text-xl font-bold text-slate-900">Identified Skill Gaps</h3>
+                <p className="text-xs text-slate-500">Focus on these areas to reach target proficiency.</p>
+              </div>
+
+              <div className="flex gap-1.5">
+                {["All", "High", "Medium"].map((priority) => (
+                  <button
+                    key={priority}
+                    type="button"
+                    onClick={() => setPriorityFilter(priority)}
+                    className={`rounded-full px-3 py-1 text-xs font-semibold transition-all duration-200 ${
+                      priorityFilter === priority
+                        ? "bg-slate-900 text-white scale-105 shadow-xs"
+                        : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 active:scale-95"
+                    }`}
+                  >
+                    {priority} Priority
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid gap-5 lg:grid-cols-3">
+              {filteredGaps.map((gap, index) => {
+                const expanded = activeGap === index;
+                return (
+                  <button
+                    key={gap.name}
+                    type="button"
+                    onClick={() => setActiveGap(expanded ? null : index)}
+                    className="text-left"
+                  >
+                    <Card
+                      hoverable
+                      className={`h-full bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${
+                        expanded ? "ring-2 ring-violet-500 shadow-md" : ""
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-50 text-xs font-bold text-violet-700">
+                          0{index + 1}
+                        </span>
+                        <span
+                          className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                            gap.priority === "High"
+                              ? "border-violet-200 bg-violet-50 text-violet-700"
+                              : "border-indigo-200 bg-indigo-50 text-indigo-700"
+                          }`}
+                        >
+                          {gap.priority}
+                        </span>
+                      </div>
+
+                      <h4 className="mt-3 font-bold text-slate-900 text-base">{gap.name}</h4>
+                      <p className="mt-1 text-xs leading-5 text-slate-600">{gap.description}</p>
+
+                      <div className="mt-4">
+                        <GapBar current={gap.current} target={gap.target} />
+                      </div>
+
+                      <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
+                        <span className="text-xs font-semibold text-indigo-600">
+                          {expanded ? "Hide details" : "View recommendations"}
+                        </span>
+                        <ArrowRightIcon className={`w-3.5 h-3.5 text-indigo-600 transition-transform duration-200 ${expanded ? "rotate-90" : ""}`} />
+                      </div>
+
+                      {expanded && (
+                        <div className="mt-3 rounded-lg bg-slate-50 p-3 text-xs leading-5 text-slate-600">
+                          <strong className="text-slate-900">Action Plan:</strong> Solve targeted practical problems covering {gap.name.toLowerCase()} concepts.
+                        </div>
+                      )}
+                    </Card>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </Section>
+      )}
+
+      {/* FINAL CTA BANNER */}
+      <Section background="white">
+        <CtaBanner
+          eyebrow="EVIDENCE-BASED LEARNING"
+          title="Turn your skill gaps into personalized roadmaps."
+          buttonLabel="View Personalized Roadmap"
+          href="/roadmap"
+        />
+      </Section>
     </div>
   );
 }
