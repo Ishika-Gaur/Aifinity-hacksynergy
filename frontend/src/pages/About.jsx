@@ -125,7 +125,7 @@ export default function About() {
             Learning should show you what you're missing.
           </h1>
           <p className="text-lg sm:text-xl leading-relaxed text-[var(--color-text-muted)] max-w-2xl mx-auto">
-            Cognify AI helps students understand the root cause behind their mistakes, identify their learning gaps, and turn those insights into a clearer path toward their goals.
+            Afinity AI helps students understand the root cause behind their mistakes, identify their learning gaps, and turn those insights into a clearer path toward their goals.
           </p>
         </Container>
       </Section>
@@ -156,7 +156,7 @@ export default function About() {
         <SectionHeading
           eyebrow="OUR METHODOLOGY"
           title="From mistakes to meaningful progress."
-          subtitle="Cognify transforms isolated quiz attempts into a structured learning loop."
+          subtitle="Afinity transforms isolated quiz attempts into a structured learning loop."
         />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -224,8 +224,8 @@ export default function About() {
       <Section background="tint" className="border-y border-[var(--color-border)]">
         <SectionHeading
           eyebrow="CONNECTED LEARNING"
-          title="The Cognify Journey"
-          subtitle="Cognify is designed to connect these stages instead of treating them as isolated activities."
+          title="The Afinity Journey"
+          subtitle="Afinity is designed to connect these stages instead of treating them as isolated activities."
         />
 
         <div className="rounded-2xl border border-[var(--color-border)] bg-white p-8 shadow-[var(--shadow-card)]">
@@ -242,7 +242,7 @@ export default function About() {
             ))}
           </div>
           <p className="mt-8 text-center text-sm leading-relaxed text-[var(--color-text-muted)] max-w-2xl mx-auto">
-            By linking attempt evaluations to concept prerequisites, practice guidance, and career standards, Cognify ensures every learning activity has a clear purpose.
+            By linking attempt evaluations to concept prerequisites, practice guidance, and career standards, Afinity ensures every learning activity has a clear purpose.
           </p>
         </div>
       </Section>
@@ -284,7 +284,7 @@ export default function About() {
             Your next step should be based on what you actually need to learn.
           </h2>
           <p className="text-lg text-slate-300 mb-8 max-w-xl mx-auto">
-            Stop guessing your learning gaps. Start identifying your root concepts with Cognify AI today.
+            Stop guessing your learning gaps. Start identifying your root concepts with Afinity AI today.
           </p>
           <Button as="a" href="/assessment" variant="primary" size="lg">
             Start Assessment
