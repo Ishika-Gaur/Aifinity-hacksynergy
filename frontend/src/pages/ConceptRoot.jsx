@@ -5,6 +5,7 @@ import Container from "../components/Container";
 import Card from "../components/Card";
 import Button from "../components/Button";
 import ConceptRootDemo from "../components/ConceptRootDemo";
+import CtaBanner from "../components/CtaBanner";
 
 const HOW_IT_WORKS_STEPS = [
   {
@@ -316,20 +317,15 @@ export default function ConceptRoot() {
         </div>
       </Section>
 
-      {/* FINAL CTA */}
-      <Section background="dark" className="py-20 text-center">
-        <Container size="narrow">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4 tracking-tight">
-            Know what to learn next.
-          </h2>
-          <p className="text-lg text-slate-300 mb-8 max-w-xl mx-auto">
-            Turn every mistake into a clearer learning path with ConceptRoot.
-          </p>
-          <Button onClick={scrollToDemo} variant="primary" size="lg">
-            Try ConceptRoot
-          </Button>
-        </Container>
-      </Section>
+      {/* CTA */}
+            <Section background="white">
+              <CtaBanner
+                eyebrow="Ready to begin?"
+                title="Your skill gap is waiting for you."
+                buttonLabel="Start Free Assessment"
+                href="/assessment"
+              />
+            </Section>
     </div>
   );
 }

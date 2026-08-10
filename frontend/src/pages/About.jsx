@@ -4,6 +4,7 @@ import SectionHeading from "../components/SectionHeading";
 import Container from "../components/Container";
 import Card from "../components/Card";
 import Button from "../components/Button";
+import CtaBanner from "../components/CtaBanner";
 
 const PROBLEM_CARDS = [
   {
@@ -277,20 +278,15 @@ export default function About() {
         </div>
       </Section>
 
-      {/* FINAL CTA */}
-      <Section background="dark" className="py-20 text-center">
-        <Container size="narrow">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4 tracking-tight">
-            Your next step should be based on what you actually need to learn.
-          </h2>
-          <p className="text-lg text-slate-300 mb-8 max-w-xl mx-auto">
-            Stop guessing your learning gaps. Start identifying your root concepts with Afinity AI today.
-          </p>
-          <Button as="a" href="/assessment" variant="primary" size="lg">
-            Start Assessment
-          </Button>
-        </Container>
-      </Section>
+     {/* CTA */}
+           <Section background="white">
+             <CtaBanner
+               eyebrow="Ready to begin?"
+               title="Your skill gap is waiting for you."
+               buttonLabel="Start Free Assessment"
+               href="/assessment"
+             />
+           </Section>
     </div>
   );
 }

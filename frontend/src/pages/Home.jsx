@@ -225,7 +225,7 @@ export default function Home() {
               <div className="flex flex-wrap gap-3.5 pt-2">
                 <Button
                   as="a"
-                  href="/assessment"
+                  href="/onboardingpage"
                   size="lg"
                   className="shadow-md transition-all duration-200 hover:scale-105 active:scale-95"
                 >
