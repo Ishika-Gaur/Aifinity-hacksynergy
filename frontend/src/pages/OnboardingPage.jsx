@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Section from "../components/Section";
 import Container from "../components/Container";
 import SectionHeading from "../components/SectionHeading";
 import Card from "../components/Card";
 import Button from "../components/Button";
 import ImageCard from "../components/ImageCard";
+import { FIELDS, FIELD_ICONS, CAREER_GOALS_BY_FIELD } from "../data/assessments";
 
 /* Original, simple AI/learning illustration — no external image dependency. */
 const WELCOME_ILLUSTRATION =
@@ -36,39 +37,54 @@ const WELCOME_ILLUSTRATION =
 </svg>
 `);
 
-const INTEREST_OPTIONS = [
-  "A Subject",
-  "A Skill",
-  "Exam Preparation",
-  "Interview Preparation",
-  "Something Else",
-];
-
 const LEVEL_OPTIONS = [
   { title: "Beginner", description: "Starting from the basics" },
   { title: "Intermediate", description: "Comfortable with the fundamentals" },
   { title: "Advanced", description: "Ready to go deeper" },
 ];
 
-const GOAL_OPTIONS = [
-  "Learn from the basics",
-  "Improve my skills",
-  "Prepare for an exam",
-  "Prepare for an interview",
-  "Master the subject",
-];
-
 const TOTAL_STEPS = 4;
+
+/* Read by data/assessments.js (getUserProfile) to personalize the
+   Assessment page. Keep this key in sync if it's ever renamed. */
+const ONBOARDING_STORAGE_KEY = "aifinity_onboarding_profile";
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(1); // 1-4 = flow, 5 = final screen
-  const [interest, setInterest] = useState(null);
-  const [customInput, setCustomInput] = useState("");
+  const [field, setField] = useState(null);
   const [level, setLevel] = useState(null);
-  const [goal, setGoal] = useState(null);
+  const [careerGoal, setCareerGoal] = useState(null);
+
+  // Career-goal options depend on the chosen field. If the field
+  // changes after a goal was already picked, drop the stale goal so
+  // we never save a goal that doesn't belong to the selected field.
+  useEffect(() => {
+    if (careerGoal && field && !CAREER_GOALS_BY_FIELD[field]?.includes(careerGoal)) {
+      setCareerGoal(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [field]);
 
   const goNext = () => setStep((s) => Math.min(s + 1, 5));
   const goBack = () => setStep((s) => Math.max(s - 1, 1));
+
+  // Persist the onboarding answers once the person reaches the final
+  // screen, so pages like Assessment can personalize using them.
+  // No UI change — this is a silent side effect only.
+  useEffect(() => {
+    if (step !== 5) return;
+    try {
+      window.localStorage.setItem(
+        ONBOARDING_STORAGE_KEY,
+        JSON.stringify({ field, careerGoal, level })
+      );
+    } catch {
+      // localStorage unavailable (e.g. private browsing) — safe to ignore,
+      // Assessment page just falls back to its default profile.
+    }
+  }, [step, field, careerGoal, level]);
+
+  const careerGoalOptions = field ? CAREER_GOALS_BY_FIELD[field] || [] : [];
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
@@ -128,42 +144,26 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* ---------------- STEP 2: WHAT DO YOU WANT TO LEARN ---------------- */}
+          {/* ---------------- STEP 2: FIELD ---------------- */}
           {step === 2 && (
             <div className="mx-auto max-w-2xl">
               <SectionHeading
-                title="What do you want to learn?"
-                subtitle="Pick whatever fits best — you can always change this later."
+                title="What field are you focused on?"
+                subtitle="This decides which assessments and recommendations you'll see — you can change it later."
               />
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {INTEREST_OPTIONS.map((option) => (
+                {FIELDS.map((f) => (
                   <SelectableCard
-                    key={option}
-                    title={option}
-                    selected={interest === option}
-                    onSelect={() => setInterest(option)}
+                    key={f}
+                    icon={FIELD_ICONS[f]}
+                    title={f}
+                    selected={field === f}
+                    onSelect={() => setField(f)}
                   />
                 ))}
               </div>
 
-              <div className="mt-8">
-                <label
-                  htmlFor="custom-subject"
-                  className="mb-2 block text-sm font-medium text-[var(--color-text-h)]"
-                >
-                  Or tell us exactly what you have in mind
-                </label>
-                <input
-                  id="custom-subject"
-                  type="text"
-                  value={customInput}
-                  onChange={(e) => setCustomInput(e.target.value)}
-                  placeholder="Enter your subject or skill"
-                  className="w-full rounded-md border border-[var(--color-border)] bg-white px-4 py-3 text-base text-[var(--color-text-h)] placeholder:text-[var(--color-text-light)] focus:border-[var(--color-primary-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-100)]"
-                />
-              </div>
-
-              <StepNav onBack={goBack} onNext={goNext} showBack />
+              <StepNav onBack={goBack} onNext={goNext} showBack nextDisabled={!field} />
             </div>
           )}
 
@@ -186,26 +186,31 @@ export default function OnboardingPage() {
                 ))}
               </div>
 
-              <StepNav onBack={goBack} onNext={goNext} showBack />
+              <StepNav onBack={goBack} onNext={goNext} showBack nextDisabled={!level} />
             </div>
           )}
 
-          {/* ---------------- STEP 4: GOAL ---------------- */}
+          {/* ---------------- STEP 4: CAREER GOAL ---------------- */}
           {step === 4 && (
             <div className="mx-auto max-w-2xl">
               <SectionHeading
-                title="What do you want to achieve?"
-                subtitle="This shapes the roadmap we build for you."
+                title={`What's your career goal in ${field}?`}
+                subtitle="This shapes the roadmap and recommendations we build for you."
               />
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {GOAL_OPTIONS.map((option) => (
+                {careerGoalOptions.map((option) => (
                   <SelectableCard
                     key={option}
                     title={option}
-                    selected={goal === option}
-                    onSelect={() => setGoal(option)}
+                    selected={careerGoal === option}
+                    onSelect={() => setCareerGoal(option)}
                   />
                 ))}
+                {careerGoalOptions.length === 0 && (
+                  <p className="col-span-full text-sm text-[var(--color-text-muted)]">
+                    Go back and pick a field first to see relevant goals here.
+                  </p>
+                )}
               </div>
 
               <StepNav
@@ -213,6 +218,7 @@ export default function OnboardingPage() {
                 onNext={goNext}
                 showBack
                 nextLabel="Finish →"
+                nextDisabled={!careerGoal}
               />
             </div>
           )}
@@ -230,7 +236,7 @@ export default function OnboardingPage() {
                 Your personalized learning journey is ready. Let's see
                 where you can go.
               </p>
-              <Button as="a" href="/dashboard" size="lg" className="mt-2">
+              <Button as="a" href="/assessment" size="lg" className="mt-2">
                 Start Learning →
               </Button>
             </div>
@@ -243,7 +249,7 @@ export default function OnboardingPage() {
 
 /* ---------------- Local helpers (kept in this file, not new component files) ---------------- */
 
-function SelectableCard({ title, description, selected, onSelect }) {
+function SelectableCard({ icon, title, description, selected, onSelect }) {
   return (
     <button
       type="button"
@@ -251,6 +257,7 @@ function SelectableCard({ title, description, selected, onSelect }) {
       className="text-left transition-transform duration-150 focus:outline-none"
     >
       <Card
+        icon={icon ? <span className="text-lg font-bold text-[var(--color-primary-600)]">{icon}</span> : undefined}
         title={title}
         hoverable={!selected}
         className={
@@ -265,7 +272,7 @@ function SelectableCard({ title, description, selected, onSelect }) {
   );
 }
 
-function StepNav({ onBack, onNext, showBack, nextLabel = "Next →" }) {
+function StepNav({ onBack, onNext, showBack, nextLabel = "Next →", nextDisabled = false }) {
   return (
     <div className="mt-10 flex items-center justify-between">
       {showBack ? (
@@ -275,7 +282,9 @@ function StepNav({ onBack, onNext, showBack, nextLabel = "Next →" }) {
       ) : (
         <span />
       )}
-      <Button onClick={onNext}>{nextLabel}</Button>
+      <Button onClick={onNext} disabled={nextDisabled}>
+        {nextLabel}
+      </Button>
     </div>
   );
 }

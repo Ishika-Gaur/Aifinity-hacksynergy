@@ -3,7 +3,8 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import About from './pages/About';
-import Assessment from './pages/Assessment';
+import AssessmentPage from "./pages/AssessmentPage";
+import AssessmentAttemptPage from "./pages/AssessmentAttemptPage";
 import Dashboard from './pages/Dashboard';
 import ConceptRoot from './pages/ConceptRoot';
 import MistakeMap from './pages/MistakeMap';
@@ -16,6 +17,7 @@ import NotFound from './pages/NotFound';
 import OnboardingPage from './pages/OnboardingPage';
 import ForgotPassword from './pages/ForgotPassword';
 
+
 function App() {
   return (
     <Router>
@@ -25,7 +27,8 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
-            <Route path="/assessment" element={<Assessment />} />
+            <Route path="/assessment" element={<AssessmentPage />} />
+        <Route path="/assessment/:id" element={<AssessmentAttemptPage />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/concept-root" element={<ConceptRoot />} />
             <Route path="/conceptroot" element={<ConceptRoot />} />
