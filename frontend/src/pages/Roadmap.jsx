@@ -5,6 +5,7 @@ import SectionHeading from "../components/SectionHeading";
 import Button from "../components/Button";
 import Card from "../components/Card";
 import CtaBanner from "../components/CtaBanner";
+import HeroSection from "../components/HeroSection";
 
 /* =========================================================
    REUSABLE SVG ICONS
@@ -85,46 +86,10 @@ const PRESET_CAREERS = [
     icon: "⌘",
     duration: "6 Months",
     stages: [
-      {
-        id: 1,
-        title: "Phase 1: Programming Fundamentals & Data Structures",
-        phase: "Foundations (0-25% Readiness)",
-        status: "completed",
-        duration: "4 Weeks",
-        concepts: ["Algorithms & Big-O", "Data Structures", "Git & Version Control", "Object-Oriented Design"],
-        description: "Master foundational problem solving, data structures, and fundamental programming concepts.",
-        questions: 20,
-      },
-      {
-        id: 2,
-        title: "Phase 2: Modern Frontend & State Management",
-        phase: "Core Competency (25-50% Readiness)",
-        status: "current",
-        duration: "6 Weeks",
-        concepts: ["React & Component Architecture", "State Management & Hooks", "Tailwind CSS & Responsive Layouts", "REST & Async Data Fetching"],
-        description: "Build interactive, high-performance web applications using modern component-driven libraries.",
-        questions: 25,
-      },
-      {
-        id: 3,
-        title: "Phase 3: Backend Systems & API Architecture",
-        phase: "Advanced Specialization (50-75% Readiness)",
-        status: "upcoming",
-        duration: "6 Weeks",
-        concepts: ["Node.js & Express APIs", "Relational & NoSQL Databases", "Authentication & Security", "System Architecture & Caching"],
-        description: "Design secure, scalable backend microservices, database schemas, and robust API endpoints.",
-        questions: 30,
-      },
-      {
-        id: 4,
-        title: "Phase 4: Full-Stack Capstone & Job Readiness Portfolio",
-        phase: "Career Readiness (75-100% Job Ready)",
-        status: "locked",
-        duration: "8 Weeks",
-        concepts: ["Production Cloud Deployment (Vite/Docker)", "CI/CD Pipeline Integration", "System Design Mock Interviews", "Portfolio & Resume Showcase"],
-        description: "Complete real-world full-stack capstone applications, optimize performance, and verify job readiness.",
-        questions: 25,
-      },
+      { id: 1, title: "Phase 1: Programming Fundamentals & Data Structures", phase: "Foundations (0-25% Readiness)", status: "completed", duration: "4 Weeks", concepts: ["Algorithms & Big-O", "Data Structures", "Git & Version Control", "Object-Oriented Design"], description: "Master foundational problem solving, data structures, and fundamental programming concepts.", questions: 20 },
+      { id: 2, title: "Phase 2: Modern Frontend & State Management", phase: "Core Competency (25-50% Readiness)", status: "current", duration: "6 Weeks", concepts: ["React & Component Architecture", "State Management & Hooks", "Tailwind CSS & Responsive Layouts", "REST & Async Data Fetching"], description: "Build interactive, high-performance web applications using modern component-driven libraries.", questions: 25 },
+      { id: 3, title: "Phase 3: Backend Systems & API Architecture", phase: "Advanced Specialization (50-75% Readiness)", status: "upcoming", duration: "6 Weeks", concepts: ["Node.js & Express APIs", "Relational & NoSQL Databases", "Authentication & Security", "System Architecture & Caching"], description: "Design secure, scalable backend microservices, database schemas, and robust API endpoints.", questions: 30 },
+      { id: 4, title: "Phase 4: Full-Stack Capstone & Job Readiness Portfolio", phase: "Career Readiness (75-100% Job Ready)", status: "locked", duration: "8 Weeks", concepts: ["Production Cloud Deployment (Vite/Docker)", "CI/CD Pipeline Integration", "System Design Mock Interviews", "Portfolio & Resume Showcase"], description: "Complete real-world full-stack capstone applications, optimize performance, and verify job readiness.", questions: 25 },
     ],
   },
   {
@@ -134,46 +99,10 @@ const PRESET_CAREERS = [
     icon: "⚛",
     duration: "6 Months",
     stages: [
-      {
-        id: 1,
-        title: "Phase 1: Python, Math & Data Analysis Foundations",
-        phase: "Foundations (0-25% Readiness)",
-        status: "completed",
-        duration: "4 Weeks",
-        concepts: ["Python for Data Science", "Pandas & NumPy Dataframes", "Linear Algebra & Statistics", "Data Cleaning & Wrangling"],
-        description: "Build deep quantitative skills, exploratory data analysis techniques, and statistical modeling basics.",
-        questions: 18,
-      },
-      {
-        id: 2,
-        title: "Phase 2: Supervised & Unsupervised Machine Learning",
-        phase: "Core Competency (25-50% Readiness)",
-        status: "current",
-        duration: "6 Weeks",
-        concepts: ["Scikit-Learn Modeling", "Regression & Classification", "Feature Engineering", "Model Evaluation Metrics"],
-        description: "Train, tune, and evaluate machine learning models for predictive analytics.",
-        questions: 22,
-      },
-      {
-        id: 3,
-        title: "Phase 3: Deep Learning & Generative AI",
-        phase: "Advanced Specialization (50-75% Readiness)",
-        status: "upcoming",
-        duration: "8 Weeks",
-        concepts: ["PyTorch / TensorFlow Neural Nets", "NLP & Large Language Models", "Computer Vision Basics", "Fine-Tuning & Prompting"],
-        description: "Implement neural network architectures and leverage GenAI models for complex real-world datasets.",
-        questions: 28,
-      },
-      {
-        id: 4,
-        title: "Phase 4: MLOps Deployment & AI Career Readiness",
-        phase: "Career Readiness (75-100% Job Ready)",
-        status: "locked",
-        duration: "6 Weeks",
-        concepts: ["Model Deployment APIs", "BigQuery / SQL Analytics", "Kaggle & Portfolio Projects", "Technical Case Interview Prep"],
-        description: "Deploy machine learning pipelines to cloud infrastructure and build an industry-grade portfolio.",
-        questions: 20,
-      },
+      { id: 1, title: "Phase 1: Python, Math & Data Analysis Foundations", phase: "Foundations (0-25% Readiness)", status: "completed", duration: "4 Weeks", concepts: ["Python for Data Science", "Pandas & NumPy Dataframes", "Linear Algebra & Statistics", "Data Cleaning & Wrangling"], description: "Build deep quantitative skills, exploratory data analysis techniques, and statistical modeling basics.", questions: 18 },
+      { id: 2, title: "Phase 2: Supervised & Unsupervised Machine Learning", phase: "Core Competency (25-50% Readiness)", status: "current", duration: "6 Weeks", concepts: ["Scikit-Learn Modeling", "Regression & Classification", "Feature Engineering", "Model Evaluation Metrics"], description: "Train, tune, and evaluate machine learning models for predictive analytics.", questions: 22 },
+      { id: 3, title: "Phase 3: Deep Learning & Generative AI", phase: "Advanced Specialization (50-75% Readiness)", status: "upcoming", duration: "8 Weeks", concepts: ["PyTorch / TensorFlow Neural Nets", "NLP & Large Language Models", "Computer Vision Basics", "Fine-Tuning & Prompting"], description: "Implement neural network architectures and leverage GenAI models for complex real-world datasets.", questions: 28 },
+      { id: 4, title: "Phase 4: MLOps Deployment & AI Career Readiness", phase: "Career Readiness (75-100% Job Ready)", status: "locked", duration: "6 Weeks", concepts: ["Model Deployment APIs", "BigQuery / SQL Analytics", "Kaggle & Portfolio Projects", "Technical Case Interview Prep"], description: "Deploy machine learning pipelines to cloud infrastructure and build an industry-grade portfolio.", questions: 20 },
     ],
   },
   {
@@ -183,59 +112,23 @@ const PRESET_CAREERS = [
     icon: "₹",
     duration: "5 Months",
     stages: [
-      {
-        id: 1,
-        title: "Phase 1: Financial Statements & Accounting Logic",
-        phase: "Foundations (0-25% Readiness)",
-        status: "completed",
-        duration: "4 Weeks",
-        concepts: ["Income Statement & Balance Sheet", "Cash Flow Modeling", "Financial Ratio Analysis", "Working Capital Management"],
-        description: "Understand core accounting logic and evaluate business operational health.",
-        questions: 15,
-      },
-      {
-        id: 2,
-        title: "Phase 2: Valuation Frameworks & DCF Modeling",
-        phase: "Core Competency (25-50% Readiness)",
-        status: "current",
-        duration: "5 Weeks",
-        concepts: ["Discounted Cash Flow (DCF)", "Enterprise Value & Multiples", "Growth Assumptions & WACC", "Comparable Company Analysis"],
-        description: "Learn to estimate intrinsic valuation of public and private companies.",
-        questions: 20,
-      },
-      {
-        id: 3,
-        title: "Phase 3: Risk Sensitivity & Financial Modeling",
-        phase: "Advanced Specialization (50-75% Readiness)",
-        status: "upcoming",
-        duration: "5 Weeks",
-        concepts: ["Excel / Python Financial Modeling", "Scenario & Sensitivity Analysis", "Macroeconomic Risk Assessment", "Capital Structure Optimization"],
-        description: "Build quantitative financial models to evaluate investment trade-offs under uncertainty.",
-        questions: 24,
-      },
-      {
-        id: 4,
-        title: "Phase 4: Equity Research & Investment Committee Pitch",
-        phase: "Career Readiness (75-100% Job Ready)",
-        status: "locked",
-        duration: "6 Weeks",
-        concepts: ["Investment Teaser Creation", "Portfolio Risk Management", "Equity Research Report Writing", "Mock Investment Pitch"],
-        description: "Draft professional investment memos and pitch equity recommendations to hiring managers.",
-        questions: 18,
-      },
+      { id: 1, title: "Phase 1: Financial Statements & Accounting Logic", phase: "Foundations (0-25% Readiness)", status: "completed", duration: "4 Weeks", concepts: ["Income Statement & Balance Sheet", "Cash Flow Modeling", "Financial Ratio Analysis", "Working Capital Management"], description: "Understand core accounting logic and evaluate business operational health.", questions: 15 },
+      { id: 2, title: "Phase 2: Valuation Frameworks & DCF Modeling", phase: "Core Competency (25-50% Readiness)", status: "current", duration: "5 Weeks", concepts: ["Discounted Cash Flow (DCF)", "Enterprise Value & Multiples", "Growth Assumptions & WACC", "Comparable Company Analysis"], description: "Learn to estimate intrinsic valuation of public and private companies.", questions: 20 },
+      { id: 3, title: "Phase 3: Risk Sensitivity & Financial Modeling", phase: "Advanced Specialization (50-75% Readiness)", status: "upcoming", duration: "5 Weeks", concepts: ["Excel / Python Financial Modeling", "Scenario & Sensitivity Analysis", "Macroeconomic Risk Assessment", "Capital Structure Optimization"], description: "Build quantitative financial models to evaluate investment trade-offs under uncertainty.", questions: 24 },
+      { id: 4, title: "Phase 4: Equity Research & Investment Committee Pitch", phase: "Career Readiness (75-100% Job Ready)", status: "locked", duration: "6 Weeks", concepts: ["Investment Teaser Creation", "Portfolio Risk Management", "Equity Research Report Writing", "Mock Investment Pitch"], description: "Draft professional investment memos and pitch equity recommendations to hiring managers.", questions: 18 },
     ],
   },
 ];
 
 /* =========================================================
-   PROGRESS & STATUS SUB-COMPONENTS
+   PROGRESS & STATUS SUB-COMPONENTS (theme tokens)
 ========================================================= */
 function StatusBadge({ status }) {
-  const styles = {
-    completed: "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
-    current: "border-cyan-200 bg-cyan-50 text-cyan-700 hover:bg-cyan-100",
-    upcoming: "border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100",
-    locked: "border-slate-200 bg-slate-100 text-slate-500",
+  const styleMap = {
+    completed: { borderColor: "var(--color-confirm)", background: "var(--color-primary-50)", color: "var(--color-confirm)" },
+    current: { borderColor: "var(--color-accent)", background: "var(--color-primary-50)", color: "var(--color-primary-700)" },
+    upcoming: { borderColor: "var(--color-primary-200)", background: "var(--color-primary-50)", color: "var(--color-primary-700)" },
+    locked: { borderColor: "var(--color-border)", background: "var(--color-surface-secondary)", color: "var(--color-text-light)" },
   };
 
   const labels = {
@@ -247,14 +140,13 @@ function StatusBadge({ status }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition-colors duration-200 ${
-        styles[status] || styles.locked
-      }`}
+      className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition-colors duration-200"
+      style={styleMap[status] || styleMap.locked}
     >
-      {status === "completed" && <CheckIcon className="w-3.5 h-3.5 text-emerald-600" />}
-      {status === "current" && <span className="h-2 w-2 rounded-full bg-cyan-500 animate-pulse" />}
-      {status === "upcoming" && <ArrowRightIcon className="w-3.5 h-3.5 text-indigo-600" />}
-      {status === "locked" && <LockIcon className="w-3.5 h-3.5 text-slate-400" />}
+      {status === "completed" && <CheckIcon className="w-3.5 h-3.5" style={{ color: "var(--color-confirm)" }} />}
+      {status === "current" && <span className="h-2 w-2 rounded-full animate-pulse" style={{ background: "var(--color-accent)" }} />}
+      {status === "upcoming" && <ArrowRightIcon className="w-3.5 h-3.5" style={{ color: "var(--color-primary-600)" }} />}
+      {status === "locked" && <LockIcon className="w-3.5 h-3.5" style={{ color: "var(--color-text-light)" }} />}
       {labels[status]}
     </span>
   );
@@ -262,10 +154,10 @@ function StatusBadge({ status }) {
 
 function ProgressBar({ value, className = "" }) {
   return (
-    <div className={`h-3 w-full overflow-hidden rounded-full bg-slate-100 ${className}`}>
+    <div className={`h-3 w-full overflow-hidden rounded-full ${className}`} style={{ background: "var(--color-surface-secondary)" }}>
       <div
-        className="h-full rounded-full bg-gradient-to-r from-indigo-600 via-violet-600 to-cyan-500 transition-all duration-700 ease-out"
-        style={{ width: `${Math.min(Math.max(value, 0), 100)}%` }}
+        className="h-full rounded-full transition-all duration-700 ease-out"
+        style={{ width: `${Math.min(Math.max(value, 0), 100)}%`, background: "var(--color-primary-600)" }}
       />
     </div>
   );
@@ -276,14 +168,16 @@ function StageCard({ stage, expanded, onToggle, onStart, onToggleCompletion }) {
 
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl border bg-white transition-all duration-300 ${
-        stage.status === "current"
-          ? "border-indigo-300 shadow-lg shadow-indigo-100/60 ring-2 ring-indigo-500/10"
-          : "border-slate-200 hover:border-indigo-200 hover:shadow-xl hover:-translate-y-0.5"
-      } ${isLocked ? "opacity-80 bg-slate-50/50" : ""}`}
+      className="relative overflow-hidden rounded-2xl border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
+      style={{
+        borderColor: stage.status === "current" ? "var(--color-primary-300)" : "var(--color-border)",
+        background: isLocked ? "var(--color-surface-secondary)" : "var(--color-surface)",
+        boxShadow: stage.status === "current" ? "var(--shadow-card-hover)" : "var(--shadow-card)",
+        opacity: isLocked ? 0.85 : 1,
+      }}
     >
       {stage.status === "current" && (
-        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-600 via-violet-600 to-cyan-500" />
+        <div className="absolute inset-x-0 top-0 h-1" style={{ background: "var(--color-primary-600)" }} />
       )}
 
       <div className="p-5 sm:p-6">
@@ -294,15 +188,16 @@ function StageCard({ stage, expanded, onToggle, onStart, onToggleCompletion }) {
             onClick={() => !isLocked && onToggleCompletion(stage.id)}
             title={isLocked ? "Locked phase" : "Click to mark phase completed"}
             disabled={isLocked}
-            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold transition-all duration-200 ${
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold transition-all duration-200 hover:scale-105 active:scale-95"
+            style={
               stage.status === "completed"
-                ? "bg-emerald-500 text-white shadow-md shadow-emerald-200 hover:bg-emerald-600 hover:scale-105 active:scale-95"
+                ? { background: "var(--color-confirm)", color: "#fff" }
                 : stage.status === "current"
-                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200 hover:bg-indigo-700 hover:scale-105 active:scale-95"
+                ? { background: "var(--color-primary-600)", color: "#fff" }
                 : isLocked
-                ? "bg-slate-200 text-slate-400 cursor-not-allowed"
-                : "bg-indigo-50 text-indigo-600 hover:bg-indigo-100 hover:scale-105 active:scale-95"
-            }`}
+                ? { background: "var(--color-surface-secondary)", color: "var(--color-text-light)", cursor: "not-allowed" }
+                : { background: "var(--color-primary-50)", color: "var(--color-primary-600)" }
+            }
           >
             {stage.status === "completed" ? <CheckIcon className="w-5 h-5" /> : stage.id}
           </button>
@@ -312,21 +207,21 @@ function StageCard({ stage, expanded, onToggle, onStart, onToggleCompletion }) {
               <div>
                 <div className="mb-2 flex flex-wrap items-center gap-2">
                   <StatusBadge status={stage.status} />
-                  <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider">
+                  <span className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-primary-600)" }}>
                     {stage.phase}
                   </span>
                 </div>
 
-                <h3 className="text-xl font-bold text-slate-900">{stage.title}</h3>
+                <h3 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--color-text-h)" }}>{stage.title}</h3>
               </div>
 
-              <div className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-slate-500">
-                <ClockIcon className="w-4 h-4 text-slate-400" />
+              <div className="flex shrink-0 items-center gap-1.5 text-xs font-medium" style={{ color: "var(--color-text-muted)" }}>
+                <ClockIcon className="w-4 h-4" style={{ color: "var(--color-text-light)" }} />
                 {stage.duration}
               </div>
             </div>
 
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
+            <p className="mt-3 max-w-3xl text-sm leading-6" style={{ color: "var(--color-text-muted)" }}>
               {stage.description}
             </p>
 
@@ -334,23 +229,25 @@ function StageCard({ stage, expanded, onToggle, onStart, onToggleCompletion }) {
               {stage.concepts.map((concept) => (
                 <span
                   key={concept}
-                  className="rounded-lg border border-slate-100 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700 transition-colors duration-200 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700"
+                  className="rounded-lg border px-2.5 py-1 text-xs font-semibold transition-colors duration-200"
+                  style={{ borderColor: "var(--color-border)", background: "var(--color-surface-secondary)", color: "var(--color-text-muted)" }}
                 >
                   {concept}
                 </span>
               ))}
             </div>
 
-            <div className="mt-5 flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="text-xs text-slate-500">
-                <span className="font-bold text-slate-700">{stage.questions}</span> career practice modules
+            <div className="mt-5 flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between" style={{ borderColor: "var(--color-border)" }}>
+              <div className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+                <span className="font-bold" style={{ color: "var(--color-text-h)" }}>{stage.questions}</span> career practice modules
               </div>
 
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => onToggle(stage.id)}
-                  className="rounded-lg border border-slate-200 px-3.5 py-1.5 text-xs font-semibold text-slate-700 transition-all duration-200 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 active:scale-95"
+                  className="rounded-lg border px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 active:scale-95"
+                  style={{ borderColor: "var(--color-border)", color: "var(--color-text-muted)" }}
                 >
                   {expanded ? "Hide details" : "View details"}
                 </button>
@@ -360,21 +257,16 @@ function StageCard({ stage, expanded, onToggle, onStart, onToggleCompletion }) {
                     size="sm"
                     variant={stage.status === "current" ? "primary" : "outline"}
                     onClick={() => onStart(stage)}
-                    className="transition-all duration-200 hover:scale-105 active:scale-95"
                   >
-                    {stage.status === "completed"
-                      ? "Review Phase"
-                      : stage.status === "current"
-                      ? "Start Learning"
-                      : "Preview"}
+                    {stage.status === "completed" ? "Review Phase" : stage.status === "current" ? "Start Learning" : "Preview"}
                   </Button>
                 )}
               </div>
             </div>
 
             {expanded && (
-              <div className="mt-5 rounded-xl border border-indigo-100 bg-indigo-50/40 p-4 sm:p-5 transition-all">
-                <p className="text-xs font-bold uppercase tracking-wider text-indigo-600">
+              <div className="mt-5 rounded-xl border p-4 sm:p-5 transition-all" style={{ borderColor: "var(--color-primary-100)", background: "var(--color-primary-50)" }}>
+                <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-primary-600)" }}>
                   Required Competencies & Action Items
                 </p>
 
@@ -382,12 +274,13 @@ function StageCard({ stage, expanded, onToggle, onStart, onToggleCompletion }) {
                   {stage.concepts.map((concept, index) => (
                     <div
                       key={concept}
-                      className="flex items-center gap-3 rounded-lg border border-indigo-50 bg-white p-3 shadow-xs transition-all hover:border-indigo-200 hover:shadow-md"
+                      className="flex items-center gap-3 rounded-lg border p-3 shadow-xs transition-all hover:shadow-md"
+                      style={{ borderColor: "var(--color-primary-100)", background: "var(--color-surface)" }}
                     >
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-cyan-50 text-xs font-bold text-cyan-700">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold" style={{ background: "var(--color-primary-50)", color: "var(--color-primary-700)" }}>
                         {index + 1}
                       </span>
-                      <span className="text-xs font-medium text-slate-700">
+                      <span className="text-xs font-medium" style={{ color: "var(--color-text-muted)" }}>
                         {concept}
                       </span>
                     </div>
@@ -425,7 +318,6 @@ export default function Roadmap() {
     };
   }, [notification]);
 
-  // Calculate dynamic readiness score based on completed stages
   const readinessScore = useMemo(() => {
     const completedCount = stages.filter((s) => s.status === "completed").length;
     return Math.round((completedCount / stages.length) * 100);
@@ -446,46 +338,10 @@ export default function Roadmap() {
       setIsGenerating(false);
       const generatedTitle = customCareer.trim();
       const generatedStages = [
-        {
-          id: 1,
-          title: `Phase 1: Foundations of ${generatedTitle}`,
-          phase: "Foundations (0-25% Readiness)",
-          status: "completed",
-          duration: "4 Weeks",
-          concepts: ["Core Principles & Theory", "Essential Tools & Environment", "Fundamental Terminology", "Basic Hands-on Practice"],
-          description: `Build complete baseline knowledge and setup required tools for ${generatedTitle}.`,
-          questions: 15,
-        },
-        {
-          id: 2,
-          title: `Phase 2: Core Competencies & Real-World Projects`,
-          phase: "Core Competency (25-50% Readiness)",
-          status: "current",
-          duration: "6 Weeks",
-          concepts: ["Standard Workflows", "Intermediate Problem Solving", "Hands-on Project Building", "Quality Control"],
-          description: `Implement hands-on projects and master intermediate skills expected in ${generatedTitle} roles.`,
-          questions: 20,
-        },
-        {
-          id: 3,
-          title: `Phase 3: Advanced Specialization & Architecture`,
-          phase: "Advanced Specialization (50-75% Readiness)",
-          status: "upcoming",
-          duration: "6 Weeks",
-          concepts: ["Advanced Design Patterns", "Performance & Optimization", "Complex Problem Decomposition", "Industry Best Practices"],
-          description: `Master advanced frameworks and system architecture techniques for professional proficiency.`,
-          questions: 25,
-        },
-        {
-          id: 4,
-          title: `Phase 4: Industry Capstone & Job Readiness Portfolio`,
-          phase: "Career Readiness (75-100% Job Ready)",
-          status: "locked",
-          duration: "6 Weeks",
-          concepts: ["Production Portfolio Project", "Resume & LinkedIn Alignment", "Technical Mock Case Interviews", "Final Career Verification"],
-          description: `Assemble your job readiness portfolio, pass mock assessments, and verify career readiness.`,
-          questions: 20,
-        },
+        { id: 1, title: `Phase 1: Foundations of ${generatedTitle}`, phase: "Foundations (0-25% Readiness)", status: "completed", duration: "4 Weeks", concepts: ["Core Principles & Theory", "Essential Tools & Environment", "Fundamental Terminology", "Basic Hands-on Practice"], description: `Build complete baseline knowledge and setup required tools for ${generatedTitle}.`, questions: 15 },
+        { id: 2, title: `Phase 2: Core Competencies & Real-World Projects`, phase: "Core Competency (25-50% Readiness)", status: "current", duration: "6 Weeks", concepts: ["Standard Workflows", "Intermediate Problem Solving", "Hands-on Project Building", "Quality Control"], description: `Implement hands-on projects and master intermediate skills expected in ${generatedTitle} roles.`, questions: 20 },
+        { id: 3, title: `Phase 3: Advanced Specialization & Architecture`, phase: "Advanced Specialization (50-75% Readiness)", status: "upcoming", duration: "6 Weeks", concepts: ["Advanced Design Patterns", "Performance & Optimization", "Complex Problem Decomposition", "Industry Best Practices"], description: `Master advanced frameworks and system architecture techniques for professional proficiency.`, questions: 25 },
+        { id: 4, title: `Phase 4: Industry Capstone & Job Readiness Portfolio`, phase: "Career Readiness (75-100% Job Ready)", status: "locked", duration: "6 Weeks", concepts: ["Production Portfolio Project", "Resume & LinkedIn Alignment", "Technical Mock Case Interviews", "Final Career Verification"], description: `Assemble your job readiness portfolio, pass mock assessments, and verify career readiness.`, questions: 20 },
       ];
 
       setSelectedCareer({
@@ -515,13 +371,7 @@ export default function Roadmap() {
       prevStages.map((stage) => {
         if (stage.id === id) {
           const nextStatus =
-            stage.status === "completed"
-              ? "current"
-              : stage.status === "current"
-              ? "completed"
-              : stage.status === "upcoming"
-              ? "completed"
-              : stage.status;
+            stage.status === "completed" ? "current" : stage.status === "current" ? "completed" : stage.status === "upcoming" ? "completed" : stage.status;
           return { ...stage, status: nextStatus };
         }
         return stage;
@@ -539,24 +389,28 @@ export default function Roadmap() {
   }, [stages, searchQuery]);
 
   return (
-    <div className="min-h-screen bg-[var(--color-surface)]">
+    <div className="min-h-screen">
       {/* Toast Notification */}
       {notification && (
-        <div className="fixed right-4 top-20 z-50 w-[calc(100%-2rem)] max-w-md rounded-xl border border-cyan-200 bg-white p-4 shadow-2xl transition-all sm:right-6">
+        <div
+          className="fixed right-4 top-20 z-50 w-[calc(100%-2rem)] max-w-md rounded-xl border p-4 shadow-2xl transition-all sm:right-6"
+          style={{ borderColor: "var(--color-primary-100)", background: "var(--color-surface)" }}
+        >
           <div className="flex items-start justify-between gap-3">
             <div className="flex gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-cyan-50 text-cyan-600">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full" style={{ background: "var(--color-primary-50)", color: "var(--color-primary-600)" }}>
                 <SparklesIcon className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-sm font-bold text-slate-900">Afinity AI Career Guidance</p>
-                <p className="mt-0.5 text-xs text-slate-600">{notification}</p>
+                <p className="text-sm font-bold" style={{ color: "var(--color-text-h)" }}>Afinity AI Career Guidance</p>
+                <p className="mt-0.5 text-xs" style={{ color: "var(--color-text-muted)" }}>{notification}</p>
               </div>
             </div>
             <button
               type="button"
               onClick={() => setNotification("")}
-              className="text-slate-400 hover:text-slate-600 font-bold text-sm"
+              className="font-bold text-sm transition"
+              style={{ color: "var(--color-text-light)" }}
               aria-label="Dismiss notification"
             >
               ✕
@@ -566,150 +420,122 @@ export default function Roadmap() {
       )}
 
       {/* HERO SECTION */}
-      <section className="relative overflow-hidden border-b border-slate-200 bg-white">
-        <div className="pointer-events-none absolute -right-40 -top-40 h-96 w-96 rounded-full bg-indigo-100/50 blur-3xl" />
-        <div className="pointer-events-none absolute -left-40 bottom-0 h-80 w-80 rounded-full bg-cyan-100/40 blur-3xl" />
+      <HeroSection
+        eyebrow="End-to-End AI Career Guidance & Readiness Engine"
+        title="Your complete path to"
+        highlightWord="career readiness."
+        description="Tell Afinity AI what career or skill you want to master. We generate a 0-to-100% sequential roadmap providing step-by-step guidance from zero prerequisites to job readiness."
+      />
 
-        <Container size="wide">
-          <div className="relative py-14 sm:py-18 lg:py-20">
-            <div className="max-w-4xl">
-              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-indigo-700 shadow-xs">
-                <SparklesIcon className="w-4 h-4 text-cyan-500" />
-                End-to-End AI Career Guidance & Readiness Engine
-              </div>
+      {/* PRESET SELECTOR + CUSTOM GENERATOR + ANALYTICS */}
+      <Section  className="pt-0 sm:pt-0">
+        <div className="flex flex-wrap gap-2.5">
+          {PRESET_CAREERS.map((career) => (
+            <button
+              key={career.id}
+              type="button"
+              onClick={() => handleSelectPreset(career)}
+              className="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-xs font-bold transition-all duration-200"
+              style={
+                selectedCareer.id === career.id
+                  ? { borderColor: "var(--color-primary-600)", background: "var(--color-primary-50)", color: "var(--color-primary-700)", boxShadow: "var(--shadow-card)" }
+                  : { borderColor: "var(--color-border)", background: "var(--color-surface)", color: "var(--color-text-muted)" }
+              }
+            >
+              <span>{career.icon}</span>
+              {career.title}
+            </button>
+          ))}
+        </div>
 
-              <h1 className="max-w-4xl text-4xl font-bold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
-                Your complete path to{" "}
-                <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-cyan-500 bg-clip-text text-transparent">
-                  career readiness.
-                </span>
-              </h1>
+        {/* Custom Career Input Card */}
+        <div className="mt-6 rounded-2xl border p-5 shadow-sm" style={{ borderColor: "var(--color-border)", background: "var(--color-surface)" }}>
+          <label htmlFor="custom-career" className="mb-2 block text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-text-light)" }}>
+            Want a custom career roadmap? Type any field or skill goal:
+          </label>
 
-              <p className="mt-6 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
-                Tell Afinity AI what career or skill you want to master. We generate a 0-to-100% sequential roadmap providing step-by-step guidance from zero prerequisites to job readiness.
-              </p>
-
-              <div className="mt-8 flex flex-wrap gap-2.5">
-                {PRESET_CAREERS.map((career) => (
-                  <button
-                    key={career.id}
-                    type="button"
-                    onClick={() => handleSelectPreset(career)}
-                    className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-xs font-bold transition-all duration-200 ${
-                      selectedCareer.id === career.id
-                        ? "border-indigo-600 bg-indigo-50 text-indigo-700 shadow-xs ring-2 ring-indigo-500/20 scale-105"
-                        : "border-slate-200 bg-white text-slate-700 hover:border-indigo-300 hover:bg-slate-50"
-                    }`}
-                  >
-                    <span>{career.icon}</span>
-                    {career.title}
-                  </button>
-                ))}
-              </div>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="relative flex-1">
+              <BriefcaseIcon className="absolute left-3.5 top-1/2 w-5 h-5 -translate-y-1/2" style={{ color: "var(--color-text-light)" }} />
+              <input
+                id="custom-career"
+                type="text"
+                placeholder="e.g. Cybersecurity Engineer, Product Manager, Cloud Architect..."
+                value={customCareer}
+                onChange={(e) => setCustomCareer(e.target.value)}
+                className="w-full rounded-xl border py-3 pl-11 pr-4 text-sm outline-none transition focus:ring-4"
+                style={{ borderColor: "var(--color-border)", background: "var(--color-surface-secondary)", color: "var(--color-text-h)" }}
+              />
             </div>
 
-            {/* Custom Career Input Card */}
-            <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-              <label htmlFor="custom-career" className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-                Want a custom career roadmap? Type any field or skill goal:
-              </label>
-
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <div className="relative flex-1">
-                  <BriefcaseIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                  <input
-                    id="custom-career"
-                    type="text"
-                    placeholder="e.g. Cybersecurity Engineer, Product Manager, Cloud Architect..."
-                    value={customCareer}
-                    onChange={(e) => setCustomCareer(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-600 focus:bg-white focus:ring-4 focus:ring-indigo-600/10"
-                  />
-                </div>
-
-                <Button
-                  size="md"
-                  disabled={!customCareer.trim() || isGenerating}
-                  onClick={handleGenerateCustom}
-                  icon={isGenerating ? <SpinnerIcon /> : <SparklesIcon className="w-4 h-4" />}
-                >
-                  {isGenerating ? "Generating Roadmap..." : "Generate Custom Roadmap"}
-                </Button>
-              </div>
-            </div>
-
-            {/* Career Readiness Analytics Bar */}
-            <div className="mt-8 grid gap-4 sm:grid-cols-3">
-              <Card hoverable={false} className="p-5">
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                  Target Career Role
-                </p>
-                <p className="mt-2 text-lg font-bold text-slate-900 truncate">
-                  {selectedCareer.title}
-                </p>
-                <p className="mt-1 text-xs text-slate-500">
-                  Estimated Duration: <span className="font-semibold text-indigo-600">{selectedCareer.duration}</span>
-                </p>
-              </Card>
-
-              <Card hoverable={false} className="p-5">
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                  Career Readiness Score
-                </p>
-                <div className="mt-2 flex items-end justify-between gap-3">
-                  <p className="text-3xl font-bold text-slate-900">{readinessScore}%</p>
-                  <span className="rounded-full bg-cyan-50 px-2.5 py-1 text-[11px] font-bold text-cyan-800">
-                    {readinessScore >= 75
-                      ? "Job Ready"
-                      : readinessScore >= 50
-                      ? "Advanced Specialization"
-                      : readinessScore >= 25
-                      ? "Building Competency"
-                      : "Foundations"}
-                  </span>
-                </div>
-                <div className="mt-3">
-                  <ProgressBar value={readinessScore} />
-                </div>
-              </Card>
-
-              <Card hoverable={false} className="p-5">
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                  Guidance Objective
-                </p>
-                <p className="mt-2 text-xs font-medium leading-5 text-slate-700">
-                  From zero prerequisites to verified job readiness with practical portfolio milestones.
-                </p>
-              </Card>
-            </div>
+            <Button
+              size="md"
+              disabled={!customCareer.trim() || isGenerating}
+              onClick={handleGenerateCustom}
+              icon={isGenerating ? <SpinnerIcon /> : <SparklesIcon className="w-4 h-4" />}
+            >
+              {isGenerating ? "Generating Roadmap..." : "Generate Custom Roadmap"}
+            </Button>
           </div>
-        </Container>
-      </section>
+        </div>
+
+        {/* Career Readiness Analytics Bar */}
+        <div className="mt-6 grid gap-4 sm:grid-cols-3">
+          <Card hoverable={false} className="p-5">
+            <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-text-light)" }}>Target Career Role</p>
+            <p className="mt-2 text-lg font-bold truncate" style={{ color: "var(--color-text-h)" }}>{selectedCareer.title}</p>
+            <p className="mt-1 text-xs" style={{ color: "var(--color-text-muted)" }}>
+              Estimated Duration: <span className="font-semibold" style={{ color: "var(--color-primary-600)" }}>{selectedCareer.duration}</span>
+            </p>
+          </Card>
+
+          <Card hoverable={false} className="p-5">
+            <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-text-light)" }}>Career Readiness Score</p>
+            <div className="mt-2 flex items-end justify-between gap-3">
+              <p className="text-3xl font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--color-text-h)" }}>{readinessScore}%</p>
+              <span className="rounded-full px-2.5 py-1 text-[11px] font-bold" style={{ background: "var(--color-primary-50)", color: "var(--color-primary-700)" }}>
+                {readinessScore >= 75 ? "Job Ready" : readinessScore >= 50 ? "Advanced Specialization" : readinessScore >= 25 ? "Building Competency" : "Foundations"}
+              </span>
+            </div>
+            <div className="mt-3">
+              <ProgressBar value={readinessScore} />
+            </div>
+          </Card>
+
+          <Card hoverable={false} className="p-5">
+            <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-text-light)" }}>Guidance Objective</p>
+            <p className="mt-2 text-xs font-medium leading-5" style={{ color: "var(--color-text-muted)" }}>
+              From zero prerequisites to verified job readiness with practical portfolio milestones.
+            </p>
+          </Card>
+        </div>
+      </Section>
 
       {/* END TO END ROADMAP STAGES */}
-      <Section background="white">
+      <Section >
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">
+            <span className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-primary-600)" }}>
               End-to-End Career Progression
             </span>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
+            <h2 className="mt-2 text-3xl font-bold tracking-tight" style={{ fontFamily: "var(--font-display)", color: "var(--color-text-h)" }}>
               {selectedCareer.title} Guidance Path
             </h2>
-            <p className="mt-1 max-w-2xl text-sm text-slate-500">
+            <p className="mt-1 max-w-2xl text-sm" style={{ color: "var(--color-text-muted)" }}>
               Click stage numbers to mark phases completed and dynamically increase your Career Readiness Score.
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             <div className="relative min-w-[220px]">
-              <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <SearchIcon className="absolute left-3.5 top-1/2 w-4 h-4 -translate-y-1/2" style={{ color: "var(--color-text-light)" }} />
               <input
                 type="text"
                 placeholder="Filter milestones & tools..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-full border border-slate-200 bg-slate-50 py-2 pl-9 pr-4 text-xs text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/10"
+                className="w-full rounded-full border py-2 pl-9 pr-4 text-xs outline-none transition focus:ring-2"
+                style={{ borderColor: "var(--color-border)", background: "var(--color-surface-secondary)", color: "var(--color-text-h)" }}
               />
             </div>
           </div>
@@ -717,20 +543,19 @@ export default function Roadmap() {
 
         {/* Timeline */}
         <div className="relative mt-10">
-          <div className="absolute bottom-8 left-5 top-8 hidden w-0.5 bg-gradient-to-b from-emerald-300 via-indigo-300 to-slate-200 sm:block" />
+          <div className="absolute bottom-8 left-5 top-8 hidden w-0.5 sm:block" style={{ background: "var(--color-border)" }} />
 
           <div className="space-y-5">
             {filteredStages.map((stage) => (
               <div key={stage.id} className="relative sm:pl-16">
                 <div
                   onClick={() => stage.status !== "locked" && handleToggleCompletion(stage.id)}
-                  className={`absolute left-0 top-6 hidden h-10 w-10 cursor-pointer items-center justify-center rounded-full border-4 border-white text-xs font-bold shadow-sm transition-all sm:flex hover:scale-110 active:scale-95 ${
-                    stage.status === "completed"
-                      ? "bg-emerald-500 text-white"
-                      : stage.status === "current"
-                      ? "bg-indigo-600 text-white"
-                      : "bg-slate-200 text-slate-500"
-                  }`}
+                  className="absolute left-0 top-6 hidden h-10 w-10 cursor-pointer items-center justify-center rounded-full border-4 text-xs font-bold shadow-sm transition-all sm:flex hover:scale-110 active:scale-95"
+                  style={{
+                    borderColor: "var(--color-surface)",
+                    background: stage.status === "completed" ? "var(--color-confirm)" : stage.status === "current" ? "var(--color-primary-600)" : "var(--color-surface-secondary)",
+                    color: stage.status === "completed" || stage.status === "current" ? "#fff" : "var(--color-text-light)",
+                  }}
                 >
                   {stage.status === "completed" ? <CheckIcon className="w-4 h-4" /> : stage.id}
                 </div>
@@ -749,7 +574,7 @@ export default function Roadmap() {
       </Section>
 
       {/* JOB READINESS CHECKLIST SECTION */}
-      <Section background="tint">
+      <Section >
         <SectionHeading
           eyebrow="JOB READINESS VERIFICATION"
           title="What makes you job-ready?"
@@ -758,51 +583,30 @@ export default function Roadmap() {
 
         <div className="grid gap-6 md:grid-cols-4">
           {[
-            {
-              num: "01",
-              title: "Foundational Theory",
-              desc: "Master foundational concepts, terminology, and core principles of your domain.",
-              done: readinessScore >= 25,
-            },
-            {
-              num: "02",
-              title: "Applied Projects",
-              desc: "Build real-world hands-on projects demonstrating practical problem solving.",
-              done: readinessScore >= 50,
-            },
-            {
-              num: "03",
-              title: "System Architecture",
-              desc: "Understand enterprise design patterns, scaling trade-offs, and tool ecosystems.",
-              done: readinessScore >= 75,
-            },
-            {
-              num: "04",
-              title: "Portfolio & Interview",
-              desc: "Complete technical case studies, portfolio showcase, and mock interviews.",
-              done: readinessScore >= 100,
-            },
+            { num: "01", title: "Foundational Theory", desc: "Master foundational concepts, terminology, and core principles of your domain.", done: readinessScore >= 25 },
+            { num: "02", title: "Applied Projects", desc: "Build real-world hands-on projects demonstrating practical problem solving.", done: readinessScore >= 50 },
+            { num: "03", title: "System Architecture", desc: "Understand enterprise design patterns, scaling trade-offs, and tool ecosystems.", done: readinessScore >= 75 },
+            { num: "04", title: "Portfolio & Interview", desc: "Complete technical case studies, portfolio showcase, and mock interviews.", done: readinessScore >= 100 },
           ].map((item) => (
             <Card key={item.num} hoverable className="p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-indigo-600">{item.num}</span>
+                <span className="text-xs font-bold" style={{ color: "var(--color-primary-600)" }}>{item.num}</span>
                 <span
-                  className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase ${
-                    item.done ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-500"
-                  }`}
+                  className="rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase"
+                  style={item.done ? { background: "var(--color-primary-50)", color: "var(--color-confirm)" } : { background: "var(--color-surface-secondary)", color: "var(--color-text-light)" }}
                 >
                   {item.done ? "Verified ✓" : "Pending"}
                 </span>
               </div>
-              <h4 className="mt-4 font-bold text-slate-900 text-base">{item.title}</h4>
-              <p className="mt-1 text-xs leading-5 text-slate-600">{item.desc}</p>
+              <h4 className="mt-4 font-bold text-base" style={{ color: "var(--color-text-h)" }}>{item.title}</h4>
+              <p className="mt-1 text-xs leading-5" style={{ color: "var(--color-text-muted)" }}>{item.desc}</p>
             </Card>
           ))}
         </div>
       </Section>
 
       {/* FINAL CTA */}
-      <Section background="white">
+      <Section >
         <CtaBanner
           eyebrow="CAREER INTELLIGENCE"
           title="Verify your skills with Afinity AI Skill Gap."

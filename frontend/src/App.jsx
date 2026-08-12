@@ -21,7 +21,7 @@ import ForgotPassword from './pages/ForgotPassword';
 function App() {
   return (
     <Router>
-      <div className="flex flex-col min-h-screen bg-white">
+      <div className="flex flex-col min-h-screen ">
         <Navbar />
         <main className="flex-1">
           <Routes>

@@ -87,7 +87,7 @@ export default function OnboardingPage() {
   const careerGoalOptions = field ? CAREER_GOALS_BY_FIELD[field] || [] : [];
 
   return (
-    <div className="flex min-h-screen flex-col bg-white">
+    <div className="flex min-h-screen flex-col ">
       <Section background="white" className="py-16">
         <Container>
           {/* Progress indicator — shown during the 4-step flow only */}
