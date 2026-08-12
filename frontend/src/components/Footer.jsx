@@ -54,47 +54,70 @@ function TwitterIcon() {
 
 export default function Footer() {
   return (
-    <footer className="border-t border-slate-800 bg-[#0F172A] text-slate-300">
+    <footer className="border-t border-[#C4952A]/30 bg-[#1B332C] text-[#FBF8F0]">
       <Container>
         <div className="grid grid-cols-1 gap-10 py-16 sm:grid-cols-2 lg:grid-cols-5">
           {/* Brand Col */}
           <div className="flex flex-col gap-4 sm:col-span-2">
             <a href="/" className="group flex items-center gap-3 w-fit">
-              <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 border border-slate-700 p-0.5 shadow-md shadow-indigo-950 transition-all duration-300 group-hover:border-cyan-400 group-hover:scale-105">
-                <div className="flex h-full w-full items-center justify-center rounded-[10px] bg-slate-900 text-white">
-                  <svg className="w-5 h-5 text-cyan-400 transition-transform duration-300 group-hover:rotate-12" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-                      className="stroke-indigo-400"
-                    />
-                    <circle cx="12" cy="12" r="2" className="fill-cyan-400 stroke-none animate-pulse" />
-                  </svg>
-                </div>
+              {/* Emblem Badge */}
+              <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-[#2E4F42] p-2 text-[#E8C547] shadow-sm border border-[#C4952A]/40 transition-transform duration-300 group-hover:scale-105 group-hover:border-[#E8C547]">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  className="w-full h-full transition-transform duration-300 group-hover:rotate-6"
+                >
+                  <path
+                    d="M12 3L2 8L12 13L22 8L12 3Z"
+                    strokeWidth="1.75"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="stroke-[#E8C547]"
+                  />
+                  <path
+                    d="M5 9.5V15.5C5 15.5 8.5 18 12 18C15.5 18 19 15.5 19 15.5V9.5"
+                    strokeWidth="1.75"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="stroke-[#D9A62B]"
+                  />
+                  <path
+                    d="M20 9V14"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    className="stroke-[#E8C547]"
+                  />
+                  <circle cx="20" cy="14.5" r="1" fill="#E8C547" />
+                  <circle cx="12" cy="8" r="1.5" fill="#E8C547" />
+                </svg>
               </div>
 
               <div className="flex flex-col">
-                <span className="text-xl font-extrabold tracking-tight text-white leading-none group-hover:text-cyan-400 transition-colors">
-                  AFINITY<span className="ml-1 text-xs font-bold uppercase tracking-widest text-cyan-400">AI</span>
+                <span className="font-['Kalam'] text-xl font-bold tracking-tight text-[#FBF8F0] leading-none group-hover:text-[#E8C547] transition-colors">
+                  AFINITY<span className="ml-1 font-['Space_Mono'] text-xs font-bold uppercase tracking-widest text-[#E8C547]">AI</span>
                 </span>
-                <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500 leading-tight">
+                <span className="text-[9px] font-['Space_Mono'] font-bold uppercase tracking-widest text-[#8B9690] leading-tight mt-0.5">
                   Learning Intelligence
                 </span>
               </div>
             </a>
 
-            <p className="max-w-sm text-sm leading-6 text-slate-400">
-              Building clear, intelligent, and guided learning paths from where you are to where you want to be.
-            </p>
+            <div className="flex flex-col gap-1">
+              <p className="font-['Kalam'] text-base text-[#E8C547] font-semibold">
+                "Learn smarter. Learn deeper."
+              </p>
+              <p className="max-w-sm text-xs leading-5 text-[#EDE6D3]/80 font-sans">
+                Building clear, intelligent, and guided learning paths from where you are to where you want to be.
+              </p>
+            </div>
 
-            <div className="flex gap-3 mt-2">
+            <div className="flex gap-3 mt-1">
               <a
                 href="https://github.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-800 bg-slate-900/60 text-slate-400 transition-all duration-200 hover:border-cyan-400 hover:text-cyan-400 hover:scale-105"
+                className="flex h-9 w-9 items-center justify-center rounded-md border border-[#C4952A]/30 bg-[#2E4F42]/40 text-[#EDE6D3] transition-all duration-200 hover:border-[#E8C547] hover:text-[#E8C547] hover:bg-[#2E4F42] hover:-translate-y-0.5"
                 aria-label="GitHub"
               >
                 <GithubIcon />
@@ -103,7 +126,7 @@ export default function Footer() {
                 href="https://linkedin.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-800 bg-slate-900/60 text-slate-400 transition-all duration-200 hover:border-cyan-400 hover:text-cyan-400 hover:scale-105"
+                className="flex h-9 w-9 items-center justify-center rounded-md border border-[#C4952A]/30 bg-[#2E4F42]/40 text-[#EDE6D3] transition-all duration-200 hover:border-[#E8C547] hover:text-[#E8C547] hover:bg-[#2E4F42] hover:-translate-y-0.5"
                 aria-label="LinkedIn"
               >
                 <LinkedinIcon />
@@ -112,7 +135,7 @@ export default function Footer() {
                 href="https://x.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-800 bg-slate-900/60 text-slate-400 transition-all duration-200 hover:border-cyan-400 hover:text-cyan-400 hover:scale-105"
+                className="flex h-9 w-9 items-center justify-center rounded-md border border-[#C4952A]/30 bg-[#2E4F42]/40 text-[#EDE6D3] transition-all duration-200 hover:border-[#E8C547] hover:text-[#E8C547] hover:bg-[#2E4F42] hover:-translate-y-0.5"
                 aria-label="Twitter / X"
               >
                 <TwitterIcon />
@@ -123,7 +146,7 @@ export default function Footer() {
           {/* Navigation Columns */}
           {FOOTER_COLUMNS.map((col) => (
             <div key={col.heading} className="flex flex-col gap-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-200">
+              <h4 className="font-['Space_Mono'] text-xs font-bold uppercase tracking-wider text-[#E8C547]">
                 {col.heading}
               </h4>
               <ul className="flex flex-col gap-2">
@@ -131,7 +154,7 @@ export default function Footer() {
                   <li key={link.href}>
                     <a
                       href={link.href}
-                      className="text-xs font-medium text-slate-400 transition-colors duration-200 hover:text-cyan-400"
+                      className="text-xs font-sans text-[#EDE6D3]/90 transition-colors duration-200 hover:text-[#E8C547] hover:underline decoration-[#E8C547]/40"
                     >
                       {link.label}
                     </a>
@@ -143,15 +166,15 @@ export default function Footer() {
         </div>
 
         {/* Bottom copyright */}
-        <div className="flex flex-col items-center justify-between gap-4 border-t border-slate-800/80 py-6 sm:flex-row">
-          <p className="text-xs text-slate-500">
+        <div className="flex flex-col items-center justify-between gap-4 border-t border-[#2E4F42]/50 py-6 sm:flex-row font-['Space_Mono'] text-xs text-[#8B9690]">
+          <p>
             © {new Date().getFullYear()} Afinity AI. All rights reserved. Developed by Faiz, Isika, and Aman Negi.
           </p>
-          <div className="flex gap-6 text-xs text-slate-500">
-            <a href="/privacy" className="transition-colors hover:text-cyan-400">
+          <div className="flex gap-6">
+            <a href="/privacy" className="transition-colors hover:text-[#E8C547]">
               Privacy Policy
             </a>
-            <a href="/terms" className="transition-colors hover:text-cyan-400">
+            <a href="/terms" className="transition-colors hover:text-[#E8C547]">
               Terms of Service
             </a>
           </div>
