@@ -1,78 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
 /* ==========================================================================
    Typography Scale
    ========================================================================== */
 @theme {
-  --text-xs: 0.875rem;   /* 14px */
+  --text-xs: 0.875rem;
   --text-xs--line-height: 1.3rem;
-
-  --text-sm: 1rem;       /* 16px */
+  --text-sm: 1rem;
   --text-sm--line-height: 1.5rem;
-
-  --text-base: 1.125rem;   /* 18px */
+  --text-base: 1.125rem;
   --text-base--line-height: 1.75rem;
-
-  --text-lg: 1.25rem;    /* 20px */
+  --text-lg: 1.25rem;
   --text-lg--line-height: 1.85rem;
-
-  --text-xl: 1.4375rem;  /* 23px */
+  --text-xl: 1.4375rem;
   --text-xl--line-height: 1.95rem;
-
-  --text-2xl: 1.6875rem;  /* 27px */
+  --text-2xl: 1.6875rem;
   --text-2xl--line-height: 2.1rem;
-
-  --text-3xl: 2.0625rem;  /* 33px */
+  --text-3xl: 2.0625rem;
   --text-3xl--line-height: 2.4rem;
-
-  --text-4xl: 2.5625rem;  /* 41px */
+  --text-4xl: 2.5625rem;
   --text-4xl--line-height: 2.8rem;
-
-  --text-5xl: 3.3125rem;  /* 53px */
+  --text-5xl: 3.3125rem;
   --text-5xl--line-height: 1.1;
-
-  --text-6xl: 4.0625rem;  /* 65px */
+  --text-6xl: 4.0625rem;
   --text-6xl--line-height: 1.05;
+
+  /* Display + mono now match HeroSection's chalk-handwriting identity */
+  --font-display: "Kalam", cursive;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "Space Mono", monospace;
 }
 
 /* ==========================================================================
-   Color Palette — Navy / Indigo / Cyan Theme
+   Color Palette — Chalkboard Green / Gold (matches HeroSection)
    ========================================================================== */
 :root {
-  --color-primary-50:  #eef2ff;
-  --color-primary-100: #e0e7ff;
-  --color-primary-200: #c7d2fe;
-  --color-primary-300: #a5b4fc;
-  --color-primary-400: #818cf8;
-  --color-primary-500: #6366f1;
-  --color-primary-600: #4F46E5;
-  --color-primary-700: #4338ca;
-  --color-primary-800: #3730a3;
-  --color-primary-900: #312e81;
+  /* Primary — chalk-gold, anchored to HeroSection's #D9A62B / #B9860F */
+  --color-primary-50:  #FBF3DC;
+  --color-primary-100: #F6E7B8;
+  --color-primary-200: #EED28A;
+  --color-primary-300: #E4BC5C;
+  --color-primary-400: #DEB03E;
+  --color-primary-500: #D9A62B;
+  --color-primary-600: #C4952A;
+  --color-primary-700: #B9860F;
+  --color-primary-800: #8F6912;
+  --color-primary-900: #6B4F10;
 
-  --color-navy: #0F172A;
+  /* Navy → chalkboard deep green (was #0F1B2D) */
+  --color-navy: #1B332C;
 
-  --color-accent: #06B6D4;
-  --color-accent-hover: #0891b2;
+  /* Accent — chalk-highlight yellow used for the underline word */
+  --color-accent: #E8C547;
+  --color-accent-hover: #C9A62E;
+
+  /* Confirm — chalkboard green (secondary brand color from Hero bg) */
+  --color-confirm: #2E4F42;
 
   --color-white:      #ffffff;
-  --color-bg:         #F8FAFC;
-  --color-surface:    #FFFFFF;
-  --color-surface-secondary: #F1F5F9;
-  --color-border:     #E2E8F0;
-  --color-border-strong: #CBD5E1;
+  --color-bg:         #F1EDE1;   /* chalk-dust cream */
+  --color-surface:    #FBF8F0;   /* matches hs-card bg */
+  --color-surface-secondary: #EDE6D3;
+  --color-border:     rgba(46, 79, 66, 0.12);
+  --color-border-strong: rgba(46, 79, 66, 0.22);
 
-  --color-text-h:     #0F172A;
-  --color-text-body:  #0F172A;
-  --color-text-muted: #64748B;
-  --color-text-light: #94A3B8;
+  --color-text-h:     #1B332C;
+  --color-text-body:  #24413A;
+  --color-text-muted: #5B6B5F;
+  --color-text-light: #8B9690;
 
-  --color-success: #16a34a;
-  --color-warning: #f59e0b;
-  --color-error:   #dc2626;
+  --color-success: #2E4F42;
+  --color-warning: #E3A93E;
+  --color-error:   #C1443C;   /* matches hs-card push-pin red */
 
-  --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.06);
-  --shadow-card-hover: 0 12px 28px rgba(15, 23, 42, 0.12), 0 4px 10px rgba(15, 23, 42, 0.08);
+  --shadow-card: 0 1px 3px rgba(27, 51, 44, 0.10), 0 1px 2px rgba(27, 51, 44, 0.07);
+  --shadow-card-hover: 0 12px 28px rgba(27, 51, 44, 0.16), 0 4px 10px rgba(27, 51, 44, 0.10);
 }
 
 /* ==========================================================================
@@ -88,25 +91,46 @@ html {
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color-scheme: light;
-  background-color: var(--color-bg);
   color: var(--color-text-body);
   overflow-x: hidden;
+
+  background-color: var(--color-bg);
+  background-image:
+    linear-gradient(to right, rgba(27, 51, 44, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(27, 51, 44, 0.035) 1px, transparent 1px),
+    linear-gradient(to right, rgba(27, 51, 44, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(27, 51, 44, 0.07) 1px, transparent 1px);
+  background-size: 24px 24px, 24px 24px, 120px 120px, 120px 120px;
+}
+
+h1, h2, h3, h4, .font-display {
+  font-family: var(--font-display);
+}
+
+.font-mono, .eyebrow, .data-label {
+  font-family: var(--font-mono);
 }
 
 #root {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
-/* Glassmorphism & Custom Effects */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(226, 232, 240, 0.8);
+#root::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 50% 15%, rgba(46, 79, 66, 0.08), transparent 55%);
+  z-index: 0;
+}
+
+@keyframes card-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
 }

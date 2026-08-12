@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from "react";
 import Section from "../components/Section";
-import Container from "../components/Container";
 import SectionHeading from "../components/SectionHeading";
 import Card from "../components/Card";
 import Button from "../components/Button";
@@ -161,36 +160,34 @@ export default function AssessmentPage() {
   }, [category, difficulty, type]);
 
   return (
-    <div className="flex min-h-screen flex-col bg-white">
+    <div className="flex min-h-screen flex-col">
       {/* ---------------- HEADER ---------------- */}
       <Section background="tint" className="pt-14 pb-10">
-        <Container>
-          <h1 className="text-4xl font-bold tracking-tight text-[var(--color-text-h)] sm:text-5xl">
-            Assess Your Skills
-          </h1>
-          <p className="mt-3 max-w-xl text-lg leading-relaxed text-[var(--color-text-muted)]">
-            Practice what matters for your field and discover where you can improve.
-          </p>
+        <h1 className="text-4xl font-bold tracking-tight text-[var(--color-text-h)] sm:text-5xl">
+          Assess Your Skills
+        </h1>
+        <p className="mt-3 max-w-xl text-lg leading-relaxed text-[var(--color-text-muted)]">
+          Practice what matters for your field and discover where you can improve.
+        </p>
 
-          <div className="mt-6 flex flex-wrap gap-3">
-            <div className="inline-flex flex-col gap-0.5 rounded-xl border border-[var(--color-primary-100)] bg-white px-4 py-3">
-              <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-primary-600)]">
-                Career Goal
-              </span>
-              <span className="text-base font-semibold text-[var(--color-text-h)]">
-                {profile.careerGoal}
-              </span>
-            </div>
-            <div className="inline-flex flex-col gap-0.5 rounded-xl border border-[var(--color-border)] bg-white px-4 py-3">
-              <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
-                Field
-              </span>
-              <span className="text-base font-semibold text-[var(--color-text-h)]">
-                {profile.field}
-              </span>
-            </div>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <div className="inline-flex flex-col gap-0.5 rounded-xl border border-[var(--color-primary-100)] bg-white px-4 py-3">
+            <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-primary-600)]">
+              Career Goal
+            </span>
+            <span className="text-base font-semibold text-[var(--color-text-h)]">
+              {profile.careerGoal}
+            </span>
           </div>
-        </Container>
+          <div className="inline-flex flex-col gap-0.5 rounded-xl border border-[var(--color-border)] bg-white px-4 py-3">
+            <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
+              Field
+            </span>
+            <span className="text-base font-semibold text-[var(--color-text-h)]">
+              {profile.field}
+            </span>
+          </div>
+        </div>
       </Section>
 
       {/* ---------------- RECOMMENDED FOR YOU ---------------- */}

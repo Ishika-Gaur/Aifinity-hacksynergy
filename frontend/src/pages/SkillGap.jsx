@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
 import Card from "../components/Card";
 import Button from "../components/Button";
-import Container from "../components/Container";
 import Section from "../components/Section";
 import SectionHeading from "../components/SectionHeading";
 import CtaBanner from "../components/CtaBanner";
+import HeroSection from "../components/HeroSection";
 
 /* =========================================================
    REUSABLE SVG ICONS
@@ -46,109 +46,29 @@ function SpinnerIcon({ className = "w-5 h-5 animate-spin" }) {
    STATIC CONFIG & DATA
 ========================================================= */
 const DOMAINS = [
-  {
-    id: "technology",
-    label: "Technology",
-    icon: "⌘",
-    examples: "Programming, AI, Web Dev",
-    sampleQuestion: "Explain how a REST API differs from GraphQL.",
-    sampleAnswer: "REST APIs use standard HTTP verbs (GET, POST, PUT, DELETE) with fixed endpoints returning predefined data structures. GraphQL uses a single endpoint where clients specify exact query fields needed, avoiding over-fetching or under-fetching.",
-  },
-  {
-    id: "mathematics",
-    label: "Mathematics",
-    icon: "∑",
-    examples: "Algebra, Calculus, Stats",
-    sampleQuestion: "Explain the intuition behind the Central Limit Theorem.",
-    sampleAnswer: "The Central Limit Theorem states that as sample size increases, the distribution of sample means approaches a normal distribution, regardless of the population's original shape, provided samples are independent.",
-  },
-  {
-    id: "science",
-    label: "Science",
-    icon: "⚛",
-    examples: "Physics, Chemistry, Bio",
-    sampleQuestion: "How do enzymes lower activation energy in chemical reactions?",
-    sampleAnswer: "Enzymes act as biological catalysts by binding substrates at active sites. They stabilize transition states, align reactants, and weaken chemical bonds, thereby lowering the required activation energy.",
-  },
-  {
-    id: "business",
-    label: "Business",
-    icon: "◫",
-    examples: "Strategy, Management, Marketing",
-    sampleQuestion: "What is the difference between cost leadership and differentiation?",
-    sampleAnswer: "Cost leadership focuses on achieving lower operational costs to offer competitive low prices. Differentiation focuses on creating unique product features or brand value that command premium prices.",
-  },
-  {
-    id: "finance",
-    label: "Finance",
-    icon: "₹",
-    examples: "Investing, Accounting, Econ",
-    sampleQuestion: "Explain why raising interest rates helps control inflation.",
-    sampleAnswer: "Raising interest rates increases borrowing costs for consumers and businesses. This reduces spending and investments, slowing aggregate demand and cooling price inflation across the economy.",
-  },
-  {
-    id: "communication",
-    label: "Communication",
-    icon: "Aa",
-    examples: "Writing, Speaking, Pitching",
-    sampleQuestion: "How do you structure an executive elevator pitch?",
-    sampleAnswer: "Start with the core problem statement, follow with your concise solution, highlight unique value proposition with key metrics, and close with a clear call to action.",
-  },
-  {
-    id: "design",
-    label: "Design",
-    icon: "◇",
-    examples: "UI/UX, Visual, Research",
-    sampleQuestion: "Explain visual hierarchy in user interface design.",
-    sampleAnswer: "Visual hierarchy guides user focus through contrast, typography scale, spacing, color highlights, and alignment to ensure key actions are clear and intuitive.",
-  },
-  {
-    id: "other",
-    label: "Other",
-    icon: "＋",
-    examples: "General Professional Skills",
-    sampleQuestion: "How do you prioritize competing project deadlines?",
-    sampleAnswer: "I use an Eisenhower Matrix framework evaluating urgency and impact, communicate with stakeholders to align expectations, and break tasks into milestone deliverables.",
-  },
+  { id: "technology", label: "Technology", icon: "⌘", examples: "Programming, AI, Web Dev", sampleQuestion: "Explain how a REST API differs from GraphQL.", sampleAnswer: "REST APIs use standard HTTP verbs (GET, POST, PUT, DELETE) with fixed endpoints returning predefined data structures. GraphQL uses a single endpoint where clients specify exact query fields needed, avoiding over-fetching or under-fetching." },
+  { id: "mathematics", label: "Mathematics", icon: "∑", examples: "Algebra, Calculus, Stats", sampleQuestion: "Explain the intuition behind the Central Limit Theorem.", sampleAnswer: "The Central Limit Theorem states that as sample size increases, the distribution of sample means approaches a normal distribution, regardless of the population's original shape, provided samples are independent." },
+  { id: "science", label: "Science", icon: "⚛", examples: "Physics, Chemistry, Bio", sampleQuestion: "How do enzymes lower activation energy in chemical reactions?", sampleAnswer: "Enzymes act as biological catalysts by binding substrates at active sites. They stabilize transition states, align reactants, and weaken chemical bonds, thereby lowering the required activation energy." },
+  { id: "business", label: "Business", icon: "◫", examples: "Strategy, Management, Marketing", sampleQuestion: "What is the difference between cost leadership and differentiation?", sampleAnswer: "Cost leadership focuses on achieving lower operational costs to offer competitive low prices. Differentiation focuses on creating unique product features or brand value that command premium prices." },
+  { id: "finance", label: "Finance", icon: "₹", examples: "Investing, Accounting, Econ", sampleQuestion: "Explain why raising interest rates helps control inflation.", sampleAnswer: "Raising interest rates increases borrowing costs for consumers and businesses. This reduces spending and investments, slowing aggregate demand and cooling price inflation across the economy." },
+  { id: "communication", label: "Communication", icon: "Aa", examples: "Writing, Speaking, Pitching", sampleQuestion: "How do you structure an executive elevator pitch?", sampleAnswer: "Start with the core problem statement, follow with your concise solution, highlight unique value proposition with key metrics, and close with a clear call to action." },
+  { id: "design", label: "Design", icon: "◇", examples: "UI/UX, Visual, Research", sampleQuestion: "Explain visual hierarchy in user interface design.", sampleAnswer: "Visual hierarchy guides user focus through contrast, typography scale, spacing, color highlights, and alignment to ensure key actions are clear and intuitive." },
+  { id: "other", label: "Other", icon: "＋", examples: "General Professional Skills", sampleQuestion: "How do you prioritize competing project deadlines?", sampleAnswer: "I use an Eisenhower Matrix framework evaluating urgency and impact, communicate with stakeholders to align expectations, and break tasks into milestone deliverables." },
 ];
 
 const GOALS = [
-  {
-    id: "software",
-    title: "Software Engineer",
-    category: "Technology",
-    requiredSkills: ["Problem Solving", "Programming", "Data Structures", "System Design"],
-  },
-  {
-    id: "data",
-    title: "Data Scientist",
-    category: "Technology",
-    requiredSkills: ["Statistics", "Python", "Data Analysis", "Machine Learning"],
-  },
-  {
-    id: "manager",
-    title: "Business Manager",
-    category: "Business",
-    requiredSkills: ["Decision Making", "Communication", "Leadership", "Business Strategy"],
-  },
-  {
-    id: "finance",
-    title: "Financial Analyst",
-    category: "Finance",
-    requiredSkills: ["Financial Analysis", "Statistics", "Decision Making", "Communication"],
-  },
-  {
-    id: "designer",
-    title: "UI/UX Designer",
-    category: "Design",
-    requiredSkills: ["Visual Design", "User Research", "Problem Solving", "Communication"],
-  },
-  {
-    id: "research",
-    title: "Researcher",
-    category: "Science",
-    requiredSkills: ["Critical Thinking", "Research", "Analysis", "Communication"],
-  },
+  { id: "software", title: "Software Engineer", category: "Technology", requiredSkills: ["Problem Solving", "Programming", "Data Structures", "System Design"] },
+  { id: "data", title: "Data Scientist", category: "Technology", requiredSkills: ["Statistics", "Python", "Data Analysis", "Machine Learning"] },
+  { id: "manager", title: "Business Manager", category: "Business", requiredSkills: ["Decision Making", "Communication", "Leadership", "Business Strategy"] },
+  { id: "finance", title: "Financial Analyst", category: "Finance", requiredSkills: ["Financial Analysis", "Statistics", "Decision Making", "Communication"] },
+  { id: "designer", title: "UI/UX Designer", category: "Design", requiredSkills: ["Visual Design", "User Research", "Problem Solving", "Communication"] },
+  { id: "research", title: "Researcher", category: "Science", requiredSkills: ["Critical Thinking", "Research", "Analysis", "Communication"] },
+];
+
+const HERO_STEPS = [
+  ["01", "Demonstrate", "Answer a question or explain a concept"],
+  ["02", "Evaluate", "AI analyzes reasoning and depth"],
+  ["03", "Map Gap", "Get custom career skill gap analysis"],
 ];
 
 /* =========================================================
@@ -182,75 +102,21 @@ function generateAnalysis(question, answer, domain, goal) {
 
   const gapsByDomain = {
     technology: [
-      {
-        name: "System Architecture",
-        current: Math.min(95, 60 + Math.floor((score - 60) / 3)),
-        target: 88,
-        priority: "High",
-        description: "Practice connecting isolated code modules into scalable end-to-end architectures.",
-      },
-      {
-        name: "Algorithm Efficiency",
-        current: Math.min(95, 54 + Math.floor((score - 60) / 4)),
-        target: 82,
-        priority: "Medium",
-        description: "Focus on time and space complexity trade-offs under high-scale scenarios.",
-      },
-      {
-        name: "Testing & Resilience",
-        current: Math.min(95, 48 + Math.floor((score - 60) / 4)),
-        target: 78,
-        priority: "Medium",
-        description: "Build robust error handling, automated tests, and edge case coverage.",
-      },
+      { name: "System Architecture", current: Math.min(95, 60 + Math.floor((score - 60) / 3)), target: 88, priority: "High", description: "Practice connecting isolated code modules into scalable end-to-end architectures." },
+      { name: "Algorithm Efficiency", current: Math.min(95, 54 + Math.floor((score - 60) / 4)), target: 82, priority: "Medium", description: "Focus on time and space complexity trade-offs under high-scale scenarios." },
+      { name: "Testing & Resilience", current: Math.min(95, 48 + Math.floor((score - 60) / 4)), target: 78, priority: "Medium", description: "Build robust error handling, automated tests, and edge case coverage." },
     ],
     finance: [
-      {
-        name: "Valuation Frameworks",
-        current: Math.min(95, 58 + Math.floor((score - 60) / 3)),
-        target: 87,
-        priority: "High",
-        description: "Connect financial statements to discounted cash flow (DCF) models.",
-      },
-      {
-        name: "Risk Sensitivity",
-        current: Math.min(95, 52 + Math.floor((score - 60) / 4)),
-        target: 82,
-        priority: "Medium",
-        description: "Evaluate macroeconomic shifts and scenario modeling for portfolio safety.",
-      },
-      {
-        name: "Capital Allocation",
-        current: Math.min(95, 46 + Math.floor((score - 60) / 4)),
-        target: 76,
-        priority: "Medium",
-        description: "Analyze debt vs equity financing decisions for corporate growth.",
-      },
+      { name: "Valuation Frameworks", current: Math.min(95, 58 + Math.floor((score - 60) / 3)), target: 87, priority: "High", description: "Connect financial statements to discounted cash flow (DCF) models." },
+      { name: "Risk Sensitivity", current: Math.min(95, 52 + Math.floor((score - 60) / 4)), target: 82, priority: "Medium", description: "Evaluate macroeconomic shifts and scenario modeling for portfolio safety." },
+      { name: "Capital Allocation", current: Math.min(95, 46 + Math.floor((score - 60) / 4)), target: 76, priority: "Medium", description: "Analyze debt vs equity financing decisions for corporate growth." },
     ],
   };
 
   const gaps = gapsByDomain[domain] || [
-    {
-      name: "Advanced Critical Reasoning",
-      current: Math.min(95, 56 + Math.floor((score - 60) / 3)),
-      target: 86,
-      priority: "High",
-      description: "Strengthen written justifications and step-by-step logic proof.",
-    },
-    {
-      name: "Domain Synthesis",
-      current: Math.min(95, 52 + Math.floor((score - 60) / 4)),
-      target: 80,
-      priority: "Medium",
-      description: "Apply theoretical principles to multi-faceted real-world cases.",
-    },
-    {
-      name: "Structured Execution",
-      current: Math.min(95, 47 + Math.floor((score - 60) / 4)),
-      target: 75,
-      priority: "Medium",
-      description: "Improve execution speed while maintaining high quality standards.",
-    },
+    { name: "Advanced Critical Reasoning", current: Math.min(95, 56 + Math.floor((score - 60) / 3)), target: 86, priority: "High", description: "Strengthen written justifications and step-by-step logic proof." },
+    { name: "Domain Synthesis", current: Math.min(95, 52 + Math.floor((score - 60) / 4)), target: 80, priority: "Medium", description: "Apply theoretical principles to multi-faceted real-world cases." },
+    { name: "Structured Execution", current: Math.min(95, 47 + Math.floor((score - 60) / 4)), target: 75, priority: "Medium", description: "Improve execution speed while maintaining high quality standards." },
   ];
 
   const strengths = strengthsByDomain[domain] || strengthsByDomain.other;
@@ -262,7 +128,7 @@ function generateAnalysis(question, answer, domain, goal) {
 }
 
 /* =========================================================
-   SUB-COMPONENTS FOR DRY & HOVER Polish
+   SUB-COMPONENTS (theme tokens instead of hardcoded colors)
 ========================================================= */
 function ScoreRing({ score }) {
   const radius = 46;
@@ -270,39 +136,23 @@ function ScoreRing({ score }) {
   const progress = circumference - (score / 100) * circumference;
 
   return (
-    <div className="relative h-36 w-36 shrink-0 transition-transform duration-300 hover:scale-105">
-      <svg
-        className="h-full w-full -rotate-90"
-        viewBox="0 0 120 120"
-        role="progressbar"
-        aria-valuenow={score}
-        aria-valuemin={0}
-        aria-valuemax={100}
-      >
-        <circle cx="60" cy="60" r={radius} fill="none" stroke="#F1F5F9" strokeWidth="10" />
+    <div className="relative h-36 w-36 shrink-0">
+      <svg className="h-full w-full -rotate-90" viewBox="0 0 120 120" role="progressbar" aria-valuenow={score} aria-valuemin={0} aria-valuemax={100}>
+        <circle cx="60" cy="60" r={radius} fill="none" stroke="var(--color-surface-secondary)" strokeWidth="10" />
         <circle
-          cx="60"
-          cy="60"
-          r={radius}
-          fill="none"
-          stroke="url(#scoreGradient)"
+          cx="60" cy="60" r={radius} fill="none"
+          stroke="var(--color-primary-600)"
           strokeWidth="10"
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={progress}
           className="transition-all duration-1000 ease-out"
         />
-        <defs>
-          <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#4F46E5" />
-            <stop offset="100%" stopColor="#06B6D4" />
-          </linearGradient>
-        </defs>
       </svg>
 
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-3xl font-bold text-slate-900">{score}</span>
-        <span className="text-xs font-medium text-slate-500">/ 100</span>
+        <span className="text-3xl font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--color-text-h)" }}>{score}</span>
+        <span className="text-xs font-medium" style={{ color: "var(--color-text-light)" }}>/ 100</span>
       </div>
     </div>
   );
@@ -310,10 +160,10 @@ function ScoreRing({ score }) {
 
 function ProgressBar({ value, className = "" }) {
   return (
-    <div className={`h-2.5 w-full overflow-hidden rounded-full bg-slate-100 ${className}`}>
+    <div className={`h-2.5 w-full overflow-hidden rounded-full ${className}`} style={{ background: "var(--color-surface-secondary)" }}>
       <div
-        className="h-full rounded-full bg-gradient-to-r from-indigo-600 via-violet-600 to-cyan-500 transition-all duration-700 ease-out"
-        style={{ width: `${Math.min(Math.max(value, 0), 100)}%` }}
+        className="h-full rounded-full transition-all duration-700 ease-out"
+        style={{ width: `${Math.min(Math.max(value, 0), 100)}%`, background: "var(--color-primary-600)" }}
       />
     </div>
   );
@@ -322,47 +172,43 @@ function ProgressBar({ value, className = "" }) {
 function GapBar({ current, target }) {
   return (
     <div className="space-y-2">
-      <div className="relative h-3 overflow-hidden rounded-full bg-slate-100">
-        <div
-          className="absolute inset-y-0 left-0 rounded-full bg-indigo-600 transition-all duration-700"
-          style={{ width: `${current}%` }}
-        />
-        <div
-          className="absolute inset-y-0 w-1.5 rounded-full bg-cyan-500 shadow-sm"
-          style={{ left: `${target}%` }}
-        />
+      <div className="relative h-3 overflow-hidden rounded-full" style={{ background: "var(--color-surface-secondary)" }}>
+        <div className="absolute inset-y-0 left-0 rounded-full transition-all duration-700" style={{ width: `${current}%`, background: "var(--color-primary-600)" }} />
+        <div className="absolute inset-y-0 w-1.5 rounded-full shadow-sm" style={{ left: `${target}%`, background: "var(--color-accent)" }} />
       </div>
 
-      <div className="flex justify-between text-xs text-slate-500 font-medium">
+      <div className="flex justify-between text-xs font-medium" style={{ color: "var(--color-text-muted)" }}>
         <span>Current: {current}%</span>
-        <span className="text-cyan-600 font-bold">Target: {target}%</span>
+        <span className="font-bold" style={{ color: "var(--color-primary-600)" }}>Target: {target}%</span>
       </div>
     </div>
   );
 }
 
+/* Interactive selection tiles — kept custom (not the shared Card).
+   They need active/selected state styling and button semantics that
+   Card doesn't model, unlike the passive info cards elsewhere on
+   this page. */
 function DomainTile({ item, active, onClick }) {
   return (
     <button
       type="button"
       onClick={() => onClick(item.id)}
-      className={`group rounded-xl border p-4 text-left transition-all duration-300 ${
+      className="group rounded-xl border p-4 text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-lg active:scale-95"
+      style={
         active
-          ? "border-indigo-600 bg-indigo-50/60 shadow-lg shadow-indigo-500/10 ring-2 ring-indigo-600/20 scale-[1.02]"
-          : "border-slate-200 bg-white hover:-translate-y-1 hover:border-indigo-300 hover:shadow-xl active:scale-95"
-      }`}
+          ? { borderColor: "var(--color-primary-600)", background: "var(--color-primary-50)", boxShadow: "var(--shadow-card-hover)" }
+          : { borderColor: "var(--color-border)", background: "var(--color-surface)" }
+      }
     >
       <div
-        className={`flex h-10 w-10 items-center justify-center rounded-lg text-lg font-bold transition-all duration-300 ${
-          active
-            ? "bg-indigo-600 text-white scale-110"
-            : "bg-slate-100 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white group-hover:scale-110"
-        }`}
+        className="flex h-10 w-10 items-center justify-center rounded-lg text-lg font-bold transition-all duration-300"
+        style={active ? { background: "var(--color-primary-600)", color: "#fff" } : { background: "var(--color-surface-secondary)", color: "var(--color-primary-600)" }}
       >
         {item.icon}
       </div>
-      <h4 className="mt-3 text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{item.label}</h4>
-      <p className="mt-0.5 text-xs text-slate-500 truncate">{item.examples}</p>
+      <h4 className="mt-3 text-sm font-bold" style={{ color: "var(--color-text-h)" }}>{item.label}</h4>
+      <p className="mt-0.5 text-xs truncate" style={{ color: "var(--color-text-light)" }}>{item.examples}</p>
     </button>
   );
 }
@@ -372,30 +218,28 @@ function GoalCard({ item, active, isRecommended, onClick }) {
     <button
       type="button"
       onClick={() => onClick(item.title)}
-      className={`group flex items-center justify-between rounded-xl border p-4 text-left transition-all duration-300 ${
+      className="group flex items-center justify-between rounded-xl border p-4 text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-lg active:scale-95"
+      style={
         active
-          ? "border-violet-600 bg-violet-50/60 shadow-lg shadow-violet-500/10 ring-2 ring-violet-600/20 scale-[1.01]"
-          : "border-slate-200 bg-white hover:-translate-y-1 hover:border-violet-300 hover:shadow-xl active:scale-95"
-      }`}
+          ? { borderColor: "var(--color-primary-600)", background: "var(--color-primary-50)", boxShadow: "var(--shadow-card-hover)" }
+          : { borderColor: "var(--color-border)", background: "var(--color-surface)" }
+      }
     >
       <div>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-slate-500">{item.category}</span>
+          <span className="text-xs font-medium" style={{ color: "var(--color-text-light)" }}>{item.category}</span>
           {isRecommended && (
-            <span className="rounded bg-cyan-100 px-1.5 py-0.5 text-[10px] font-bold text-cyan-800 animate-pulse">
+            <span className="rounded px-1.5 py-0.5 text-[10px] font-bold" style={{ background: "var(--color-primary-50)", color: "var(--color-primary-700)" }}>
               Recommended
             </span>
           )}
         </div>
-        <h4 className="mt-1 font-bold text-slate-900 text-sm group-hover:text-violet-700 transition-colors">{item.title}</h4>
+        <h4 className="mt-1 font-bold text-sm" style={{ color: "var(--color-text-h)" }}>{item.title}</h4>
       </div>
 
       <div
-        className={`flex h-7 w-7 items-center justify-center rounded-full border text-xs transition-all duration-300 ${
-          active
-            ? "border-violet-600 bg-violet-600 text-white scale-110"
-            : "border-slate-200 text-slate-400 group-hover:border-violet-400 group-hover:text-violet-600 group-hover:scale-110"
-        }`}
+        className="flex h-7 w-7 items-center justify-center rounded-full border text-xs transition-all duration-300"
+        style={active ? { borderColor: "var(--color-primary-600)", background: "var(--color-primary-600)", color: "#fff" } : { borderColor: "var(--color-border)", color: "var(--color-text-light)" }}
       >
         {active ? <CheckIcon className="w-3.5 h-3.5" /> : <ArrowRightIcon className="w-3.5 h-3.5" />}
       </div>
@@ -416,15 +260,8 @@ export default function SkillGap() {
   const [priorityFilter, setPriorityFilter] = useState("All");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  const selectedGoal = useMemo(
-    () => GOALS.find((item) => item.title === goal) || GOALS[0],
-    [goal]
-  );
-
-  const selectedDomain = useMemo(
-    () => DOMAINS.find((item) => item.id === domain) || DOMAINS[0],
-    [domain]
-  );
+  const selectedGoal = useMemo(() => GOALS.find((item) => item.title === goal) || GOALS[0], [goal]);
+  const selectedDomain = useMemo(() => DOMAINS.find((item) => item.id === domain) || DOMAINS[0], [domain]);
 
   const domainFilteredGoals = useMemo(() => {
     const matched = GOALS.filter((g) => g.category.toLowerCase() === selectedDomain.label.toLowerCase());
@@ -444,10 +281,7 @@ export default function SkillGap() {
       setIsAnalyzing(false);
 
       setTimeout(() => {
-        document.getElementById("analysis-result")?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
+        document.getElementById("analysis-result")?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 150);
     }, 850);
   };
@@ -486,52 +320,36 @@ export default function SkillGap() {
   }, [analysis, priorityFilter]);
 
   return (
-    <div className="bg-[var(--color-surface)] text-slate-900 min-h-screen">
-      {/* HERO SECTION */}
-      <section className="relative overflow-hidden border-b border-slate-200 bg-white">
-        <div className="pointer-events-none absolute -right-40 -top-40 h-96 w-96 rounded-full bg-indigo-100/50 blur-3xl" />
-        <div className="pointer-events-none absolute -left-40 bottom-0 h-80 w-80 rounded-full bg-cyan-100/40 blur-3xl" />
+    <div className="flex min-h-screen flex-col">
+      {/* =========================================================
+         HERO SECTION
+      ========================================================= */}
+      <HeroSection
+        eyebrow="Afinity AI · Skill Intelligence Engine"
+        title="Measure what you know."
+        highlightWord="Discover what you're missing."
+        description="Show us what you know. Afinity evaluates your logic, reasoning, and answers to map the exact distance between your current level and career goals."
+        primaryCta={{ label: "Start Assessment", href: "#assessment" }}
+        secondaryCta={{ label: "See How It Works", href: "#assessment" }}
+      />
 
-        <Container>
-          <div className="relative mx-auto max-w-4xl py-14 sm:py-18 lg:py-20 text-center">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-indigo-700 shadow-xs">
-              <SparklesIcon className="w-4 h-4 text-cyan-500" />
-              Afinity AI · Skill Intelligence Engine
-            </div>
-
-            <h1 className="text-4xl font-bold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
-              Measure what you know.{" "}
-              <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-cyan-500 bg-clip-text text-transparent">
-                Discover what you're missing.
-              </span>
-            </h1>
-
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
-              Show us what you know. Afinity evaluates your logic, reasoning, and answers to map the exact distance between your current level and career goals.
-            </p>
-
-            <div className="mt-10 grid gap-4 text-left sm:grid-cols-3">
-              {[
-                ["01", "Demonstrate", "Answer a question or explain a concept"],
-                ["02", "Evaluate", "AI analyzes reasoning and depth"],
-                ["03", "Map Gap", "Get custom career skill gap analysis"],
-              ].map(([number, title, description]) => (
-                <div
-                  key={number}
-                  className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all duration-300 hover:border-indigo-300 hover:shadow-lg hover:-translate-y-1"
-                >
-                  <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">{number}</span>
-                  <h3 className="mt-1.5 font-bold text-slate-900 text-sm">{title}</h3>
-                  <p className="mt-1 text-xs leading-5 text-slate-500">{description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Container>
-      </section>
+      {/* Hero-adjacent 3-step preview strip */}
+      <Section className="pt-0 sm:pt-0">
+        <div className="mx-auto grid max-w-4xl gap-4 text-left sm:grid-cols-3">
+          {HERO_STEPS.map(([number, title, description]) => (
+            <Card
+              key={number}
+              icon={<span style={{ fontFamily: "var(--font-mono)" }} className="text-lg font-bold">{number}</span>}
+              title={title}
+            >
+              {description}
+            </Card>
+          ))}
+        </div>
+      </Section>
 
       {/* ASSESSMENT SECTION */}
-      <Section background="white" id="assessment">
+      <Section id="assessment">
         <SectionHeading
           eyebrow="STEP-BY-STEP ASSESSMENT"
           title="Start with what you actually know"
@@ -542,22 +360,15 @@ export default function SkillGap() {
         <div className="mb-12">
           <div className="mb-4 flex items-center justify-between">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">
-                Step 01
-              </span>
-              <h3 className="mt-0.5 text-lg font-bold text-slate-900">What field are you learning?</h3>
+              <span className="text-xs font-bold uppercase tracking-wider" style={{ fontFamily: "var(--font-mono)", color: "var(--color-primary-600)" }}>Step 01</span>
+              <h3 className="mt-0.5 text-lg font-bold" style={{ color: "var(--color-text-h)" }}>What field are you learning?</h3>
             </div>
-            <span className="text-xs text-slate-500 font-medium">8 Supported Domains</span>
+            <span className="text-xs font-medium" style={{ color: "var(--color-text-light)" }}>8 Supported Domains</span>
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {DOMAINS.map((item) => (
-              <DomainTile
-                key={item.id}
-                item={item}
-                active={domain === item.id}
-                onClick={handleDomainChange}
-              />
+              <DomainTile key={item.id} item={item} active={domain === item.id} onClick={handleDomainChange} />
             ))}
           </div>
         </div>
@@ -565,10 +376,8 @@ export default function SkillGap() {
         {/* Step 2: Select Goal */}
         <div className="mb-12">
           <div className="mb-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">
-              Step 02
-            </span>
-            <h3 className="mt-0.5 text-lg font-bold text-slate-900">What is your target career role?</h3>
+            <span className="text-xs font-bold uppercase tracking-wider" style={{ fontFamily: "var(--font-mono)", color: "var(--color-primary-600)" }}>Step 02</span>
+            <h3 className="mt-0.5 text-lg font-bold" style={{ color: "var(--color-text-h)" }}>What is your target career role?</h3>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -576,27 +385,19 @@ export default function SkillGap() {
               const active = goal === item.title;
               const isRecommended = item.category.toLowerCase() === selectedDomain.label.toLowerCase();
               return (
-                <GoalCard
-                  key={item.id}
-                  item={item}
-                  active={active}
-                  isRecommended={isRecommended}
-                  onClick={handleGoalChange}
-                />
+                <GoalCard key={item.id} item={item} active={active} isRecommended={isRecommended} onClick={handleGoalChange} />
               );
             })}
           </div>
         </div>
 
         {/* Step 3: Question & Answer Submission Card */}
-        <Card hoverable={false} className="border-slate-200 p-6 shadow-sm sm:p-8 transition-all duration-300 hover:shadow-xl">
+        <Card hoverable={false} className="p-6 shadow-sm sm:p-8 transition-all duration-300 hover:shadow-xl">
           <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">
-                Step 03
-              </span>
-              <h3 className="mt-0.5 text-xl font-bold text-slate-900">Show us your knowledge</h3>
-              <p className="mt-1 text-sm text-slate-500">
+              <span className="text-xs font-bold uppercase tracking-wider" style={{ fontFamily: "var(--font-mono)", color: "var(--color-primary-600)" }}>Step 03</span>
+              <h3 className="mt-0.5 text-xl font-bold" style={{ color: "var(--color-text-h)" }}>Show us your knowledge</h3>
+              <p className="mt-1 text-sm" style={{ color: "var(--color-text-muted)" }}>
                 Ask a question and explain your answer. Or click the preset button below to test instantly.
               </p>
             </div>
@@ -605,9 +406,8 @@ export default function SkillGap() {
               size="sm"
               variant="subtle"
               onClick={handleLoadPreset}
-              icon={<SparklesIcon className="w-4 h-4 text-indigo-600" />}
+              icon={<SparklesIcon className="w-4 h-4" style={{ color: "var(--color-primary-600)" }} />}
               iconPosition="left"
-              className="transition-all duration-200 hover:scale-105 active:scale-95"
             >
               Load {selectedDomain.label} Sample
             </Button>
@@ -615,7 +415,7 @@ export default function SkillGap() {
 
           <div className="space-y-5">
             <div>
-              <label htmlFor="question" className="mb-1.5 block text-sm font-semibold text-slate-900">
+              <label htmlFor="question" className="mb-1.5 block text-sm font-semibold" style={{ color: "var(--color-text-h)" }}>
                 The Question or Problem
               </label>
               <textarea
@@ -624,16 +424,17 @@ export default function SkillGap() {
                 onChange={(e) => setQuestion(e.target.value)}
                 rows={3}
                 placeholder={`e.g. ${selectedDomain.sampleQuestion}`}
-                className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition-all duration-200 placeholder:text-slate-400 focus:border-indigo-600 focus:bg-white focus:ring-4 focus:ring-indigo-600/10"
+                className="w-full resize-none rounded-xl border px-4 py-3 text-sm outline-none transition-all duration-200 focus:ring-4"
+                style={{ borderColor: "var(--color-border)", background: "var(--color-surface-secondary)", color: "var(--color-text-h)" }}
               />
             </div>
 
             <div>
               <div className="mb-1.5 flex items-center justify-between">
-                <label htmlFor="answer" className="block text-sm font-semibold text-slate-900">
+                <label htmlFor="answer" className="block text-sm font-semibold" style={{ color: "var(--color-text-h)" }}>
                   Your Reasoning & Explanation
                 </label>
-                <span className="text-xs font-medium text-slate-500">{wordCount} words</span>
+                <span className="text-xs font-medium" style={{ color: "var(--color-text-light)" }}>{wordCount} words</span>
               </div>
 
               <textarea
@@ -642,18 +443,22 @@ export default function SkillGap() {
                 onChange={(e) => setAnswer(e.target.value)}
                 rows={6}
                 placeholder="Explain your thought process. Afinity evaluates logic, concepts, and depth..."
-                className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-900 outline-none transition-all duration-200 placeholder:text-slate-400 focus:border-indigo-600 focus:bg-white focus:ring-4 focus:ring-indigo-600/10"
+                className="w-full resize-none rounded-xl border px-4 py-3 text-sm leading-6 outline-none transition-all duration-200 focus:ring-4"
+                style={{ borderColor: "var(--color-border)", background: "var(--color-surface-secondary)", color: "var(--color-text-h)" }}
               />
             </div>
 
-            <div className="flex flex-col gap-4 rounded-xl border border-cyan-100 bg-cyan-50/50 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div
+              className="flex flex-col gap-4 rounded-xl border p-4 sm:flex-row sm:items-center sm:justify-between"
+              style={{ borderColor: "var(--color-primary-100)", background: "var(--color-primary-50)" }}
+            >
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-cyan-600 shadow-xs">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg shadow-xs" style={{ background: "var(--color-surface)", color: "var(--color-primary-600)" }}>
                   <SparklesIcon className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-900">AI Evaluation Criteria</p>
-                  <p className="text-xs text-slate-600">Decomposition · Logic · Concepts · Application</p>
+                  <p className="text-xs font-bold" style={{ color: "var(--color-text-h)" }}>AI Evaluation Criteria</p>
+                  <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>Decomposition · Logic · Concepts · Application</p>
                 </div>
               </div>
 
@@ -662,7 +467,7 @@ export default function SkillGap() {
                 disabled={!canAnalyze || isAnalyzing}
                 icon={isAnalyzing ? <SpinnerIcon /> : <ArrowRightIcon />}
                 onClick={handleAnalyze}
-                className="w-full sm:w-auto transition-all duration-200 hover:scale-105 active:scale-95"
+                className="w-full sm:w-auto"
               >
                 {isAnalyzing ? "Analyzing..." : "Analyze Skill Gap"}
               </Button>
@@ -673,27 +478,31 @@ export default function SkillGap() {
 
       {/* AI ANALYSIS RESULTS SECTION */}
       {analysis && (
-        <Section background="tint" id="analysis-result" className="scroll-mt-20">
+        <Section id="analysis-result" className="scroll-mt-20">
           <div className="mb-10 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-700">
+              <div
+                className="mb-3 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold"
+                style={{ borderColor: "var(--color-primary-100)", background: "var(--color-primary-50)", color: "var(--color-primary-700)" }}
+              >
                 <SparklesIcon className="w-3.5 h-3.5" />
                 AI Skill Analysis Complete
               </div>
 
-              <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl" style={{ fontFamily: "var(--font-display)", color: "var(--color-text-h)" }}>
                 Here's what we discovered
               </h2>
 
-              <p className="mt-2 max-w-2xl text-sm text-slate-600">
-                Analysis based on response in <strong className="text-slate-900">{selectedDomain.label}</strong> evaluated against target role <strong className="text-indigo-600">{analysis.goal}</strong>.
+              <p className="mt-2 max-w-2xl text-sm" style={{ color: "var(--color-text-muted)" }}>
+                Analysis based on response in <strong style={{ color: "var(--color-text-h)" }}>{selectedDomain.label}</strong> evaluated against target role <strong style={{ color: "var(--color-primary-600)" }}>{analysis.goal}</strong>.
               </p>
             </div>
 
             <button
               type="button"
               onClick={resetAssessment}
-              className="text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition"
+              className="text-sm font-semibold transition"
+              style={{ color: "var(--color-primary-600)" }}
             >
               ← Analyze another question
             </button>
@@ -701,45 +510,41 @@ export default function SkillGap() {
 
           {/* Overview Cards */}
           <div className="grid gap-6 lg:grid-cols-2">
-            <Card hoverable={false} className="bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-xl">
+            <Card hoverable={false} className="p-6 shadow-sm transition-all duration-300 hover:shadow-xl">
               <div className="flex flex-col items-center gap-6 sm:flex-row">
                 <ScoreRing score={analysis.score} />
 
                 <div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-cyan-600">
+                  <span className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-primary-600)" }}>
                     Demonstrated Capability
                   </span>
 
-                  <h3 className="mt-1 text-2xl font-bold text-slate-900">
-                    {analysis.score >= 75
-                      ? "Strong Capability Foundation"
-                      : analysis.score >= 60
-                      ? "Developing Capability"
-                      : "Early Stage Capability"}
+                  <h3 className="mt-1 text-2xl font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--color-text-h)" }}>
+                    {analysis.score >= 75 ? "Strong Capability Foundation" : analysis.score >= 60 ? "Developing Capability" : "Early Stage Capability"}
                   </h3>
 
-                  <p className="mt-2 text-xs leading-5 text-slate-600">
+                  <p className="mt-2 text-xs leading-5" style={{ color: "var(--color-text-muted)" }}>
                     Reflects how effectively your reasoning demonstrated underlying concepts and application.
                   </p>
                 </div>
               </div>
             </Card>
 
-            <Card hoverable={false} className="bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-xl">
-              <span className="text-xs font-bold uppercase tracking-wider text-violet-600">
+            <Card hoverable={false} className="p-6 shadow-sm transition-all duration-300 hover:shadow-xl">
+              <span className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-primary-600)" }}>
                 Estimated Career Gap
               </span>
 
               <div className="mt-3 flex items-end gap-2">
-                <span className="text-4xl font-bold text-slate-900">{analysis.averageGap}</span>
-                <span className="mb-1 text-xs font-medium text-slate-500">points average skill gap</span>
+                <span className="text-4xl font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--color-text-h)" }}>{analysis.averageGap}</span>
+                <span className="mb-1 text-xs font-medium" style={{ color: "var(--color-text-light)" }}>points average skill gap</span>
               </div>
 
               <div className="mt-4">
                 <ProgressBar value={Math.min(analysis.averageGap * 2.5, 100)} />
               </div>
 
-              <p className="mt-3 text-xs leading-5 text-slate-600">
+              <p className="mt-3 text-xs leading-5" style={{ color: "var(--color-text-muted)" }}>
                 The smaller this gap number, the closer your demonstrated abilities match your target role.
               </p>
             </Card>
@@ -747,18 +552,19 @@ export default function SkillGap() {
 
           {/* Strengths List */}
           <div className="mt-6">
-            <Card hoverable={false} className="border-cyan-100 bg-white p-5 shadow-sm transition-all duration-300 hover:shadow-lg">
+            <Card hoverable={false} className="p-5 shadow-sm transition-all duration-300 hover:shadow-lg" style={{ borderColor: "var(--color-primary-100)" }}>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: "var(--color-primary-50)", color: "var(--color-primary-600)" }}>
                   <CheckIcon className="w-5 h-5" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-sm font-bold text-slate-900">Demonstrated Strengths</h3>
+                  <h3 className="text-sm font-bold" style={{ color: "var(--color-text-h)" }}>Demonstrated Strengths</h3>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {analysis.strengths.map((str) => (
                       <span
                         key={str}
-                        className="rounded-full border border-cyan-100 bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-700 transition-colors hover:bg-cyan-100"
+                        className="rounded-full border px-3 py-1 text-xs font-semibold transition-colors"
+                        style={{ borderColor: "var(--color-primary-100)", background: "var(--color-primary-50)", color: "var(--color-primary-700)" }}
                       >
                         ✓ {str}
                       </span>
@@ -773,8 +579,8 @@ export default function SkillGap() {
           <div className="mt-10">
             <div className="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
               <div>
-                <h3 className="text-xl font-bold text-slate-900">Identified Skill Gaps</h3>
-                <p className="text-xs text-slate-500">Focus on these areas to reach target proficiency.</p>
+                <h3 className="text-xl font-bold" style={{ color: "var(--color-text-h)" }}>Identified Skill Gaps</h3>
+                <p className="text-xs" style={{ color: "var(--color-text-light)" }}>Focus on these areas to reach target proficiency.</p>
               </div>
 
               <div className="flex gap-1.5">
@@ -783,11 +589,12 @@ export default function SkillGap() {
                     key={priority}
                     type="button"
                     onClick={() => setPriorityFilter(priority)}
-                    className={`rounded-full px-3 py-1 text-xs font-semibold transition-all duration-200 ${
+                    className="rounded-full px-3 py-1 text-xs font-semibold transition-all duration-200 active:scale-95"
+                    style={
                       priorityFilter === priority
-                        ? "bg-slate-900 text-white scale-105 shadow-xs"
-                        : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 active:scale-95"
-                    }`}
+                        ? { background: "var(--color-primary-600)", color: "#fff" }
+                        : { border: "1px solid var(--color-border)", background: "var(--color-surface)", color: "var(--color-text-muted)" }
+                    }
                   >
                     {priority} Priority
                   </button>
@@ -799,50 +606,45 @@ export default function SkillGap() {
               {filteredGaps.map((gap, index) => {
                 const expanded = activeGap === index;
                 return (
-                  <button
-                    key={gap.name}
-                    type="button"
-                    onClick={() => setActiveGap(expanded ? null : index)}
-                    className="text-left"
-                  >
+                  <button key={gap.name} type="button" onClick={() => setActiveGap(expanded ? null : index)} className="text-left">
                     <Card
                       hoverable
-                      className={`h-full bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${
-                        expanded ? "ring-2 ring-violet-500 shadow-md" : ""
-                      }`}
+                      className="h-full"
+                      style={expanded ? { boxShadow: "var(--shadow-card-hover)", borderColor: "var(--color-primary-600)" } : undefined}
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-50 text-xs font-bold text-violet-700">
+                        <span className="flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold" style={{ background: "var(--color-primary-50)", color: "var(--color-primary-700)" }}>
                           0{index + 1}
                         </span>
                         <span
-                          className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                          className="rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider"
+                          style={
                             gap.priority === "High"
-                              ? "border-violet-200 bg-violet-50 text-violet-700"
-                              : "border-indigo-200 bg-indigo-50 text-indigo-700"
-                          }`}
+                              ? { borderColor: "var(--color-primary-200)", background: "var(--color-primary-50)", color: "var(--color-primary-700)" }
+                              : { borderColor: "var(--color-border)", background: "var(--color-surface-secondary)", color: "var(--color-text-muted)" }
+                          }
                         >
                           {gap.priority}
                         </span>
                       </div>
 
-                      <h4 className="mt-3 font-bold text-slate-900 text-base">{gap.name}</h4>
-                      <p className="mt-1 text-xs leading-5 text-slate-600">{gap.description}</p>
+                      <h4 className="mt-3 font-bold text-base" style={{ color: "var(--color-text-h)" }}>{gap.name}</h4>
+                      <p className="mt-1 text-xs leading-5" style={{ color: "var(--color-text-muted)" }}>{gap.description}</p>
 
                       <div className="mt-4">
                         <GapBar current={gap.current} target={gap.target} />
                       </div>
 
-                      <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
-                        <span className="text-xs font-semibold text-indigo-600">
+                      <div className="mt-4 flex items-center justify-between border-t pt-3" style={{ borderColor: "var(--color-border)" }}>
+                        <span className="text-xs font-semibold" style={{ color: "var(--color-primary-600)" }}>
                           {expanded ? "Hide details" : "View recommendations"}
                         </span>
-                        <ArrowRightIcon className={`w-3.5 h-3.5 text-indigo-600 transition-transform duration-200 ${expanded ? "rotate-90" : ""}`} />
+                        <ArrowRightIcon className={`w-3.5 h-3.5 transition-transform duration-200 ${expanded ? "rotate-90" : ""}`} style={{ color: "var(--color-primary-600)" }} />
                       </div>
 
                       {expanded && (
-                        <div className="mt-3 rounded-lg bg-slate-50 p-3 text-xs leading-5 text-slate-600">
-                          <strong className="text-slate-900">Action Plan:</strong> Solve targeted practical problems covering {gap.name.toLowerCase()} concepts.
+                        <div className="mt-3 rounded-lg p-3 text-xs leading-5" style={{ background: "var(--color-surface-secondary)", color: "var(--color-text-muted)" }}>
+                          <strong style={{ color: "var(--color-text-h)" }}>Action Plan:</strong> Solve targeted practical problems covering {gap.name.toLowerCase()} concepts.
                         </div>
                       )}
                     </Card>
@@ -855,7 +657,7 @@ export default function SkillGap() {
       )}
 
       {/* FINAL CTA BANNER */}
-      <Section background="white">
+      <Section>
         <CtaBanner
           eyebrow="EVIDENCE-BASED LEARNING"
           title="Turn your skill gaps into personalized roadmaps."
@@ -863,7 +665,6 @@ export default function SkillGap() {
           href="/roadmap"
         />
       </Section>
-
     </div>
   );
 }

@@ -1,11 +1,10 @@
 import React from "react";
 import Section from "../components/Section";
 import SectionHeading from "../components/SectionHeading";
-import Container from "../components/Container";
 import Card from "../components/Card";
-import Button from "../components/Button";
 import ConceptRootDemo from "../components/ConceptRootDemo";
 import CtaBanner from "../components/CtaBanner";
+import HeroSection from "../components/HeroSection";
 
 const HOW_IT_WORKS_STEPS = [
   {
@@ -62,103 +61,20 @@ const JOURNEY_STEPS = [
 ];
 
 export default function ConceptRoot() {
-  const scrollToDemo = () => {
-    const elem = document.getElementById("interactive-demo");
-    if (elem) {
-      elem.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
-  const scrollToHowItWorks = () => {
-    const elem = document.getElementById("how-it-works");
-    if (elem) {
-      elem.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
   return (
     <div>
       {/* HERO SECTION */}
-      <Section background="tint" className="pt-20 pb-16 border-b border-[var(--color-border)]">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          {/* Hero Left Content */}
-          <div className="lg:col-span-7 space-y-6 text-left">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-primary-100)] px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-[var(--color-primary-700)]">
-              CONCEPTROOT AI
-            </span>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[var(--color-text-h)] tracking-tight leading-tight">
-              Don't just see what's wrong. Understand why.
-            </h1>
-            <p className="text-lg sm:text-xl leading-relaxed text-[var(--color-text-muted)] max-w-xl">
-              ConceptRoot helps uncover the concept behind a mistake, identify missing prerequisites, and show students what to learn next.
-            </p>
-            <div className="flex flex-wrap items-center gap-4 pt-2">
-              <Button onClick={scrollToDemo} size="lg">
-                Try ConceptRoot
-              </Button>
-              <Button onClick={scrollToHowItWorks} variant="outline" size="lg">
-                How It Works
-              </Button>
-            </div>
-          </div>
-
-          {/* Hero Right Visual Preview Card */}
-          <div className="lg:col-span-5">
-            <div className="rounded-2xl border border-[var(--color-border)] bg-white p-6 shadow-[var(--shadow-card-hover)] space-y-4">
-              <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
-                <span className="text-xs font-mono font-semibold text-[var(--color-primary-600)] uppercase tracking-wider">
-                  Live Analysis Preview
-                </span>
-                <span className="inline-flex items-center rounded-md bg-amber-50 px-2 py-0.5 text-xs font-bold text-amber-700 border border-amber-200">
-                  Needs Review
-                </span>
-              </div>
-
-              <div className="space-y-3 text-xs">
-                <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                  <span className="text-[10px] font-bold text-gray-500 uppercase block mb-0.5">
-                    Question / Code
-                  </span>
-                  <span className="font-mono text-gray-800">
-                    let max = 0; // for negative array
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="bg-[var(--color-primary-50)] p-2.5 rounded-lg border border-[var(--color-primary-100)]">
-                    <span className="text-[10px] font-bold text-[var(--color-primary-700)] block uppercase">
-                      Root Concept
-                    </span>
-                    <span className="font-semibold text-[var(--color-primary-900)]">
-                      Boundary Conditions
-                    </span>
-                  </div>
-                  <div className="bg-indigo-50 p-2.5 rounded-lg border border-indigo-100">
-                    <span className="text-[10px] font-bold text-indigo-700 block uppercase">
-                      Missing Gap
-                    </span>
-                    <span className="font-semibold text-indigo-900">
-                      Edge-Case Invariants
-                    </span>
-                  </div>
-                </div>
-
-                <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                  <span className="text-[10px] font-bold text-gray-500 uppercase block mb-0.5">
-                    Targeted Recommendation
-                  </span>
-                  <span className="text-gray-700">
-                    Review accumulator initialization strategies with negative array bounds.
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Section>
+      <HeroSection
+        eyebrow="CONCEPTROOT AI"
+        title="Don't just see what's wrong."
+        highlightWord="Understand why."
+        description="ConceptRoot helps uncover the concept behind a mistake, identify missing prerequisites, and show students what to learn next."
+        primaryCta={{ label: "Try ConceptRoot", href: "#demo" }}
+        secondaryCta={{ label: "How It Works", href: "#how-it-works" }}
+      />
 
       {/* THE CORE IDEA */}
-      <Section background="white">
+      <Section>
         <SectionHeading
           eyebrow="CORE PHILOSOPHY"
           title="An incorrect answer is only the symptom."
@@ -166,7 +82,9 @@ export default function ConceptRoot() {
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {/* Traditional Feedback Card */}
+          {/* Traditional Feedback Card — kept bespoke: this is a one-off
+              comparison layout, not a repeatable list item, so the
+              generic Card shape doesn't fit it. */}
           <div className="rounded-2xl border border-red-100 bg-red-50/30 p-8 flex flex-col justify-between space-y-6">
             <div>
               <span className="text-xs font-bold text-red-600 uppercase tracking-wider block mb-2">
@@ -191,7 +109,7 @@ export default function ConceptRoot() {
             </p>
           </div>
 
-          {/* ConceptRoot Card */}
+          {/* ConceptRoot Card — same, bespoke flow layout */}
           <div className="rounded-2xl border border-[var(--color-primary-200)] bg-[var(--color-primary-50)]/40 p-8 flex flex-col justify-between space-y-6 shadow-sm">
             <div>
               <span className="text-xs font-bold text-[var(--color-primary-600)] uppercase tracking-wider block mb-2">
@@ -227,7 +145,7 @@ export default function ConceptRoot() {
       </Section>
 
       {/* HOW IT WORKS */}
-      <Section id="how-it-works" background="tint" className="border-y border-[var(--color-border)]">
+      <Section id="how-it-works" className="border-y border-[var(--color-border)]">
         <SectionHeading
           eyebrow="STEP-BY-STEP"
           title="How ConceptRoot Works"
@@ -236,26 +154,19 @@ export default function ConceptRoot() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {HOW_IT_WORKS_STEPS.map((s) => (
-            <div
+            <Card
               key={s.step}
-              className="rounded-2xl border border-[var(--color-border)] bg-white p-6 shadow-sm"
+              icon={<span style={{ fontFamily: "var(--font-mono)" }} className="text-lg font-bold">{s.step}</span>}
+              title={s.title}
             >
-              <span className="text-2xl font-bold text-[var(--color-primary-600)] block mb-3">
-                {s.step}
-              </span>
-              <h3 className="text-lg font-semibold text-[var(--color-text-h)] mb-2">
-                {s.title}
-              </h3>
-              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
-                {s.description}
-              </p>
-            </div>
+              {s.description}
+            </Card>
           ))}
         </div>
       </Section>
 
       {/* INTERACTIVE DEMO */}
-      <Section id="interactive-demo" background="white">
+      <Section id="interactive-demo">
         <SectionHeading
           eyebrow="LIVE DEMO"
           title="Interactive ConceptRoot Demo"
@@ -266,7 +177,7 @@ export default function ConceptRoot() {
       </Section>
 
       {/* WHAT CONCEPTROOT FINDS */}
-      <Section background="tint" className="border-y border-[var(--color-border)]">
+      <Section className="border-y border-[var(--color-border)]">
         <SectionHeading
           eyebrow="DIAGNOSTICS"
           title="What ConceptRoot Finds"
@@ -275,11 +186,7 @@ export default function ConceptRoot() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {FEATURE_CARDS.map((f) => (
-            <Card
-              key={f.eyebrow}
-              eyebrow={f.eyebrow}
-              title={f.title}
-            >
+            <Card key={f.eyebrow} eyebrow={f.eyebrow} title={f.title}>
               {f.description}
             </Card>
           ))}
@@ -287,7 +194,7 @@ export default function ConceptRoot() {
       </Section>
 
       {/* EXAMPLE LEARNING JOURNEY */}
-      <Section background="white">
+      <Section>
         <SectionHeading
           eyebrow="VISUAL PROGRESSION"
           title="Example Learning Journey"
@@ -318,14 +225,14 @@ export default function ConceptRoot() {
       </Section>
 
       {/* CTA */}
-            <Section background="white">
-              <CtaBanner
-                eyebrow="Ready to begin?"
-                title="Your skill gap is waiting for you."
-                buttonLabel="Start Free Assessment"
-                href="/assessment"
-              />
-            </Section>
+      <Section>
+        <CtaBanner
+          eyebrow="Ready to begin?"
+          title="Your skill gap is waiting for you."
+          buttonLabel="Start Free Assessment"
+          href="/assessment"
+        />
+      </Section>
     </div>
   );
 }

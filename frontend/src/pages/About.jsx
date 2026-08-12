@@ -1,7 +1,7 @@
 import React from "react";
 import Section from "../components/Section";
+import HeroSection from "../components/HeroSection";
 import SectionHeading from "../components/SectionHeading";
-import Container from "../components/Container";
 import Card from "../components/Card";
 import Button from "../components/Button";
 import CtaBanner from "../components/CtaBanner";
@@ -117,22 +117,15 @@ export default function About() {
   return (
     <div>
       {/* HERO SECTION */}
-      <Section background="tint" className="pt-20 pb-16 border-b border-[var(--color-border)]">
-        <Container size="narrow" className="text-center">
-          <span className="inline-block rounded-full bg-[var(--color-primary-100)] px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-[var(--color-primary-700)] mb-4">
-            ABOUT COGNIFY AI
-          </span>
-          <h1 className="text-4xl sm:text-5xl font-bold text-[var(--color-text-h)] tracking-tight mb-6">
-            Learning should show you what you're missing.
-          </h1>
-          <p className="text-lg sm:text-xl leading-relaxed text-[var(--color-text-muted)] max-w-2xl mx-auto">
-            Afinity AI helps students understand the root cause behind their mistakes, identify their learning gaps, and turn those insights into a clearer path toward their goals.
-          </p>
-        </Container>
-      </Section>
+      <HeroSection
+        eyebrow="ABOUT COGNIFY AI"
+        title="Learning should show you"
+        highlightWord="what you're missing."
+        description="Afinity AI helps students understand the root cause behind their mistakes, identify their learning gaps, and turn those insights into a clearer path toward their goals."
+      />
 
       {/* WHY COGNIFY EXISTS */}
-      <Section background="white">
+      <Section>
         <SectionHeading
           eyebrow="THE PROBLEM"
           title="Students know their scores. They don't always know their gaps."
@@ -141,11 +134,7 @@ export default function About() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {PROBLEM_CARDS.map((card) => (
-            <Card
-              key={card.eyebrow}
-              eyebrow={card.eyebrow}
-              title={card.title}
-            >
+            <Card key={card.eyebrow} eyebrow={card.eyebrow} title={card.title}>
               {card.description}
             </Card>
           ))}
@@ -153,7 +142,7 @@ export default function About() {
       </Section>
 
       {/* HOW COGNIFY THINKS */}
-      <Section background="tint" className="border-y border-[var(--color-border)]">
+      <Section className="border-y border-[var(--color-border)]">
         <SectionHeading
           eyebrow="OUR METHODOLOGY"
           title="From mistakes to meaningful progress."
@@ -162,33 +151,20 @@ export default function About() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {THINKING_STEPS.map((step) => (
-            <div
+            <Card
               key={step.step}
-              className="relative flex flex-col justify-between rounded-2xl border border-[var(--color-border)] bg-white p-6 shadow-[var(--shadow-card)] transition-all hover:shadow-[var(--shadow-card-hover)]"
+              icon={<span style={{ fontFamily: "var(--font-mono)" }} className="text-lg font-bold">{step.step}</span>}
+              eyebrow={step.label}
+              title={step.title}
             >
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-2xl font-bold text-[var(--color-primary-600)]">
-                    {step.step}
-                  </span>
-                  <span className="rounded-md bg-[var(--color-primary-50)] px-2.5 py-1 text-[11px] font-bold tracking-wider text-[var(--color-primary-700)]">
-                    {step.label}
-                  </span>
-                </div>
-                <h3 className="text-lg font-semibold text-[var(--color-text-h)] mb-2">
-                  {step.title}
-                </h3>
-                <p className="text-sm leading-relaxed text-[var(--color-text-muted)]">
-                  {step.description}
-                </p>
-              </div>
-            </div>
+              {step.description}
+            </Card>
           ))}
         </div>
       </Section>
 
       {/* THREE SYSTEMS */}
-      <Section background="white">
+      <Section>
         <SectionHeading
           eyebrow="PRODUCT ARCHITECTURE"
           title="Three intelligent systems. One clearer learning journey."
@@ -202,27 +178,19 @@ export default function About() {
               eyebrow={system.name}
               title={system.tagline}
               footer={
-                <Button
-                  as="a"
-                  href={system.href}
-                  variant="subtle"
-                  size="sm"
-                  className="w-full justify-center"
-                >
+                <Button as="a" href={system.href} variant="subtle" size="sm" className="w-full justify-center">
                   Explore {system.name}
                 </Button>
               }
             >
-              <p className="text-sm leading-relaxed text-[var(--color-text-muted)] mb-2">
-                {system.description}
-              </p>
+              {system.description}
             </Card>
           ))}
         </div>
       </Section>
 
       {/* THE COGNIFY JOURNEY */}
-      <Section background="tint" className="border-y border-[var(--color-border)]">
+      <Section className="border-y border-[var(--color-border)]">
         <SectionHeading
           eyebrow="CONNECTED LEARNING"
           title="The Afinity Journey"
@@ -232,24 +200,26 @@ export default function About() {
         <div className="rounded-2xl border border-[var(--color-border)] bg-white p-8 shadow-[var(--shadow-card)]">
           <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4 text-center">
             {JOURNEY_STAGES.map((stage, idx) => (
-              <div key={stage} className="flex flex-col items-center justify-center p-4 rounded-xl bg-[var(--color-primary-50)]/50 border border-[var(--color-primary-100)]">
+              <div
+                key={stage}
+                className="flex flex-col items-center justify-center p-4 rounded-xl bg-[var(--color-primary-50)]/50 border border-[var(--color-primary-100)]"
+              >
                 <span className="text-xs font-mono font-bold text-[var(--color-primary-600)] mb-1">
                   STAGE 0{idx + 1}
                 </span>
-                <span className="text-sm font-semibold text-[var(--color-text-h)]">
-                  {stage}
-                </span>
+                <span className="text-sm font-semibold text-[var(--color-text-h)]">{stage}</span>
               </div>
             ))}
           </div>
           <p className="mt-8 text-center text-sm leading-relaxed text-[var(--color-text-muted)] max-w-2xl mx-auto">
-            By linking attempt evaluations to concept prerequisites, practice guidance, and career standards, Afinity ensures every learning activity has a clear purpose.
+            By linking attempt evaluations to concept prerequisites, practice guidance, and career standards, Afinity
+            ensures every learning activity has a clear purpose.
           </p>
         </div>
       </Section>
 
       {/* IMPACT */}
-      <Section background="white">
+      <Section>
         <SectionHeading
           eyebrow="OUTCOMES"
           title="Turn learning into measurable progress."
@@ -258,35 +228,26 @@ export default function About() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {IMPACT_OUTCOMES.map((item) => (
-            <div
+            <Card
               key={item.title}
-              className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm hover:border-[var(--color-primary-300)] transition-all"
+              icon={<span className="text-base font-bold">✓</span>}
+              title={item.title}
             >
-              <div className="flex items-center gap-2 mb-2">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-primary-100)] text-xs font-bold text-[var(--color-primary-700)]">
-                  ✓
-                </span>
-                <h3 className="text-base font-semibold text-[var(--color-text-h)]">
-                  {item.title}
-                </h3>
-              </div>
-              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed pl-8">
-                {item.desc}
-              </p>
-            </div>
+              {item.desc}
+            </Card>
           ))}
         </div>
       </Section>
 
-     {/* CTA */}
-           <Section background="white">
-             <CtaBanner
-               eyebrow="Ready to begin?"
-               title="Your skill gap is waiting for you."
-               buttonLabel="Start Free Assessment"
-               href="/assessment"
-             />
-           </Section>
+      {/* CTA */}
+      <Section>
+        <CtaBanner
+          eyebrow="Ready to begin?"
+          title="Your skill gap is waiting for you."
+          buttonLabel="Start Free Assessment"
+          href="/assessment"
+        />
+      </Section>
     </div>
   );
 }
