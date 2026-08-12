@@ -1,0 +1,6 @@
+{
+  "type": "module",
+  "dependencies": {
+    "firebase-admin": "^14.2.0"
+  }
+}

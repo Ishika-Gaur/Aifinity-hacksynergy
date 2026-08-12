@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // -------------------------------------------------------------
+    // Helper Functions for Security Enforcement
+    // -------------------------------------------------------------
+    function isSignedIn() {
+      return request.auth != null && request.auth.token.firebase.sign_in_provider != 'anonymous';
+    }
+    
+    function isUser(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function bootstrapExists() {
+      return exists(/databases/$(database)/documents/system_config/admin_bootstrap);
+    }
+
+    // SINGLE AUTHORITATIVE SOURCE OF TRUTH FOR ADMIN AUTHORIZATION:
+    // Only the UID recorded in system_config/admin_bootstrap is authorized as Admin.
+    function isAdmin() {
+      return isSignedIn() &&
+             bootstrapExists() &&
+             get(/databases/$(database)/documents/system_config/admin_bootstrap).data.adminUid == request.auth.uid;
+    }
+
+    // -------------------------------------------------------------
+    // Singleton Admin Bootstrap Configuration: /system_config/admin_bootstrap
+    // -------------------------------------------------------------
+    match /system_config/admin_bootstrap {
+      // Minimum Access: Only authenticated users can read setup status
+      allow read: if isSignedIn();
+
+      // CLIENT WRITES ARE PERMANENTLY FORBIDDEN TO ALL CLIENT BROWSERS.
+      // Initial Admin Provisioning MUST be executed via Trusted Backend / Firebase Admin SDK!
+      allow write: if false;
+    }
+
+    // -------------------------------------------------------------
+    // User Profiles: /users/{userId}
+    // -------------------------------------------------------------
+    match /users/{userId} {
+      // Privacy Enforcement: Users can ONLY read their OWN document; admins can read all
+      allow read: if isUser(userId) || isAdmin();
+
+      // Normal users CANNOT set role == 'Admin' or privileged authorization fields!
+      allow create: if isUser(userId) 
+                    && (!request.resource.data.keys().hasAny(['role', 'isAdmin', 'permissions', 'admin', 'privileged']));
+
+      // Self-modification: Users can update their own profile EXCEPT privileged authorization fields
+      allow update: if isUser(userId) && (
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isAdmin', 'permissions', 'admin', 'privileged']) ||
+        isAdmin()
+      );
+
+      // Admin Management
+      allow update, delete: if isAdmin();
+    }
+  }
+}
