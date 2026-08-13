@@ -164,7 +164,7 @@ export default function AssessmentAttemptPage() {
 
   if (!assessment) {
     return (
-      <Section background="white" className="py-24">
+      <Section  className="py-24">
         <Container>
           <div className="mx-auto max-w-md text-center">
             <h1 className="text-2xl font-bold text-[var(--color-text-h)]">
@@ -213,7 +213,7 @@ export default function AssessmentAttemptPage() {
       : 0;
 
     return (
-      <Section background="white" className="py-16">
+      <Section  className="py-16">
         <Container>
           <div className="mx-auto flex max-w-lg flex-col items-center gap-6 text-center">
             <span className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-primary-50)] text-3xl">

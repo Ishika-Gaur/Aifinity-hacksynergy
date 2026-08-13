@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Container from "./Container";
 
 const BACKGROUND_CLASSES = {
-  white: "bg-transparent",
+  white: "bg-grid",
   tint: "bg-[var(--color-primary-50)]",
   dark: "bg-[var(--color-navy)] text-white",
 };
@@ -46,12 +46,17 @@ export default function Section({
       className={[
         "py-16 sm:py-20 lg:py-24",
         BACKGROUND_CLASSES[background] || BACKGROUND_CLASSES.white,
-        reveal ? "transition-all duration-700 ease-out motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0" : "",
-        reveal && !isVisible ? "opacity-0 translate-y-6" : "opacity-100 translate-y-0",
         className,
       ].join(" ")}
     >
-      <Container size={containerSize}>{children}</Container>
+      <div
+        className={[
+          reveal ? "transition-all duration-700 ease-out motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0" : "",
+          reveal && !isVisible ? "opacity-0 translate-y-6" : "opacity-100 translate-y-0",
+        ].join(" ")}
+      >
+        <Container size={containerSize}>{children}</Container>
+      </div>
     </section>
   );
 }
