@@ -118,7 +118,7 @@ export default function About() {
     <div>
       {/* HERO SECTION */}
       <HeroSection
-        eyebrow="ABOUT COGNIFY AI"
+        eyebrow="ABOUT AIFINITY"
         title="Learning should show you"
         highlightWord="what you're missing."
         description="Afinity AI helps students understand the root cause behind their mistakes, identify their learning gaps, and turn those insights into a clearer path toward their goals."
