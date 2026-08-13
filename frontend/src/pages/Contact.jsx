@@ -239,7 +239,7 @@ export default function Contact() {
                 className="p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
               >
                 <a href="mailto:hello@cognifyai.com" className="font-semibold transition-colors" style={{ color: "var(--color-primary-600)" }}>
-                  hello@cognifyai.com
+                  hello@aifinityai.com
                 </a>
               </Card>
 
