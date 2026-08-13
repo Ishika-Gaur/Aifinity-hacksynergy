@@ -162,7 +162,7 @@ export default function AssessmentPage() {
   return (
     <div className="flex min-h-screen flex-col">
       {/* ---------------- HEADER ---------------- */}
-      <Section background="tint" className="pt-14 pb-10">
+      <Section  className="pt-14 pb-10">
         <h1 className="text-4xl font-bold tracking-tight text-[var(--color-text-h)] sm:text-5xl">
           Assess Your Skills
         </h1>
@@ -191,7 +191,7 @@ export default function AssessmentPage() {
       </Section>
 
       {/* ---------------- RECOMMENDED FOR YOU ---------------- */}
-      <Section background="white">
+      <Section >
         <SectionHeading
           title="Recommended for You"
           subtitle={`Recommended for your ${profile.careerGoal} goal — based on your field (${profile.field}) and skills: ${profile.skills.join(", ")}.`}
@@ -209,7 +209,7 @@ export default function AssessmentPage() {
       </Section>
 
       {/* ---------------- DAILY ASSESSMENT ---------------- */}
-      <Section background="tint">
+      <Section >
         <SectionHeading
           title="Daily Assessment"
           subtitle={`A fresh ${profile.field} challenge, every day this month.`}
@@ -264,7 +264,7 @@ export default function AssessmentPage() {
       </Section>
 
       {/* ---------------- EXPLORE ASSESSMENTS ---------------- */}
-      <Section background="white">
+      <Section >
         <SectionHeading
           title="Explore Assessments"
           subtitle="Browse across every field — new ones are added as you progress."

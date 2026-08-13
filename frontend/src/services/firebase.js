@@ -21,6 +21,14 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
+// Developer-friendly validation for missing/placeholder env vars
+const _isPlaceholder = (v) => !v || String(v).startsWith('your_') || String(v).toLowerCase().includes('replace');
+if (_isPlaceholder(firebaseConfig.apiKey)) {
+  // eslint-disable-next-line no-console
+  console.error('\nFirebase config is missing or invalid.\nPlease create a `frontend/.env` (or `.env.local`) with your Firebase credentials. Example in `frontend/.env.example`.\nThen restart the dev server.\n');
+  throw new Error('Missing or invalid Firebase API key. See frontend/.env.example for required VITE_FIREBASE_* variables.');
+}
+
 // Initialize Firebase App, Auth & Firestore
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 export const auth = getAuth(app);

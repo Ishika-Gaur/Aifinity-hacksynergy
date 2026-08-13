@@ -215,7 +215,7 @@ export default function Contact() {
       />
 
       {/* CONTACT CONTENT SECTION */}
-      <Section background="white">
+      <Section >
         <div className="grid gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
           {/* LEFT SIDE: CONTACT INFO */}
           <div>
