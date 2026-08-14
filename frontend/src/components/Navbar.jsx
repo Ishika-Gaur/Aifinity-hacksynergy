@@ -11,6 +11,7 @@ const NAV_LINKS = [
   { label: "Skill Gap", href: "/skill-gap" },
   { label: "Roadmap", href: "/roadmap" },
   { label: "Contact", href: "/contact" },
+  {label: "FAQS", href: "/faq"},
 ];
 
 function BrandLogo() {

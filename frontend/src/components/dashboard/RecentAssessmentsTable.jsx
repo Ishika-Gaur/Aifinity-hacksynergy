@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 export default function RecentAssessmentsTable({ assessments }) {
   const items = assessments || [
@@ -99,13 +100,13 @@ export default function RecentAssessmentsTable({ assessments }) {
       </div>
 
       <div className="pt-2 text-right">
-        <a
-          href="/assessment"
+        <Link
+          to="/assessment"
           className="inline-flex items-center gap-1 font-['Space_Mono'] text-xs font-bold text-[#1B332C] hover:text-[#C4952A] hover:translate-x-1 transition-all duration-200"
         >
           <span>View All Assessments</span>
           <span>→</span>
-        </a>
+        </Link>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import React from "react";
-import Button from "../Button";
+import { Link } from "react-router-dom";
 
 export default function AIInsightCard({ aiInsight }) {
   const {
@@ -48,9 +48,9 @@ export default function AIInsightCard({ aiInsight }) {
         <span className="text-xs text-[#8B9690] font-['Space_Mono']">
           Confidence: 94%
         </span>
-        <Button variant="accent" size="sm" as="a" href={href} className="group-hover:scale-105 transition-transform">
+        <Link to={href} className="inline-flex items-center justify-center gap-2 rounded-md font-medium transition-all duration-200 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none bg-[var(--color-accent)] text-white border border-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] hover:border-[var(--color-accent-hover)] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] px-3.5 py-1.5 text-sm group-hover:scale-105 transition-transform">
           {cta} →
-        </Button>
+        </Link>
       </div>
     </div>
   );

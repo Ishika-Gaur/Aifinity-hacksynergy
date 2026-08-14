@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Container from "../components/Container";
 import Section from "../components/Section";
 import SectionHeading from "../components/SectionHeading";
@@ -164,7 +165,20 @@ function ProgressBar({ value, className = "" }) {
 }
 
 function StageCard({ stage, expanded, onToggle, onStart, onToggleCompletion }) {
+  const navigate = useNavigate();
   const isLocked = stage.status === "locked";
+
+  const handleViewDetails = () => {
+    navigate("/dashboard");
+  };
+
+  const handleActionClick = () => {
+    if (stage.status === "completed") {
+      navigate("/dashboard");
+    } else {
+      onStart(stage);
+    }
+  };
 
   return (
     <div
@@ -245,18 +259,18 @@ function StageCard({ stage, expanded, onToggle, onStart, onToggleCompletion }) {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => onToggle(stage.id)}
+                  onClick={handleViewDetails}
                   className="rounded-lg border px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 active:scale-95"
                   style={{ borderColor: "var(--color-border)", color: "var(--color-text-muted)" }}
                 >
-                  {expanded ? "Hide details" : "View details"}
+                  View details
                 </button>
 
                 {!isLocked && (
                   <Button
                     size="sm"
                     variant={stage.status === "current" ? "primary" : "outline"}
-                    onClick={() => onStart(stage)}
+                    onClick={handleActionClick}
                   >
                     {stage.status === "completed" ? "Review Phase" : stage.status === "current" ? "Start Learning" : "Preview"}
                   </Button>
