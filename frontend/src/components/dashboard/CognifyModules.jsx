@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import Button from "../Button";
 
 export default function CognifyModules({ conceptRoot, mistakeMap, skillGap }) {
@@ -80,16 +81,13 @@ export default function CognifyModules({ conceptRoot, mistakeMap, skillGap }) {
         </div>
 
         <div className="pt-5 mt-4 border-t border-[#2E4F42]/10">
-          <Button
-            variant="outline"
-            size="sm"
-            as="a"
-            href={conceptRoot?.href || "/concept-root"}
-            className="w-full justify-between group-hover:bg-[#1B332C] group-hover:text-[#E8C547] group-hover:border-[#1B332C] transition-all duration-200"
+          <Link
+            to={conceptRoot?.href || "/concept-root"}
+            className="inline-flex items-center justify-center gap-2 rounded-md font-medium transition-all duration-200 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none bg-[var(--color-surface)] text-[var(--color-primary-600)] border border-[var(--color-primary-600)] hover:bg-[var(--color-primary-50)] px-3.5 py-1.5 text-sm w-full justify-between group-hover:bg-[#1B332C] group-hover:text-[#E8C547] group-hover:border-[#1B332C] transition-all duration-200"
           >
             <span>{conceptRoot?.cta || "Explore ConceptRoot"}</span>
             <span>→</span>
-          </Button>
+          </Link>
         </div>
       </div>
 
@@ -136,16 +134,13 @@ export default function CognifyModules({ conceptRoot, mistakeMap, skillGap }) {
         </div>
 
         <div className="pt-5 mt-4 border-t border-[#2E4F42]/10">
-          <Button
-            variant="outline"
-            size="sm"
-            as="a"
-            href={mistakeMap?.href || "/mistake-map"}
-            className="w-full justify-between group-hover:bg-[#1B332C] group-hover:text-[#E8C547] group-hover:border-[#1B332C] transition-all duration-200"
+          <Link
+            to={mistakeMap?.href || "/mistake-map"}
+            className="inline-flex items-center justify-center gap-2 rounded-md font-medium transition-all duration-200 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none bg-[var(--color-surface)] text-[var(--color-primary-600)] border border-[var(--color-primary-600)] hover:bg-[var(--color-primary-50)] px-3.5 py-1.5 text-sm w-full justify-between group-hover:bg-[#1B332C] group-hover:text-[#E8C547] group-hover:border-[#1B332C] transition-all duration-200"
           >
             <span>{mistakeMap?.cta || "View MistakeMap"}</span>
             <span>→</span>
-          </Button>
+          </Link>
         </div>
       </div>
 
@@ -210,16 +205,13 @@ export default function CognifyModules({ conceptRoot, mistakeMap, skillGap }) {
         </div>
 
         <div className="pt-5 mt-4 border-t border-[#2E4F42]/10">
-          <Button
-            variant="outline"
-            size="sm"
-            as="a"
-            href={skillGap?.href || "/skill-gap"}
-            className="w-full justify-between group-hover:bg-[#1B332C] group-hover:text-[#E8C547] group-hover:border-[#1B332C] transition-all duration-200"
+          <Link
+            to={skillGap?.href || "/skill-gap"}
+            className="inline-flex items-center justify-center gap-2 rounded-md font-medium transition-all duration-200 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none bg-[var(--color-surface)] text-[var(--color-primary-600)] border border-[var(--color-primary-600)] hover:bg-[var(--color-primary-50)] px-3.5 py-1.5 text-sm w-full justify-between group-hover:bg-[#1B332C] group-hover:text-[#E8C547] group-hover:border-[#1B332C] transition-all duration-200"
           >
             <span>{skillGap?.cta || "View Skill Gap"}</span>
             <span>→</span>
-          </Button>
+          </Link>
         </div>
       </div>
     </div>

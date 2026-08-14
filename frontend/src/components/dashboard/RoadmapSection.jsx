@@ -1,5 +1,5 @@
 import React from "react";
-import Button from "../Button";
+import { Link } from "react-router-dom";
 
 export default function RoadmapSection({ roadmap }) {
   const items = roadmap?.items || [
@@ -52,15 +52,12 @@ export default function RoadmapSection({ roadmap }) {
           </p>
         </div>
 
-        <Button
-          variant="primary"
-          size="sm"
-          as="a"
-          href={roadmap?.href || "/roadmap"}
-          className="hover:scale-105 transition-transform shrink-0"
+        <Link
+          to={roadmap?.href || "/roadmap"}
+          className="inline-flex items-center justify-center gap-2 rounded-md font-medium transition-all duration-200 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none bg-[var(--color-primary-600)] text-white border border-[var(--color-primary-600)] hover:bg-[var(--color-primary-700)] hover:border-[var(--color-primary-700)] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] px-3.5 py-1.5 text-sm hover:scale-105 transition-transform shrink-0"
         >
           {roadmap?.cta || "Continue Roadmap"} →
-        </Button>
+        </Link>
       </div>
 
       {/* Stepper Timeline with Node Hover Feedback */}

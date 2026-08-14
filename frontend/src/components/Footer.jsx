@@ -18,6 +18,7 @@ const FOOTER_COLUMNS = [
     links: [
       { label: "About Us", href: "/about" },
       { label: "Contact", href: "/contact" },
+      {label: "FAQS", href: "/faq"},
     ],
   },
   {
