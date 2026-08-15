@@ -87,8 +87,8 @@ export default function OnboardingPage() {
   const careerGoalOptions = field ? CAREER_GOALS_BY_FIELD[field] || [] : [];
 
   return (
-    <div className="flex min-h-screen flex-col ">
-      <Section  className="py-16">
+    <>
+      <Section  className="py-16 flex-1">
         <Container>
           {/* Progress indicator — shown during the 4-step flow only */}
           {step >= 1 && step <= TOTAL_STEPS && (
@@ -243,7 +243,7 @@ export default function OnboardingPage() {
           )}
         </Container>
       </Section>
-    </div>
+    </>
   );
 }
 

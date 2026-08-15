@@ -396,7 +396,7 @@ export default function Home() {
           eyebrow="READY TO BEGIN?"
           title="Your career skill gap is waiting for you."
           buttonLabel="Start Free Assessment"
-          href="/assessment"
+          href="/onboardingpage"
         />
       </Section>
     </div>

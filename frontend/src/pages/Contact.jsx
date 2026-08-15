@@ -5,6 +5,7 @@ import Button from "../components/Button";
 import Card from "../components/Card";
 import CtaBanner from "../components/CtaBanner";
 import HeroSection from "../components/HeroSection";
+import emailjs from "@emailjs/browser";
 
 /* =========================================================
    REUSABLE SVG ICONS
@@ -85,7 +86,7 @@ function InstagramIcon() {
 /* =========================================================
    STATIC CONFIG & HELPERS
 ========================================================= */
-const SUBJECT_PRESETS = ["Technical Issue", "Feature Idea", "Collaboration", "General Inquiry"];
+const SUBJECT_PRESETS = ["Technical Issue", "Feature Idea", "Collaboration", "General Inquiry", "Other"];
 
 const SOCIAL_LINKS = [
   { label: "GitHub", href: "https://github.com", icon: GithubIcon },
@@ -93,6 +94,8 @@ const SOCIAL_LINKS = [
   { label: "Twitter / X", href: "https://x.com", icon: TwitterIcon },
   { label: "Instagram", href: "https://instagram.com", icon: InstagramIcon },
 ];
+
+
 
 function FormInput({ id, label, type = "text", name, placeholder, value, onChange, onBlur, error, required = true }) {
   return (
@@ -122,10 +125,11 @@ function FormInput({ id, label, type = "text", name, placeholder, value, onChang
 }
 
 export default function Contact() {
-  const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
+  const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "", customSubject: "" });
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [sendError, setSendError] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
@@ -180,29 +184,50 @@ export default function Contact() {
     setErrors((prev) => ({ ...prev, subject: "" }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const newErrors = {
-      name: validateField("name", formData.name),
-      email: validateField("email", formData.email),
-      subject: validateField("subject", formData.subject),
-      message: validateField("message", formData.message),
-    };
+ const handleSubmit = (e) => {
+  e.preventDefault();
+  const newErrors = {
+    name: validateField("name", formData.name),
+    email: validateField("email", formData.email),
+    subject: validateField("subject", formData.subject),
+    message: validateField("message", formData.message),
+  };
 
-    setTouched({ name: true, email: true, subject: true, message: true });
-    setErrors(newErrors);
+  setTouched({ name: true, email: true, subject: true, message: true });
+  setErrors(newErrors);
 
-    if (Object.values(newErrors).some(Boolean)) return;
+  if (Object.values(newErrors).some(Boolean)) return;
 
-    setIsSubmitting(true);
-    setTimeout(() => {
+  setIsSubmitting(true);
+  setSendError("");
+
+ const templateParams = {
+  name: formData.name,
+  email: formData.email,
+  title: formData.subject === "Other" ? formData.customSubject : formData.subject,
+  message: formData.message,
+};
+
+  emailjs
+    .send(
+      import.meta.env.VITE_EMAILJS_SERVICE_ID,
+      import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+      templateParams,
+      import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+    )
+    .then(() => {
       setIsSubmitting(false);
       setSubmitted(true);
-      setFormData({ name: "", email: "", subject: "", message: "" });
+      setFormData({ name: "", email: "", subject: "", message: "", customSubject: "" });
       setTouched({});
       setErrors({});
-    }, 800);
-  };
+    })
+    .catch((err) => {
+      console.error("EmailJS error:", err);
+      setIsSubmitting(false);
+      setSendError("Message not send. Please try again or contact by the direct mail.");
+    });
+};
 
   return (
     <div className="min-h-screen">
@@ -311,6 +336,15 @@ export default function Contact() {
                 </p>
               </div>
 
+              {sendError && (
+              <div
+                    className="mb-6 rounded-xl border p-4 text-sm font-medium"
+                   style={{ borderColor: "var(--color-error)", color: "var(--color-error)" }}
+               >
+                 {sendError}
+                 </div>
+                )}
+
               {/* Success Alert */}
               {submitted && (
                 <div
@@ -367,46 +401,55 @@ export default function Contact() {
                   />
                 </div>
 
-                {/* Subject Field & Presets */}
-                <div>
-                  <div className="mb-1.5 flex flex-wrap items-center justify-between gap-1">
-                    <label htmlFor="subject" className="block text-sm font-semibold" style={{ color: "var(--color-text-h)" }}>
-                      Subject <span style={{ color: "var(--color-error)" }}>*</span>
-                    </label>
+               {/* Subject Field (Dropdown) */}
+<div>
+  <label htmlFor="subject" className="mb-1.5 block text-sm font-semibold" style={{ color: "var(--color-text-h)" }}>
+    Subject <span style={{ color: "var(--color-error)" }}>*</span>
+  </label>
 
-                    <div className="flex flex-wrap gap-1.5">
-                      {SUBJECT_PRESETS.map((preset) => (
-                        <button
-                          key={preset}
-                          type="button"
-                          onClick={() => handlePresetSelect(preset)}
-                          className="rounded-lg border px-2.5 py-1 text-xs font-semibold transition-all duration-200 active:scale-95"
-                          style={{ borderColor: "var(--color-border)", background: "var(--color-surface-secondary)", color: "var(--color-primary-600)" }}
-                        >
-                          + {preset}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+  <select
+    id="subject"
+    name="subject"
+    value={formData.subject}
+    onChange={handleChange}
+    onBlur={handleBlur}
+    aria-invalid={Boolean(errors.subject)}
+    className="w-full rounded-xl border px-4 py-3 text-sm outline-none transition-all duration-200 focus:ring-4"
+    style={
+      errors.subject
+        ? { borderColor: "var(--color-error)", background: "var(--color-surface)" }
+        : { borderColor: "var(--color-border)", background: "var(--color-surface-secondary)", color: "var(--color-text-h)" }
+    }
+  >
+    <option value="" disabled>
+      Select a subject
+    </option>
+    {SUBJECT_PRESETS.map((preset) => (
+      <option key={preset} value={preset}>
+        {preset}
+      </option>
+    ))}
+  </select>
 
-                  <input
-                    id="subject"
-                    type="text"
-                    name="subject"
-                    placeholder="What would you like to talk about?"
-                    value={formData.subject}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    aria-invalid={Boolean(errors.subject)}
-                    className="w-full rounded-xl border px-4 py-3 text-sm outline-none transition-all duration-200 focus:ring-4"
-                    style={
-                      errors.subject
-                        ? { borderColor: "var(--color-error)", background: "var(--color-surface)" }
-                        : { borderColor: "var(--color-border)", background: "var(--color-surface-secondary)", color: "var(--color-text-h)" }
-                    }
-                  />
-                  {errors.subject && <p className="mt-1.5 text-xs font-medium" style={{ color: "var(--color-error)" }}>{errors.subject}</p>}
-                </div>
+  {errors.subject && (
+    <p className="mt-1.5 text-xs font-medium" style={{ color: "var(--color-error)" }}>
+      {errors.subject}
+    </p>
+  )}
+
+  {/* Show free-text input only when "Other" is chosen */}
+  {formData.subject === "Other" && (
+    <input
+      type="text"
+      name="customSubject"
+      placeholder="Please specify your subject"
+      value={formData.customSubject || ""}
+      onChange={handleChange}
+      className="mt-2 w-full rounded-xl border px-4 py-3 text-sm outline-none transition-all duration-200 focus:ring-4"
+      style={{ borderColor: "var(--color-border)", background: "var(--color-surface-secondary)", color: "var(--color-text-h)" }}
+    />
+  )}
+</div>
 
                 {/* Message Field */}
                 <div>
@@ -449,6 +492,7 @@ export default function Contact() {
                   iconPosition="right"
                 >
                   {isSubmitting ? "Sending..." : "Send Message"}
+                  
                 </Button>
 
                 <p className="text-center text-xs" style={{ color: "var(--color-text-light)" }}>

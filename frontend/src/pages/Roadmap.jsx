@@ -59,14 +59,6 @@ function SearchIcon({ className = "w-4 h-4" }) {
   );
 }
 
-function BriefcaseIcon({ className = "w-5 h-5" }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-    </svg>
-  );
-}
-
 function SpinnerIcon({ className = "w-5 h-5 animate-spin" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24">
@@ -119,6 +111,20 @@ const PRESET_CAREERS = [
       { id: 4, title: "Phase 4: Equity Research & Investment Committee Pitch", phase: "Career Readiness (75-100% Job Ready)", status: "locked", duration: "6 Weeks", concepts: ["Investment Teaser Creation", "Portfolio Risk Management", "Equity Research Report Writing", "Mock Investment Pitch"], description: "Draft professional investment memos and pitch equity recommendations to hiring managers.", questions: 18 },
     ],
   },
+];
+
+/* =========================================================
+   CUSTOM CAREER DROPDOWN OPTIONS (used to auto-generate a roadmap)
+========================================================= */
+const CUSTOM_CAREER_OPTIONS = [
+  "Cybersecurity Engineer",
+  "Product Manager",
+  "Cloud Architect",
+  "UI/UX Designer",
+  "DevOps Engineer",
+  "Digital Marketing Specialist",
+  "Business Analyst",
+  "Mobile App Developer",
 ];
 
 /* =========================================================
@@ -442,45 +448,65 @@ export default function Roadmap() {
       />
 
       {/* PRESET SELECTOR + CUSTOM GENERATOR + ANALYTICS */}
-      <Section  className="pt-0 sm:pt-0">
-        <div className="flex flex-wrap gap-2.5">
-          {PRESET_CAREERS.map((career) => (
-            <button
-              key={career.id}
-              type="button"
-              onClick={() => handleSelectPreset(career)}
-              className="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-xs font-bold transition-all duration-200"
-              style={
-                selectedCareer.id === career.id
-                  ? { borderColor: "var(--color-primary-600)", background: "var(--color-primary-50)", color: "var(--color-primary-700)", boxShadow: "var(--shadow-card)" }
-                  : { borderColor: "var(--color-border)", background: "var(--color-surface)", color: "var(--color-text-muted)" }
-              }
-            >
-              <span>{career.icon}</span>
-              {career.title}
-            </button>
-          ))}
+      <Section className="pt-0 sm:pt-0">
+        {/* Preset Career Dropdown */}
+        <div className="max-w-md">
+          <label htmlFor="career-select" className="mb-1.5 block text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-text-light)" }}>
+            Choose a career path
+          </label>
+
+          <select
+            id="career-select"
+            value={PRESET_CAREERS.some((c) => c.id === selectedCareer.id) ? selectedCareer.id : ""}
+            onChange={(e) => {
+              const chosen = PRESET_CAREERS.find((c) => c.id === e.target.value);
+              if (chosen) handleSelectPreset(chosen);
+            }}
+            className="w-full rounded-xl border px-4 py-3 text-sm font-semibold outline-none transition-all duration-200 focus:ring-4"
+            style={{ borderColor: "var(--color-primary-600)", background: "var(--color-primary-50)", color: "var(--color-primary-700)" }}
+          >
+            {!PRESET_CAREERS.some((c) => c.id === selectedCareer.id) && (
+              <option value="" disabled>
+                Custom roadmap active — pick a preset to switch
+              </option>
+            )}
+            {PRESET_CAREERS.map((career) => (
+              <option key={career.id} value={career.id}>
+                {career.icon} {career.title}
+              </option>
+            ))}
+          </select>
+
+          {selectedCareer.id === "custom" && (
+            <p className="mt-2 text-xs font-medium" style={{ color: "var(--color-primary-600)" }}>
+              Currently viewing custom roadmap: {selectedCareer.title}
+            </p>
+          )}
         </div>
 
-        {/* Custom Career Input Card */}
+        {/* Custom Career Dropdown + Generate */}
         <div className="mt-6 rounded-2xl border p-5 shadow-sm" style={{ borderColor: "var(--color-border)", background: "var(--color-surface)" }}>
           <label htmlFor="custom-career" className="mb-2 block text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-text-light)" }}>
-            Want a custom career roadmap? Type any field or skill goal:
+            Want a custom career roadmap? Choose a field or skill goal:
           </label>
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            <div className="relative flex-1">
-              <BriefcaseIcon className="absolute left-3.5 top-1/2 w-5 h-5 -translate-y-1/2" style={{ color: "var(--color-text-light)" }} />
-              <input
-                id="custom-career"
-                type="text"
-                placeholder="e.g. Cybersecurity Engineer, Product Manager, Cloud Architect..."
-                value={customCareer}
-                onChange={(e) => setCustomCareer(e.target.value)}
-                className="w-full rounded-xl border py-3 pl-11 pr-4 text-sm outline-none transition focus:ring-4"
-                style={{ borderColor: "var(--color-border)", background: "var(--color-surface-secondary)", color: "var(--color-text-h)" }}
-              />
-            </div>
+            <select
+              id="custom-career"
+              value={customCareer}
+              onChange={(e) => setCustomCareer(e.target.value)}
+              className="w-full flex-1 rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-4"
+              style={{ borderColor: "var(--color-border)", background: "var(--color-surface-secondary)", color: "var(--color-text-h)" }}
+            >
+              <option value="" disabled>
+                Select a career or skill goal
+              </option>
+              {CUSTOM_CAREER_OPTIONS.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
 
             <Button
               size="md"
@@ -526,7 +552,7 @@ export default function Roadmap() {
       </Section>
 
       {/* END TO END ROADMAP STAGES */}
-      <Section >
+      <Section>
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <span className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-primary-600)" }}>
@@ -588,7 +614,7 @@ export default function Roadmap() {
       </Section>
 
       {/* JOB READINESS CHECKLIST SECTION */}
-      <Section >
+      <Section>
         <SectionHeading
           eyebrow="JOB READINESS VERIFICATION"
           title="What makes you job-ready?"
@@ -620,7 +646,7 @@ export default function Roadmap() {
       </Section>
 
       {/* FINAL CTA */}
-      <Section >
+      <Section>
         <CtaBanner
           eyebrow="CAREER INTELLIGENCE"
           title="Verify your skills with Afinity AI Skill Gap."
