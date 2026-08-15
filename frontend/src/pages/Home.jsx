@@ -177,7 +177,7 @@ export default function Home() {
          HERO SECTION
       ========================================================= */}
       <HeroSection
-        eyebrow="Aifinity AI · Built for Job-Ready Learning"
+        eyebrow="AIFinity · Built for Job-Ready Learning"
         title="Know exactly what to"
         highlightWord="learn next"
         description="Find your weak concepts, see your skill gap, and follow an end-to-end roadmap built around your own mistakes — not a generic syllabus."

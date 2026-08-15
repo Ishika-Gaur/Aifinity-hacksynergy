@@ -66,7 +66,7 @@ export default function Footer() {
               <div className="relative flex h-14 w-14 items-center justify-center rounded-xl bg-white p-1.5 shadow-sm transition-transform duration-300 group-hover:scale-105">
                 <img
                   src={logo}
-                  alt="Aifinity Logo"
+                  alt="AIFinity Logo"
                   className="w-full h-full object-contain transition-transform duration-300 group-hover:rotate-6"
                 />
               </div>
@@ -146,7 +146,7 @@ export default function Footer() {
         {/* Bottom copyright */}
         <div className="flex flex-col items-center justify-between gap-4 border-t border-[#2E4F42]/50 py-6 sm:flex-row font-['Space_Mono'] text-xs text-[#8B9690]">
           <p>
-            © {new Date().getFullYear()} Aifinity . All rights reserved. Developed by Faiz, Isika, and Aman Negi.
+            © {new Date().getFullYear()} AIFinity. All rights reserved. Developed by Faiz, Isika, and Aman Negi.
           </p>
           <div className="flex gap-6">
             <a href="/privacy" className="transition-colors hover:text-[#E8C547]">
