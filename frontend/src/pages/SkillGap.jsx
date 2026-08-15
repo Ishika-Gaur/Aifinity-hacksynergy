@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Card from "../components/Card";
 import Button from "../components/Button";
 import Section from "../components/Section";
@@ -70,6 +70,11 @@ const HERO_STEPS = [
   ["02", "Evaluate", "AI analyzes reasoning and depth"],
   ["03", "Map Gap", "Get custom career skill gap analysis"],
 ];
+
+/* Same key OnboardingPage.jsx writes to. Kept in sync so this page
+   can silently pre-fill domain/goal from what the user already told
+   us during onboarding, instead of asking again. */
+const ONBOARDING_STORAGE_KEY = "aifinity_onboarding_profile";
 
 /* =========================================================
    ANALYSIS ENGINE (SIMULATED AI)
@@ -259,6 +264,53 @@ export default function SkillGap() {
   const [activeGap, setActiveGap] = useState(null);
   const [priorityFilter, setPriorityFilter] = useState("All");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [prefilledFromOnboarding, setPrefilledFromOnboarding] = useState(false);
+
+  // On first load, silently pick up whatever the user already told us
+  // during onboarding (field + career goal) so they don't have to
+  // repeat that selection here — they can still change it below.
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(ONBOARDING_STORAGE_KEY);
+      if (!raw) return;
+
+      const profile = JSON.parse(raw);
+      if (!profile) return;
+
+      let matchedDomain = null;
+      if (profile.field) {
+        matchedDomain = DOMAINS.find(
+          (d) => d.label.toLowerCase() === String(profile.field).toLowerCase()
+        );
+        if (matchedDomain) setDomain(matchedDomain.id);
+      }
+
+      if (profile.careerGoal) {
+        const matchedGoal = GOALS.find(
+          (g) => g.title.toLowerCase() === String(profile.careerGoal).toLowerCase()
+        );
+        if (matchedGoal) {
+          setGoal(matchedGoal.title);
+        } else if (matchedDomain) {
+          // Career goal from onboarding doesn't map to a known GOALS
+          // entry (e.g. a field-specific option not modeled here) —
+          // fall back to the first goal matching the matched domain.
+          const fallbackGoal = GOALS.find(
+            (g) => g.category.toLowerCase() === matchedDomain.label.toLowerCase()
+          );
+          if (fallbackGoal) setGoal(fallbackGoal.title);
+        }
+      }
+
+      if (matchedDomain || profile.careerGoal) {
+        setPrefilledFromOnboarding(true);
+      }
+    } catch {
+      // Missing/invalid onboarding data — safe to ignore, page just
+      // keeps its own defaults.
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const selectedGoal = useMemo(() => GOALS.find((item) => item.title === goal) || GOALS[0], [goal]);
   const selectedDomain = useMemo(() => DOMAINS.find((item) => item.id === domain) || DOMAINS[0], [domain]);
@@ -289,6 +341,7 @@ export default function SkillGap() {
   const handleDomainChange = (id) => {
     setDomain(id);
     setAnalysis(null);
+    setPrefilledFromOnboarding(false);
     const targetDomainObj = DOMAINS.find((d) => d.id === id);
     if (targetDomainObj) {
       const matchedGoal = GOALS.find((g) => g.category.toLowerCase() === targetDomainObj.label.toLowerCase());
@@ -299,6 +352,7 @@ export default function SkillGap() {
   const handleGoalChange = (value) => {
     setGoal(value);
     setAnalysis(null);
+    setPrefilledFromOnboarding(false);
   };
 
   const handleLoadPreset = () => {
@@ -325,17 +379,30 @@ export default function SkillGap() {
          HERO SECTION
       ========================================================= */}
       <HeroSection
-        eyebrow="Afinity AI · Skill Intelligence Engine"
-        title="Measure what you know."
-        highlightWord="Discover what you're missing."
-        description="Show us what you know. Afinity evaluates your logic, reasoning, and answers to map the exact distance between your current level and career goals."
+        eyebrow="Afinity AI · Skill Gap Analysis"
+        title="Know exactly where you"
+        highlightWord="stand — and what's next."
         primaryCta={{ label: "Start Assessment", href: "#assessment" }}
-        secondaryCta={{ label: "See How It Works", href: "#assessment" }}
+        secondaryCta={{ label: "See How It Works", href: "#how-it-works" }}
       />
 
-      {/* Hero-adjacent 3-step preview strip */}
-      <Section className="pt-0 sm:pt-0">
-        <div className="mx-auto grid max-w-4xl gap-4 text-left sm:grid-cols-3">
+      {/* INTRO SECTION — explains what this page is and why it matters */}
+      <Section id="how-it-works" className="pt-0 sm:pt-0">
+        <div className="mx-auto max-w-3xl text-center">
+          <span className="text-xs font-bold uppercase tracking-wider" style={{ fontFamily: "var(--font-mono)", color: "var(--color-primary-600)" }}>
+            What is Skill Gap Analysis?
+          </span>
+          <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl" style={{ fontFamily: "var(--font-display)", color: "var(--color-text-h)" }}>
+            Most people guess what they need to learn. Afinity AI measures it.
+          </h2>
+          <p className="mt-3 text-sm leading-6" style={{ color: "var(--color-text-muted)" }}>
+            Pick your field and target career role, then explain a real concept in your own words. Instead of a
+            generic quiz, Afinity AI reads your reasoning — not just the final answer — to figure out how close you
+            actually are to your target role, and shows you the specific gaps to close next.
+          </p>
+        </div>
+
+        <div className="mx-auto mt-10 grid max-w-4xl gap-4 text-left sm:grid-cols-3">
           {HERO_STEPS.map(([number, title, description]) => (
             <Card
               key={number}
@@ -355,6 +422,20 @@ export default function SkillGap() {
           title="Start with what you actually know"
           subtitle="Select a domain, target goal, and answer a question. Afinity uses empirical evidence to measure capability."
         />
+
+        {prefilledFromOnboarding && (
+          <div
+            className="mb-8 flex items-center gap-3 rounded-xl border p-4"
+            style={{ borderColor: "var(--color-primary-100)", background: "var(--color-primary-50)" }}
+          >
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" style={{ background: "var(--color-surface)", color: "var(--color-primary-600)" }}>
+              <SparklesIcon className="w-4 h-4" />
+            </div>
+            <p className="text-xs font-medium" style={{ color: "var(--color-text-muted)" }}>
+              We've pre-filled your domain and career goal from onboarding. Feel free to change them below.
+            </p>
+          </div>
+        )}
 
         {/* Step 1: Select Domain */}
         <div className="mb-12">

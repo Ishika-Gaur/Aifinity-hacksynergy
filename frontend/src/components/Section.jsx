@@ -44,7 +44,7 @@ export default function Section({
       ref={ref}
       id={id}
       className={[
-        "py-16 sm:py-20 lg:py-24",
+        "w-full py-16 sm:py-20 lg:py-24",
         BACKGROUND_CLASSES[background] || BACKGROUND_CLASSES.white,
         className,
       ].join(" ")}
