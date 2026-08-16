@@ -422,7 +422,7 @@ export default function Roadmap() {
                 <SparklesIcon className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-sm font-bold" style={{ color: "var(--color-text-h)" }}>Afinity AI Career Guidance</p>
+                <p className="text-sm font-bold" style={{ color: "var(--color-text-h)" }}>AIFinity AI Career Guidance</p>
                 <p className="mt-0.5 text-xs" style={{ color: "var(--color-text-muted)" }}>{notification}</p>
               </div>
             </div>
@@ -444,7 +444,7 @@ export default function Roadmap() {
         eyebrow="End-to-End AI Career Guidance & Readiness Engine"
         title="Your complete path to"
         highlightWord="career readiness."
-        description="Tell Afinity AI what career or skill you want to master. We generate a 0-to-100% sequential roadmap providing step-by-step guidance from zero prerequisites to job readiness."
+        description="Tell AIFinity AI what career or skill you want to master. We generate a 0-to-100% sequential roadmap providing step-by-step guidance from zero prerequisites to job readiness."
       />
 
       {/* PRESET SELECTOR + CUSTOM GENERATOR + ANALYTICS */}
@@ -618,7 +618,7 @@ export default function Roadmap() {
         <SectionHeading
           eyebrow="JOB READINESS VERIFICATION"
           title="What makes you job-ready?"
-          subtitle="Afinity AI verifies your readiness through four essential career criteria."
+          subtitle="AIFinity  verifies your readiness through four essential career criteria."
         />
 
         <div className="grid gap-6 md:grid-cols-4">
@@ -649,7 +649,7 @@ export default function Roadmap() {
       <Section>
         <CtaBanner
           eyebrow="CAREER INTELLIGENCE"
-          title="Verify your skills with Afinity AI Skill Gap."
+          title="Verify your skills with AIFinity Skill Gap."
           buttonLabel="Explore Skill Gap"
           href="/skill-gap"
         />

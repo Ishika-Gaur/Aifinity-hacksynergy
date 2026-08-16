@@ -7,19 +7,19 @@ const FAQ_DATA = [
     category: "Overview",
     items: [
       {
-        q: "What is Aifinity AI?",
-        a: "Aifinity AI is a learning intelligence platform that helps students understand why they keep making mistakes, which concepts they are missing, and what to learn next to become career-ready.",
+        q: "What is AIFinity?",
+        a: "AIFinity is a learning intelligence platform that helps students understand why they keep making mistakes, which concepts they are missing, and what to learn next to become career-ready.",
       },
       {
-        q: "Who is Aifinity AI for?",
+        q: "Who is AIFinity for?",
         a: "It is built for students, early-career learners, and anyone preparing for a job where they need to improve core skills, identify gaps, and turn weak areas into a structured learning plan.",
       },
       {
         q: "What problem does it solve?",
-        a: "Most learning platforms show scores. Aifinity AI explains the underlying concept gap, highlights recurring mistakes, and turns those insights into personalized next steps.",
+        a: "Most learning platforms show scores. AIFinity explains the underlying concept gap, highlights recurring mistakes, and turns those insights into personalized next steps.",
       },
       {
-        q: "What makes Aifinity AI different from other ed-tech platforms?",
+        q: "What makes AIFinity different from other ed-tech platforms?",
         a: "Instead of stopping at a right-or-wrong result, it traces every mistake back to its root cause and connects that insight to a career-readiness roadmap, not just a study plan.",
       },
     ],
@@ -116,7 +116,7 @@ const FAQ_DATA = [
         a: "Yes. You sign up, choose a learning path or assessment, and then the platform begins analyzing your performance to personalize the experience.",
       },
       {
-        q: "Is Aifinity AI suitable for beginners?",
+        q: "Is AIFinity suitable for beginners?",
         a: "Yes. It adapts recommendations to the learner's current level, so both beginners and more advanced students can improve with relevant guidance.",
       },
       {
@@ -216,7 +216,7 @@ export default function FAQ() {
             AI That Turns Struggles into Strengths
           </h1>
           <p className="mt-4 text-sm sm:text-base leading-6 text-[#4A5A52] font-sans">
-            Everything you need to know about how Aifinity AI helps you
+            Everything you need to know about how AIFinity helps you
             discover, analyze, improve, and prepare — from your first mistake
             to your next career move.
           </p>

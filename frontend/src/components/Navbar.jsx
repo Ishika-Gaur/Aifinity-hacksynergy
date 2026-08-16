@@ -24,7 +24,7 @@ function BrandLogo() {
       <div className="relative flex h-15 w-25 items-center justify-center transition-transform duration-300 group-hover:scale-105">
         <img
           src={logo}
-          alt="Aifinity Logo"
+          alt="AIFinity Logo"
           className="w-full h-full object-contain transition-transform duration-300 group-hover:rotate-6"
         />
       </div>
