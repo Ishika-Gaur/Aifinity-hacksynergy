@@ -263,15 +263,15 @@ export default function Contact() {
                 title="Email Us Direct"
                 className="p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
               >
-                <a href="mailto:hello@cognifyai.com" className="font-semibold transition-colors" style={{ color: "var(--color-primary-600)" }}>
-                  hello@aifinityai.com
+                <a href="mailto:hello@aifinity.com" className="font-semibold transition-colors" style={{ color: "var(--color-primary-600)" }}>
+                  hello@aifinity.com
                 </a>
               </Card>
 
               <Card
                 hoverable
                 icon={<SupportIcon className="w-5 h-5" style={{ color: "var(--color-primary-600)" }} />}
-                title="Afinity AI Support"
+                title="AIFinity  Support"
                 className="p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
               >
                 <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
@@ -295,7 +295,7 @@ export default function Contact() {
             {/* Social Links */}
             <div className="mt-10">
               <p className="mb-4 text-xs font-bold tracking-widest uppercase" style={{ color: "var(--color-text-light)" }}>
-                Connect with Afinity AI
+                Connect with AIFinity 
               </p>
 
               <div className="flex gap-3">
@@ -567,7 +567,7 @@ export default function Contact() {
               </button>
             }
           >
-            Interested in collaborating with Afinity AI on education, research, AI models, or student innovation?
+            Interested in collaborating with AIFinity on education, research, AI models, or student innovation?
           </Card>
         </div>
       </Section>

@@ -379,9 +379,10 @@ export default function SkillGap() {
          HERO SECTION
       ========================================================= */}
       <HeroSection
-        eyebrow="Afinity AI · Skill Gap Analysis"
+        eyebrow="AIFinity AI · Skill Gap Analysis"
         title="Know exactly where you"
         highlightWord="stand — and what's next."
+        description="Discover your exact proficiency level in any skill with AI-powered analysis. Get personalized insights into your strengths and the gaps you need to close for your target career role."
         primaryCta={{ label: "Start Assessment", href: "#assessment" }}
         secondaryCta={{ label: "See How It Works", href: "#how-it-works" }}
       />
@@ -393,11 +394,11 @@ export default function SkillGap() {
             What is Skill Gap Analysis?
           </span>
           <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl" style={{ fontFamily: "var(--font-display)", color: "var(--color-text-h)" }}>
-            Most people guess what they need to learn. Afinity AI measures it.
+            Most people guess what they need to learn. AIFinity AI measures it.
           </h2>
           <p className="mt-3 text-sm leading-6" style={{ color: "var(--color-text-muted)" }}>
             Pick your field and target career role, then explain a real concept in your own words. Instead of a
-            generic quiz, Afinity AI reads your reasoning — not just the final answer — to figure out how close you
+            generic quiz, AIFinity AI reads your reasoning — not just the final answer — to figure out how close you
             actually are to your target role, and shows you the specific gaps to close next.
           </p>
         </div>
@@ -420,7 +421,7 @@ export default function SkillGap() {
         <SectionHeading
           eyebrow="STEP-BY-STEP ASSESSMENT"
           title="Start with what you actually know"
-          subtitle="Select a domain, target goal, and answer a question. Afinity uses empirical evidence to measure capability."
+          subtitle="Select a domain, target goal, and answer a question. AIFinity uses empirical evidence to measure capability."
         />
 
         {prefilledFromOnboarding && (
@@ -523,7 +524,7 @@ export default function SkillGap() {
                 value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
                 rows={6}
-                placeholder="Explain your thought process. Afinity evaluates logic, concepts, and depth..."
+                placeholder="Explain your thought process. AIFinity evaluates logic, concepts, and depth..."
                 className="w-full resize-none rounded-xl border px-4 py-3 text-sm leading-6 outline-none transition-all duration-200 focus:ring-4"
                 style={{ borderColor: "var(--color-border)", background: "var(--color-surface-secondary)", color: "var(--color-text-h)" }}
               />
