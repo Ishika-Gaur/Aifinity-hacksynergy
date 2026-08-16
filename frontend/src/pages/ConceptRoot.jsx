@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import Section from "../components/Section";
 import SectionHeading from "../components/SectionHeading";
 import Card from "../components/Card";
@@ -61,6 +61,37 @@ const JOURNEY_STEPS = [
 ];
 
 export default function ConceptRoot() {
+  const demoRef = useRef(null);
+  const howItWorksRef = useRef(null);
+
+  const handleScrollToDemo = (e) => {
+    if (e) e.preventDefault();
+    if (demoRef.current) {
+      const navbarHeight = 85;
+      const elementPosition = demoRef.current.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - navbarHeight;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const handleScrollToHowItWorks = (e) => {
+    if (e) e.preventDefault();
+    if (howItWorksRef.current) {
+      const navbarHeight = 85;
+      const elementPosition = howItWorksRef.current.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - navbarHeight;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      });
+    }
+  };
+
   return (
     <div>
       {/* HERO SECTION */}
@@ -69,8 +100,8 @@ export default function ConceptRoot() {
         title="Don't just see what's wrong."
         highlightWord="Understand why."
         description="ConceptRoot helps uncover the concept behind a mistake, identify missing prerequisites, and show students what to learn next."
-        primaryCta={{ label: "Try ConceptRoot", href: "#demo" }}
-        secondaryCta={{ label: "How It Works", href: "#how-it-works" }}
+        primaryCta={{ label: "Try ConceptRoot", onClick: handleScrollToDemo }}
+        secondaryCta={{ label: "How It Works", onClick: handleScrollToHowItWorks }}
       />
 
       {/* THE CORE IDEA */}
@@ -145,36 +176,40 @@ export default function ConceptRoot() {
       </Section>
 
       {/* HOW IT WORKS */}
-      <Section id="how-it-works" className="border-y border-[var(--color-border)]">
-        <SectionHeading
-          eyebrow="STEP-BY-STEP"
-          title="How ConceptRoot Works"
-          subtitle="Four simple steps from attempt to deep conceptual clarity."
-        />
+      <div ref={howItWorksRef} id="how-it-works" className="scroll-mt-20">
+        <Section className="border-y border-[var(--color-border)]">
+          <SectionHeading
+            eyebrow="STEP-BY-STEP"
+            title="How ConceptRoot Works"
+            subtitle="Four simple steps from attempt to deep conceptual clarity."
+          />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {HOW_IT_WORKS_STEPS.map((s) => (
-            <Card
-              key={s.step}
-              icon={<span style={{ fontFamily: "var(--font-mono)" }} className="text-lg font-bold">{s.step}</span>}
-              title={s.title}
-            >
-              {s.description}
-            </Card>
-          ))}
-        </div>
-      </Section>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {HOW_IT_WORKS_STEPS.map((s) => (
+              <Card
+                key={s.step}
+                icon={<span style={{ fontFamily: "var(--font-mono)" }} className="text-lg font-bold">{s.step}</span>}
+                title={s.title}
+              >
+                {s.description}
+              </Card>
+            ))}
+          </div>
+        </Section>
+      </div>
 
       {/* INTERACTIVE DEMO */}
-      <Section id="interactive-demo">
-        <SectionHeading
-          eyebrow="LIVE DEMO"
-          title="Interactive ConceptRoot Demo"
-          subtitle="Try out ConceptRoot on a sample conceptual question or JavaScript code snippet."
-        />
+      <div ref={demoRef} id="interactive-demo" className="scroll-mt-20">
+        <Section>
+          <SectionHeading
+            eyebrow="LIVE DEMO"
+            title="Interactive ConceptRoot Demo"
+            subtitle="Try out ConceptRoot on a sample conceptual question or JavaScript code snippet."
+          />
 
-        <ConceptRootDemo />
-      </Section>
+          <ConceptRootDemo />
+        </Section>
+      </div>
 
       {/* WHAT CONCEPTROOT FINDS */}
       <Section className="border-y border-[var(--color-border)]">

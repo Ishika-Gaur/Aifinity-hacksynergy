@@ -1,5 +1,7 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Button from "../components/Button";
+import { authApi } from "../services/api";
 
 const BENEFITS = [
   "Takes under 10 minutes to see your first result",
@@ -12,6 +14,34 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [locked, setLocked] = useState(true); // readOnly trick against autofill
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    if (!name || !email || !password) {
+      setError("Please complete all required fields.");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long.");
+      return;
+    }
+
+    setLoading(true);
+    const res = await authApi.register(name, email, password);
+    setLoading(false);
+
+    if (!res.success) {
+      setError(res.error || "Registration failed.");
+    } else {
+      navigate("/dashboard");
+    }
+  };
 
   return (
     <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
@@ -69,10 +99,16 @@ export default function SignupPage() {
             Free to start — no card required.
           </p>
 
+          {error && (
+            <div className="mt-4 rounded-md bg-rose-50 p-3 text-xs font-medium text-rose-700 border border-rose-200">
+              {error}
+            </div>
+          )}
+
           <form
             className="mt-6 flex flex-col gap-4"
             autoComplete="off"
-            onSubmit={(e) => e.preventDefault()}
+            onSubmit={handleSubmit}
           >
             <div>
               <label
@@ -131,34 +167,16 @@ export default function SignupPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 onFocus={() => setLocked(false)}
                 readOnly={locked}
-                placeholder="At least 8 characters"
+                placeholder="At least 6 characters"
                 autoComplete="off"
                 className="w-full rounded-md border border-[var(--color-border)] bg-white px-4 py-2.5 text-base text-[var(--color-text-h)] placeholder:text-[var(--color-text-light)] focus:border-[var(--color-primary-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-100)]"
               />
             </div>
 
-            <Button type="submit" size="lg" className="mt-1 w-full">
-              Create Account
+            <Button type="submit" size="lg" className="mt-1 w-full" disabled={loading}>
+              {loading ? "Creating Account..." : "Create Account"}
             </Button>
           </form>
-
-          <div className="my-5 flex items-center gap-3">
-            <span className="h-px flex-1 bg-[var(--color-border)]" />
-            <span className="text-xs font-medium uppercase text-[var(--color-text-light)]">
-              or
-            </span>
-            <span className="h-px flex-1 bg-[var(--color-border)]" />
-          </div>
-
-          <Button
-            as="a"
-            href="/auth/google"
-            variant="outline"
-            size="md"
-            className="w-full"
-          >
-            Continue with Google
-          </Button>
 
           <p className="mt-6 text-center text-sm text-[var(--color-text-muted)]">
             Already have an account?{" "}

@@ -27,7 +27,6 @@ import ProtectedRoute from './components/admin/ProtectedRoute';
 
 // Admin Auth Pages
 import AdminLogin from './pages/admin/AdminLogin';
-import AdminSignup from './pages/admin/AdminSignup';
 
 // Admin Dashboard
 import AdminLayout from './components/admin/AdminLayout';
@@ -76,7 +75,6 @@ function App() {
               ===================================================== */}
 
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/signup" element={<AdminSignup />} />
 
 
           {/* =====================================================
