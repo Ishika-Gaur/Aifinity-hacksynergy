@@ -1,4 +1,15 @@
 import React from "react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  Cell,
+} from "recharts";
 import Section from "../components/Section";
 import Container from "../components/Container";
 import SectionHeading from "../components/SectionHeading";
@@ -46,11 +57,15 @@ const FEATURES = [
   },
 ];
 
-// const STATS = [
-//   { value: "100%", label: "Traced to a concept" },
-//   { value: "Auto", label: "Clustering, no manual tagging" },
-//   { value: "Live", label: "Updates after every attempt" },
-// ];
+// Personalized progress — mistakes before vs now per topic.
+// Replace with real data from your API (per-concept mistake counts over attempts).
+const TOPIC_PROGRESS = [
+  { concept: "Time & Work", before: 9, after: 2, needsAttention: false },
+  { concept: "Recursion", before: 7, after: 5, needsAttention: true },
+  { concept: "Probability", before: 8, after: 3, needsAttention: false },
+  { concept: "SQL Joins", before: 6, after: 6, needsAttention: true },
+  { concept: "Verbal Analogies", before: 5, after: 1, needsAttention: false },
+];
 
 const COMPARISON = [
   {
@@ -71,21 +86,42 @@ const COMPARISON = [
   },
 ];
 
+// Custom tooltip so it matches the site's card styling instead of recharts' default box
+function ProgressTooltip({ active, payload, label }) {
+  if (!active || !payload || !payload.length) return null;
+  const row = TOPIC_PROGRESS.find((t) => t.concept === label);
+  return (
+    <div className="rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 shadow-[var(--shadow-card)]">
+      <p className="mb-1 text-xs font-semibold text-[var(--color-text-h)]">
+        {label}
+      </p>
+      {payload.map((p) => (
+        <p key={p.dataKey} className="text-xs text-[var(--color-text-muted)]">
+          {p.name}: <span className="font-medium text-[var(--color-text-h)]">{p.value}</span>
+        </p>
+      ))}
+      {row?.needsAttention && (
+        <p className="mt-1 text-xs font-semibold text-amber-600">Needs attention</p>
+      )}
+    </div>
+  );
+}
+
 export default function MistakeMapPage() {
   return (
     <div className="flex min-h-screen flex-col ">
       {/* Hero */}
-     <HeroSection
-  eyebrow="AI-Powered · Mistake Map"
-  title="Every mistake,"
-  highlightWord="mapped to its cause"
-  description="Wrong answers don't just get marked incorrect. Our AI traces each one back to the concept behind it, so you always know exactly what to fix."
-  primaryCta={{ label: "See Your Mistake Map", href: "/assessment" }}
-  secondaryCta={{ label: "How It Works", href: "/about" }}
-  // stats={STATS}
-/>
+      <HeroSection
+        eyebrow="AI-Powered · Mistake Map"
+        title="Every mistake,"
+        highlightWord="mapped to its cause"
+        description="Wrong answers don't just get marked incorrect. Our AI traces each one back to the concept behind it, so you always know exactly what to fix."
+        primaryCta={{ label: "See Your Mistake Map", href: "/assessment" }}
+        secondaryCta={{ label: "How It Works", href: "/about" }}
+      />
+
       {/* How it works */}
-      <Section >
+      <Section>
         <SectionHeading
           title="From wrong answer to clear fix, automatically"
           subtitle="No manual tagging. The AI does the tracing so your map stays accurate on its own."
@@ -117,7 +153,7 @@ export default function MistakeMapPage() {
       </Section>
 
       {/* Features */}
-      <Section >
+      <Section>
         <SectionHeading
           title="Built to find the real gap, not just the wrong answer"
           subtitle="Three ways the AI keeps your map accurate and useful."
@@ -135,75 +171,76 @@ export default function MistakeMapPage() {
         </div>
       </Section>
 
-      {/* NEW: What happens next — arrow-connected flow, visually distinct from the numbered steps above */}
-      <Section >
+      {/* Your Progress — real recharts bar graph, before vs now per topic */}
+      <Section>
         <SectionHeading
-          title="Here's where you go next"
-          subtitle="Your Mistake Map only starts filling in once you've taken an assessment."
+          title="Your progress, topic by topic"
+          subtitle="How many mistakes you made before vs. now — topics still flagged in amber need more work."
         />
-        <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-2">
-          <div className="flex w-full max-w-[220px] flex-col gap-1.5 rounded-xl border border-[var(--color-primary-100)] bg-white px-5 py-4 text-center shadow-[var(--shadow-card)]">
-            <span className="text-sm font-semibold text-[var(--color-primary-600)]">
-              Take the assessment
-            </span>
-            <span className="text-xs leading-relaxed text-[var(--color-text-muted)]">
-              ~10 minutes, any subject
-            </span>
-          </div>
+        <div className="mx-auto mt-10 max-w-4xl rounded-2xl border border-[var(--color-border)] bg-white p-4 shadow-[var(--shadow-card)] sm:p-6">
+          <ResponsiveContainer width="100%" height={340}>
+            <BarChart
+              data={TOPIC_PROGRESS}
+              margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+              barGap={4}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+              <XAxis
+                dataKey="concept"
+                tick={{ fill: "var(--color-text-muted)", fontSize: 12 }}
+                axisLine={{ stroke: "var(--color-border)" }}
+                tickLine={false}
+              />
+              <YAxis
+                allowDecimals={false}
+                tick={{ fill: "var(--color-text-muted)", fontSize: 12 }}
+                axisLine={false}
+                tickLine={false}
+                label={{
+                  value: "Mistakes",
+                  angle: -90,
+                  position: "insideLeft",
+                  fill: "var(--color-text-muted)",
+                  fontSize: 12,
+                }}
+              />
+              <Tooltip content={<ProgressTooltip />} cursor={{ fill: "var(--color-surface-secondary)" }} />
+              <Legend
+                wrapperStyle={{ fontSize: 12, color: "var(--color-text-muted)" }}
+              />
+              <Bar dataKey="before" name="Before" fill="var(--color-text-light)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="after" name="Now" radius={[4, 4, 0, 0]}>
+                {TOPIC_PROGRESS.map((entry) => (
+                  <Cell
+                    key={entry.concept}
+                    fill={entry.needsAttention ? "#f59e0b" : "var(--color-primary-600)"}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
 
-          <span
-            className="hidden text-xl text-[var(--color-primary-300)] sm:block"
-            aria-hidden="true"
-          >
-            →
-          </span>
-          <span
-            className="block text-xl text-[var(--color-primary-300)] sm:hidden"
-            aria-hidden="true"
-          >
-            ↓
-          </span>
-
-          <div className="flex w-full max-w-[220px] flex-col gap-1.5 rounded-xl border border-[var(--color-primary-100)] bg-white px-5 py-4 text-center shadow-[var(--shadow-card)]">
-            <span className="text-sm font-semibold text-[var(--color-primary-600)]">
-              We analyse your answers
+          {/* Legend for the attention flag, since recharts Cell colors aren't in the auto-legend */}
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs text-[var(--color-text-muted)]">
+            <span className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-[var(--color-primary-600)]" />
+              Improved / stable
             </span>
-            <span className="text-xs leading-relaxed text-[var(--color-text-muted)]">
-              Every mistake traced to a concept
-            </span>
-          </div>
-
-          <span
-            className="hidden text-xl text-[var(--color-primary-300)] sm:block"
-            aria-hidden="true"
-          >
-            →
-          </span>
-          <span
-            className="block text-xl text-[var(--color-primary-300)] sm:hidden"
-            aria-hidden="true"
-          >
-            ↓
-          </span>
-
-          <div className="flex w-full max-w-[220px] flex-col gap-1.5 rounded-xl border-2 border-[var(--color-primary-600)] bg-white px-5 py-4 text-center shadow-[var(--shadow-card-hover)]">
-            <span className="text-sm font-semibold text-[var(--color-text-h)]">
-              Your Mistake Map is ready
-            </span>
-            <span className="text-xs leading-relaxed text-[var(--color-text-muted)]">
-              Flagged concepts, ranked by impact
+            <span className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+              Needs attention
             </span>
           </div>
         </div>
         <div className="mt-10 flex justify-center">
           <Button as="a" href="/assessment" size="lg">
-            Take the Assessment
+            Take Another Assessment
           </Button>
         </div>
       </Section>
 
-      {/* NEW: Without vs With — comparison, replaces the earlier subject grid above the CTA */}
-      <Section >
+      {/* Without vs With — comparison, replaces the earlier subject grid above the CTA */}
+      <Section>
         <SectionHeading
           title="What changes once you have a Mistake Map"
           subtitle="Same mistakes, same test results — just organized into something you can act on."
@@ -247,7 +284,7 @@ export default function MistakeMapPage() {
       </Section>
 
       {/* CTA */}
-      <Section >
+      <Section>
         <CtaBanner
           eyebrow="Ready to begin?"
           title="Your skill gap is waiting for you."
