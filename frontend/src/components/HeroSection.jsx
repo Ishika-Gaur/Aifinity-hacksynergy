@@ -202,12 +202,23 @@ export default function HeroSection({
           {(primaryCta || secondaryCta) && (
             <div className="flex flex-wrap justify-center gap-3.5 pt-2">
               {primaryCta && (
-                <Button as="a" href={primaryCta.href} size="lg">
+                <Button
+                  as={primaryCta.onClick ? "button" : (primaryCta.as || (primaryCta.href ? "a" : "button"))}
+                  href={primaryCta.onClick ? undefined : primaryCta.href}
+                  onClick={primaryCta.onClick}
+                  size="lg"
+                >
                   {primaryCta.label}
                 </Button>
               )}
               {secondaryCta && (
-                <Button as="a" href={secondaryCta.href} variant="outline" size="lg">
+                <Button
+                  as={secondaryCta.onClick ? "button" : (secondaryCta.as || (secondaryCta.href ? "a" : "button"))}
+                  href={secondaryCta.onClick ? undefined : secondaryCta.href}
+                  onClick={secondaryCta.onClick}
+                  variant="outline"
+                  size="lg"
+                >
                   {secondaryCta.label}
                 </Button>
               )}

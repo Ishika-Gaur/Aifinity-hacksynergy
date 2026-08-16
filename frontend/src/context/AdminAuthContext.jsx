@@ -1,61 +1,55 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
-import {
-  loginAdmin,
-  signupAdmin,
-  logoutAdmin,
-  subscribeToAuth,
-  checkAdminExists,
-} from "../services/firebase";
+import { authApi } from "../services/api";
 
 const AdminAuthContext = createContext(null);
 
 export function AdminAuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [adminExists, setAdminExists] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [logoutError, setLogoutError] = useState(null);
 
-  // Authoritative check against Firestore
-  const verifyAdminExistence = useCallback(async () => {
-    const exists = await checkAdminExists();
-    setAdminExists(exists);
-    return exists;
+  const fetchCurrentUser = useCallback(async () => {
+    try {
+      const res = await authApi.getMe();
+      if (res.success && res.user && res.user.role === "admin") {
+        setUser(res.user);
+      } else {
+        setUser(null);
+      }
+    } catch {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
-    // Initial check on mount
-    verifyAdminExistence();
-
-    const unsubscribe = subscribeToAuth(async (authUser) => {
-      setUser(authUser || null);
-      await verifyAdminExistence();
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [verifyAdminExistence]);
+    fetchCurrentUser();
+  }, [fetchCurrentUser]);
 
   const login = async (email, password) => {
     setLoading(true);
-    const res = await loginAdmin(email, password);
-    if (res.user) {
-      setUser(res.user);
-      await verifyAdminExistence();
-    }
-    setLoading(false);
-    return res;
-  };
+    const res = await authApi.login(email, password);
 
-  const signup = async (email, password, displayName) => {
-    setLoading(true);
-    const res = await signupAdmin(email, password, displayName);
-    if (res.user) {
+    if (res.success && res.user) {
+      if (res.user.role !== "admin") {
+        await authApi.logout();
+        setUser(null);
+        setLoading(false);
+        return {
+          user: null,
+          error: "Access denied. Account is not authorized as system administrator.",
+        };
+      }
+
       setUser(res.user);
-      setAdminExists(true);
+      setLoading(false);
+      return { user: res.user, error: null };
     }
+
     setLoading(false);
-    return res;
+    return { user: null, error: res.error || "Login failed" };
   };
 
   const logout = async () => {
@@ -63,15 +57,16 @@ export function AdminAuthProvider({ children }) {
     setLogoutError(null);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      await logoutAdmin();
+      const res = await authApi.logout();
       setUser(null);
-      await verifyAdminExistence();
       setIsLoggingOut(false);
-      return { success: true };
+      if (res.success) {
+        return { success: true };
+      }
+      return { success: false, error: res.error || "Logout failed" };
     } catch (err) {
       setIsLoggingOut(false);
-      const errMsg = err.message || "Failed to sign out from Firebase.";
+      const errMsg = err.message || "Failed to sign out.";
       setLogoutError(errMsg);
       return { success: false, error: errMsg };
     }
@@ -80,15 +75,13 @@ export function AdminAuthProvider({ children }) {
   const value = {
     user,
     loading,
-    isAdmin: !!user,
-    adminExists,
-    verifyAdminExistence,
+    isAdmin: !!(user && user.role === "admin"),
     isLoggingOut,
     logoutError,
     setLogoutError,
     login,
-    signup,
     logout,
+    refreshUser: fetchCurrentUser,
   };
 
   return (
