@@ -26,121 +26,6 @@ function ArrowRightIcon({ className = "w-4 h-4" }) {
 }
 
 /* =========================================================
-   HERO DATA — this page's own content + visual
-========================================================= */
-const HERO_ROLE_PRESETS = [
-  { id: "frontend", label: "Frontend Dev", current: 42, target: 90, gapConcepts: 12, nextConcept: "Closures & Scope" },
-  { id: "datascience", label: "Data Scientist", current: 55, target: 88, gapConcepts: 9, nextConcept: "Gradient Boosting & XGBoost" },
-  { id: "finance", label: "Financial Analyst", current: 48, target: 85, gapConcepts: 11, nextConcept: "DCF Valuation Modeling" },
-];
-
-
-function RoleSimulatorVisual({ selectedRole, setSelectedRole }) {
-  return (
-    <div>
-      <div
-        className="relative rounded-3xl border p-6 shadow-xl transition-all duration-300 hover:shadow-2xl"
-        style={{ borderColor: "var(--color-border)", background: "var(--color-surface)", boxShadow: "var(--shadow-card-hover)" }}
-      >
-        {/* Role Selector Pills */}
-        <div
-          className="mb-5 flex flex-wrap items-center justify-between gap-2 border-b pb-4"
-          style={{ borderColor: "var(--color-border)" }}
-        >
-          <span
-            className="text-xs font-bold uppercase tracking-wider"
-            style={{ fontFamily: "var(--font-mono)", color: "var(--color-text-light)" }}
-          >
-            Target Role Simulator
-          </span>
-          <div className="flex gap-1.5">
-            {HERO_ROLE_PRESETS.map((preset) => (
-              <button
-                key={preset.id}
-                type="button"
-                onClick={() => setSelectedRole(preset)}
-                className="rounded-lg px-2.5 py-1 text-[11px] font-bold transition-all duration-200"
-                style={
-                  selectedRole.id === preset.id
-                    ? { background: "var(--color-primary-600)", color: "#fff", transform: "scale(1.05)" }
-                    : { background: "var(--color-surface-secondary)", color: "var(--color-text-muted)" }
-                }
-              >
-                {preset.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Live Progress Bars */}
-        <div className="space-y-4">
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center justify-between text-xs font-semibold">
-              <span style={{ color: "var(--color-text-muted)" }}>Where you are</span>
-              <span style={{ color: "var(--color-text-h)" }}>{selectedRole.current}%</span>
-            </div>
-            <div className="h-2.5 w-full overflow-hidden rounded-full" style={{ background: "var(--color-surface-secondary)" }}>
-              <div
-                className="h-full rounded-full transition-all duration-700 ease-out"
-                style={{ width: `${selectedRole.current}%`, background: "var(--color-primary-300)" }}
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center justify-between text-xs font-semibold">
-              <span style={{ color: "var(--color-text-muted)" }}>Role Target</span>
-              <span style={{ color: "var(--color-text-h)" }}>{selectedRole.target}%</span>
-            </div>
-            <div className="h-2.5 w-full overflow-hidden rounded-full" style={{ background: "var(--color-surface-secondary)" }}>
-              <div
-                className="h-full rounded-full transition-all duration-700 ease-out"
-                style={{ width: `${selectedRole.target}%`, background: "var(--color-primary-600)" }}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Concepts Badge Box */}
-        <div
-          className="mt-6 flex items-center justify-between rounded-xl p-3.5 transition-colors duration-200"
-          style={{ background: "var(--color-primary-50)" }}
-        >
-          <span className="text-xs font-semibold" style={{ color: "var(--color-text-muted)" }}>
-            Concepts to close gap
-          </span>
-          <span
-            className="flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold"
-            style={{ background: "var(--color-primary-600)", color: "#fff", fontFamily: "var(--font-mono)" }}
-          >
-            {selectedRole.gapConcepts}
-          </span>
-        </div>
-      </div>
-
-      {/* Floating Badge */}
-      <div
-        className="absolute -bottom-5 -left-5 rounded-2xl border p-3.5 shadow-lg transition-all duration-300 hover:scale-105 sm:block hidden"
-        style={{ borderColor: "var(--color-border)", background: "var(--color-surface)", boxShadow: "var(--shadow-card-hover)" }}
-      >
-        <div className="flex items-center gap-2">
-          <span className="flex h-2.5 w-2.5 rounded-full animate-pulse" style={{ background: "var(--color-accent)" }} />
-          <p
-            className="text-[11px] font-bold uppercase tracking-wider"
-            style={{ fontFamily: "var(--font-mono)", color: "var(--color-text-light)" }}
-          >
-            Next Concept Focus
-          </p>
-        </div>
-        <p className="mt-0.5 text-xs font-bold" style={{ color: "var(--color-text-h)" }}>
-          {selectedRole.nextConcept}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-/* =========================================================
    PAGE DATA
 ========================================================= */
 const FEATURES = [
@@ -169,7 +54,6 @@ const CHALLENGE_SOLUTIONS = [
 
 export default function Home() {
   const [activeObsTab, setActiveObsTab] = useState(OBSERVATORY_TABS[0]);
-  const [selectedRole, setSelectedRole] = useState(HERO_ROLE_PRESETS[0]);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -177,13 +61,13 @@ export default function Home() {
          HERO SECTION
       ========================================================= */}
       <HeroSection
+        variant="home"
         eyebrow="AIFinity · Built for Job-Ready Learning"
         title="Know exactly what to"
         highlightWord="learn next"
         description="Find your weak concepts, see your skill gap, and follow an end-to-end roadmap built around your own mistakes — not a generic syllabus."
         primaryCta={{ label: "Start Assessment", href: "/onboardingpage" }}
         secondaryCta={{ label: "Explore Roadmap", href: "/roadmap" }}
-        visual={<RoleSimulatorVisual selectedRole={selectedRole} setSelectedRole={setSelectedRole} />}
       />
 
       {/* =========================================================

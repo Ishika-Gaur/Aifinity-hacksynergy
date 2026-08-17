@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   BarChart,
   Bar,
@@ -222,6 +222,7 @@ export default function MistakeMapPage() {
     <div className="flex min-h-screen flex-col ">
       {/* Hero */}
       <HeroSection
+        variant="mistake-map"
         eyebrow="AI-Powered · Mistake Map"
         title="Every mistake,"
         highlightWord="mapped to its cause"

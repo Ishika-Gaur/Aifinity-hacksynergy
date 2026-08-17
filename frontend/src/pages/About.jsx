@@ -118,6 +118,7 @@ export default function About() {
     <div>
       {/* HERO SECTION */}
       <HeroSection
+        variant="about"
         eyebrow="ABOUT AIFinity"
         title="Learning should show you"
         highlightWord="what you're missing."

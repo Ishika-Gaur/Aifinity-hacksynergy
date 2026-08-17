@@ -441,10 +441,13 @@ export default function Roadmap() {
 
       {/* HERO SECTION */}
       <HeroSection
+        variant="roadmap"
         eyebrow="End-to-End AI Career Guidance & Readiness Engine"
         title="Your complete path to"
         highlightWord="career readiness."
         description="Tell AIFinity AI what career or skill you want to master. We generate a 0-to-100% sequential roadmap providing step-by-step guidance from zero prerequisites to job readiness."
+        primaryCta={{ label: "Build My Roadmap", href: "#career-select" }}
+        secondaryCta={{ label: "See How It Works", href: "#roadmap-stages" }}
       />
 
       {/* PRESET SELECTOR + CUSTOM GENERATOR + ANALYTICS */}
@@ -552,7 +555,7 @@ export default function Roadmap() {
       </Section>
 
       {/* END TO END ROADMAP STAGES */}
-      <Section>
+      <Section id="roadmap-stages">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <span className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-primary-600)" }}>
