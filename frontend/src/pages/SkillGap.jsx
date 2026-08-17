@@ -379,6 +379,7 @@ export default function SkillGap() {
          HERO SECTION
       ========================================================= */}
       <HeroSection
+        variant="skill-gap"
         eyebrow="AIFinity AI · Skill Gap Analysis"
         title="Know exactly where you"
         highlightWord="stand — and what's next."

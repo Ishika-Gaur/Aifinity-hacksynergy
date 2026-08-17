@@ -96,6 +96,7 @@ export default function ConceptRoot() {
     <div>
       {/* HERO SECTION */}
       <HeroSection
+        variant="concept-root"
         eyebrow="CONCEPTROOT AI"
         title="Don't just see what's wrong."
         highlightWord="Understand why."
