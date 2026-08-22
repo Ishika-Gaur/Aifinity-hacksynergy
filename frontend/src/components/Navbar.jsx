@@ -11,7 +11,7 @@ const NAV_LINKS = [
   { label: "Skill Gap", href: "/skill-gap" },
   { label: "Roadmap", href: "/roadmap" },
   { label: "Contact", href: "/contact" },
-  {label: "FAQS", href: "/faq"},
+  { label: "FAQS", href: "/faq" },
 ];
 
 function BrandLogo() {
@@ -20,7 +20,6 @@ function BrandLogo() {
       href="/"
       className="group flex items-center gap-3 transition-all duration-300 hover:opacity-95 active:scale-98"
     >
-      {/* Logo Image */}
       <div className="relative flex h-15 w-25 items-center justify-center transition-transform duration-300 group-hover:scale-105">
         <img
           src={logo}

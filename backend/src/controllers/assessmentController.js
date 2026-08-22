@@ -87,63 +87,277 @@ export async function startAttempt(req, res) {
   });
 }
 
+function getNormalizedType(q) {
+  const t = String(q.type || "").toLowerCase().trim();
+  if (["mcq", "multiple-choice", "scenario", "logical-reasoning", "data-interpretation"].includes(t)) {
+    return "mcq";
+  }
+  if (["true_false", "true-false", "tf", "boolean"].includes(t)) {
+    return "true_false";
+  }
+  if (["short_answer", "short-answer", "short", "output", "fill-in-the-blank"].includes(t)) {
+    return "short_answer";
+  }
+  if (["long_answer", "long-answer", "essay", "descriptive", "conceptual", "problem-solving", "coding"].includes(t)) {
+    return "long_answer";
+  }
+  if (Array.isArray(q.options) && q.options.length > 0) {
+    if (q.options.length === 2) {
+      const o0 = String(q.options[0]).toLowerCase();
+      const o1 = String(q.options[1]).toLowerCase();
+      if ((o0 === "true" || o0 === "false") && (o1 === "true" || o1 === "false")) {
+        return "true_false";
+      }
+    }
+    return "mcq";
+  }
+  return "short_answer";
+}
+
+function evaluateSingleQuestion(q, userResp, sessionQ) {
+  const maxMarks = 10;
+  const normType = getNormalizedType(q);
+  const qId = String(q._id || q.id);
+  const qText = q.question;
+
+  const originalAnswer = sessionQ ? sessionQ.answer : q.answer;
+  const originalOptions = sessionQ ? (sessionQ.options || q.options) : q.options;
+  const shuffledOptions = sessionQ ? sessionQ.shuffledOptions : q.options;
+
+  // Unanswered Check
+  if (userResp === undefined || userResp === null || String(userResp).trim() === "") {
+    return {
+      questionId: qId,
+      questionText: qText,
+      type: normType,
+      userAnswer: null,
+      correctAnswer: originalAnswer != null ? String(originalAnswer) : "N/A",
+      status: "unanswered",
+      isCorrect: false,
+      marksAwarded: 0,
+      maxMarks,
+      explanation: "Question was left unanswered.",
+    };
+  }
+
+  // 1. MCQ
+  if (normType === "mcq") {
+    let userText = String(userResp);
+    if (typeof userResp === "number" && Array.isArray(shuffledOptions) && shuffledOptions[userResp] !== undefined) {
+      userText = shuffledOptions[userResp];
+    }
+
+    let correctText = String(originalAnswer);
+    if (typeof originalAnswer === "number" && Array.isArray(originalOptions) && originalOptions[originalAnswer] !== undefined) {
+      correctText = originalOptions[originalAnswer];
+    }
+
+    const isMatch = userText.trim().toLowerCase() === correctText.trim().toLowerCase();
+    return {
+      questionId: qId,
+      questionText: qText,
+      type: normType,
+      userAnswer: userText,
+      correctAnswer: correctText,
+      status: isMatch ? "correct" : "incorrect",
+      isCorrect: isMatch,
+      marksAwarded: isMatch ? maxMarks : 0,
+      maxMarks,
+      explanation: isMatch ? "Correct option selected." : `Incorrect option selected. You chose "${userText}".`,
+    };
+  }
+
+  // 2. TRUE / FALSE
+  if (normType === "true_false") {
+    let userChoice = String(userResp).trim().toLowerCase();
+    if (userResp === 0 || userResp === "0") userChoice = "true";
+    if (userResp === 1 || userResp === "1") userChoice = "false";
+    if (userChoice === "t" || userChoice === "yes") userChoice = "true";
+    if (userChoice === "f" || userChoice === "no") userChoice = "false";
+
+    let correctChoice = String(originalAnswer).trim().toLowerCase();
+    if (originalAnswer === true || originalAnswer === 0 || originalAnswer === "0" || correctChoice === "t" || correctChoice === "yes") correctChoice = "true";
+    if (originalAnswer === false || originalAnswer === 1 || originalAnswer === "1" || correctChoice === "f" || correctChoice === "no") correctChoice = "false";
+
+    const isMatch = userChoice === correctChoice;
+    const formattedUser = userChoice === "true" ? "True" : "False";
+    const formattedCorrect = correctChoice === "true" ? "True" : "False";
+
+    return {
+      questionId: qId,
+      questionText: qText,
+      type: normType,
+      userAnswer: formattedUser,
+      correctAnswer: formattedCorrect,
+      status: isMatch ? "correct" : "incorrect",
+      isCorrect: isMatch,
+      marksAwarded: isMatch ? maxMarks : 0,
+      maxMarks,
+      explanation: isMatch ? "Correct choice selected." : `Incorrect choice. You selected "${formattedUser}".`,
+    };
+  }
+
+  // 3. SHORT ANSWER
+  if (normType === "short_answer") {
+    const userText = String(userResp).trim();
+    const correctText = originalAnswer ? String(originalAnswer).trim() : "";
+
+    const cleanUser = userText.toLowerCase().replace(/[^\w\s]/gi, "");
+    const cleanCorrect = correctText.toLowerCase().replace(/[^\w\s]/gi, "");
+
+    let isMatch = cleanUser === cleanCorrect;
+    if (!isMatch && cleanCorrect && cleanUser.includes(cleanCorrect)) {
+      isMatch = true;
+    }
+
+    return {
+      questionId: qId,
+      questionText: qText,
+      type: normType,
+      userAnswer: userText,
+      correctAnswer: correctText || "Valid short answer required",
+      status: isMatch ? "correct" : "incorrect",
+      isCorrect: isMatch,
+      marksAwarded: isMatch ? maxMarks : 0,
+      maxMarks,
+      explanation: isMatch ? "Exact/Normalized match with target answer." : `Submitted: "${userText}". Expected: "${correctText}".`,
+    };
+  }
+
+  // 4. LONG ANSWER / ESSAY / CODE
+  if (normType === "long_answer") {
+    const userText = String(userResp).trim();
+    const modelAnswer = originalAnswer ? String(originalAnswer).trim() : "";
+
+    const words = userText.split(/\s+/).filter(Boolean);
+    const wordCount = words.length;
+
+    let marksAwarded = 0;
+    let status = "incorrect";
+    let isCorrect = false;
+    let explanation = "";
+
+    if (modelAnswer) {
+      const modelKeywords = modelAnswer
+        .toLowerCase()
+        .replace(/[^\w\s]/gi, "")
+        .split(/\s+/)
+        .filter((w) => w.length > 3);
+
+      const uniqueKeywords = [...new Set(modelKeywords)];
+      let matchedCount = 0;
+      const cleanUserLower = userText.toLowerCase();
+
+      uniqueKeywords.forEach((kw) => {
+        if (cleanUserLower.includes(kw)) matchedCount++;
+      });
+
+      const matchRatio = uniqueKeywords.length ? matchedCount / uniqueKeywords.length : 0.5;
+
+      if (matchRatio >= 0.6 && wordCount >= 10) {
+        marksAwarded = maxMarks;
+        status = "correct";
+        isCorrect = true;
+        explanation = "Comprehensive answer covering key technical concepts accurately.";
+      } else if (matchRatio >= 0.3 || wordCount >= 25) {
+        marksAwarded = 7;
+        status = "partial";
+        isCorrect = true;
+        explanation = "Satisfactory answer covering core points with relevant detail.";
+      } else if (wordCount >= 10) {
+        marksAwarded = 5;
+        status = "partial";
+        isCorrect = false;
+        explanation = "Basic response provided, but lacks necessary depth and key concepts.";
+      } else {
+        marksAwarded = 2;
+        status = "incorrect";
+        isCorrect = false;
+        explanation = "Response is too brief to adequately address the question prompt.";
+      }
+    } else {
+      if (wordCount >= 25) {
+        marksAwarded = maxMarks;
+        status = "correct";
+        isCorrect = true;
+        explanation = "Detailed, thorough answer provided.";
+      } else if (wordCount >= 10) {
+        marksAwarded = 7;
+        status = "partial";
+        isCorrect = true;
+        explanation = "Clear response provided.";
+      } else {
+        marksAwarded = 3;
+        status = "incorrect";
+        isCorrect = false;
+        explanation = "Response is too brief.";
+      }
+    }
+
+    return {
+      questionId: qId,
+      questionText: qText,
+      type: normType,
+      userAnswer: userText,
+      correctAnswer: modelAnswer || "Detailed explanation",
+      status,
+      isCorrect,
+      marksAwarded,
+      maxMarks,
+      explanation,
+    };
+  }
+
+  return {
+    questionId: qId,
+    questionText: qText,
+    type: normType,
+    userAnswer: String(userResp),
+    correctAnswer: "N/A",
+    status: "correct",
+    isCorrect: true,
+    marksAwarded: maxMarks,
+    maxMarks,
+    explanation: "Answer submitted.",
+  };
+}
+
 export async function submitAttempt(req, res) {
-  const { attemptId, responses, elapsedSeconds, violations = [] } = req.body;
+  const { attemptId, responses = {}, elapsedSeconds = 0, violations = [] } = req.body;
   const assessment = await Assessment.findById(req.params.id);
   if (!assessment) return res.status(404).json({ success: false, message: "Assessment not found." });
 
   const session = activeAttemptSessions.get(attemptId);
   const rawQuestions = assessment.questions || [];
-  const GRADABLE_TYPES = ["mcq", "scenario", "logical-reasoning", "data-interpretation", "output"];
-  const gradableQuestions = rawQuestions.filter((q) => GRADABLE_TYPES.includes(q.type));
 
+  const questionResults = [];
+  let totalScore = 0;
+  let maxScore = 0;
   let correctCount = 0;
+  let incorrectCount = 0;
+  let unansweredCount = 0;
 
-  gradableQuestions.forEach((q) => {
+  rawQuestions.forEach((q) => {
     const qId = String(q._id);
     const userResp = responses ? responses[qId] : undefined;
-    if (userResp === undefined || userResp === null || userResp === "") return;
+    const sessionQ = session && session.answersMap ? session.answersMap.get(qId) : null;
 
-    if (session && session.answersMap.has(qId)) {
-      const sessionQ = session.answersMap.get(qId);
-      const originalAnswer = sessionQ.answer;
+    const evalResult = evaluateSingleQuestion(q, userResp, sessionQ);
+    questionResults.push(evalResult);
 
-      if (q.type === "output") {
-        if (String(userResp).trim().toLowerCase() === String(originalAnswer).trim().toLowerCase()) {
-          correctCount++;
-        }
-      } else if (Array.isArray(sessionQ.shuffledOptions)) {
-        const selectedText = typeof userResp === "number" ? sessionQ.shuffledOptions[userResp] : String(userResp);
-        let correctText = originalAnswer;
-        if (typeof originalAnswer === "number" && sessionQ.options) {
-          correctText = sessionQ.options[originalAnswer];
-        }
-        if (String(selectedText).trim().toLowerCase() === String(correctText).trim().toLowerCase()) {
-          correctCount++;
-        }
-      }
+    totalScore += evalResult.marksAwarded;
+    maxScore += evalResult.maxMarks;
+
+    if (evalResult.status === "correct" || evalResult.marksAwarded >= 7) {
+      correctCount++;
+    } else if (evalResult.status === "unanswered") {
+      unansweredCount++;
     } else {
-      // Fallback check against raw database question
-      if (q.type === "output") {
-        if (String(userResp).trim().toLowerCase() === String(q.answer).trim().toLowerCase()) {
-          correctCount++;
-        }
-      } else if (Array.isArray(q.options)) {
-        const selectedText = typeof userResp === "number" ? q.options[userResp] : String(userResp);
-        let correctText = q.answer;
-        if (typeof q.answer === "number" && q.options[q.answer]) {
-          correctText = q.options[q.answer];
-        }
-        if (String(selectedText).trim().toLowerCase() === String(correctText).trim().toLowerCase()) {
-          correctCount++;
-        }
-      }
+      incorrectCount++;
     }
   });
 
-  const scorePercent = gradableQuestions.length
-    ? Math.round((correctCount / gradableQuestions.length) * 100)
-    : 0;
+  const percentage = maxScore > 0 ? Math.min(100, Math.round((totalScore / maxScore) * 100)) : 0;
 
   if (attemptId) {
     activeAttemptSessions.delete(attemptId);
@@ -151,10 +365,16 @@ export async function submitAttempt(req, res) {
 
   res.json({
     success: true,
-    scorePercent,
+    scorePercent: percentage,
+    totalScore,
+    maxScore,
+    percentage,
     correctCount,
-    gradableCount: gradableQuestions.length,
-    answeredCount: Object.keys(responses || {}).length,
+    incorrectCount,
+    unansweredCount,
+    answeredCount: rawQuestions.length - unansweredCount,
+    totalQuestions: rawQuestions.length,
+    questionResults,
     elapsedSeconds,
     violationsCount: violations.length,
     violations,

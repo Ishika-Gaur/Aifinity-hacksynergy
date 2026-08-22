@@ -65,10 +65,13 @@ export default function RecentAssessmentsTable({ assessments }) {
               return (
                 <tr
                   key={row.id}
+                  onClick={() => window.location.href = `/assessment`}
                   className="hover:bg-[#EDE6D3]/60 transition-colors duration-200 group cursor-pointer"
                 >
                   <td className="py-3.5 px-4 font-semibold text-[#1B332C] group-hover:text-[#C4952A] transition-colors">
-                    {row.name}
+                    <Link to="/assessment" className="hover:underline">
+                      {row.name}
+                    </Link>
                   </td>
                   <td className="py-3.5 px-4 text-center font-['Kalam'] font-bold text-lg text-[#1B332C]">
                     {row.score}

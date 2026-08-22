@@ -70,7 +70,7 @@ export async function startServer() {
   }
 }
 
-if (process.env.NODE_ENV !== "test" && import.meta.url === `file:///${process.argv[1].replace(/\\/g, "/")}`) {
+if (process.env.NODE_ENV !== "test") {
   startServer();
 }
 
