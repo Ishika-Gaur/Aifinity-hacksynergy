@@ -65,6 +65,13 @@ export default function OnboardingPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [field]);
 
+  // Scroll to the top of the page every time the step changes, so each
+  // step always opens from the top instead of wherever the user last
+  // scrolled to on the previous step.
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+  }, [step]);
+
   const goNext = () => setStep((s) => Math.min(s + 1, 5));
   const goBack = () => setStep((s) => Math.max(s - 1, 1));
 
@@ -88,7 +95,7 @@ export default function OnboardingPage() {
 
   return (
     <>
-      <Section  className="py-16 flex-1">
+      <Section className="py-16 flex-1">
         <Container>
           {/* Progress indicator — shown during the 4-step flow only */}
           {step >= 1 && step <= TOTAL_STEPS && (
@@ -102,11 +109,10 @@ export default function OnboardingPage() {
                 {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
                   <div
                     key={i}
-                    className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${
-                      i < step
+                    className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${i < step
                         ? "bg-[var(--color-primary-600)]"
                         : "bg-[var(--color-primary-100)]"
-                    }`}
+                      }`}
                   />
                 ))}
               </div>
@@ -254,20 +260,44 @@ function SelectableCard({ icon, title, description, selected, onSelect }) {
     <button
       type="button"
       onClick={onSelect}
+      aria-pressed={selected}
       className="text-left transition-transform duration-150 focus:outline-none"
     >
-      <Card
-        icon={icon ? <span className="text-lg font-bold text-[var(--color-primary-600)]">{icon}</span> : undefined}
-        title={title}
-        hoverable={!selected}
-        className={
-          selected
-            ? "border-2 border-[var(--color-primary-600)] bg-[var(--color-primary-50)] shadow-[var(--shadow-card-hover)]"
-            : "border-[var(--color-border)]"
-        }
+      {/*
+        Selection styling lives on this wrapper div instead of being
+        passed into <Card> via className. Card renders its own default
+        border/background classes internally, and depending on how
+        Tailwind orders utilities in the final stylesheet, those
+        defaults can visually win over classes passed in from outside —
+        which is why the highlight wasn't showing. Applying the ring +
+        background here guarantees it always renders on top.
+      */}
+      <div
+        className={`relative rounded-2xl transition-all duration-150 ${selected
+            ? "ring-2 ring-[var(--color-primary-600)] ring-offset-2 ring-offset-[var(--color-bg,transparent)] bg-[var(--color-primary-50)] shadow-[var(--shadow-card-hover)] scale-[1.01]"
+            : ""
+          }`}
       >
-        {description}
-      </Card>
+        {selected && (
+          <span className="absolute -top-2 -right-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-primary-600)] text-xs font-bold text-white shadow-sm">
+            ✓
+          </span>
+        )}
+        <Card
+          icon={
+            icon ? (
+              <span className="text-lg font-bold text-[var(--color-primary-600)]">
+                {icon}
+              </span>
+            ) : undefined
+          }
+          title={title}
+          hoverable={!selected}
+          className={selected ? "border-transparent bg-transparent" : "border-[var(--color-border)]"}
+        >
+          {description}
+        </Card>
+      </div>
     </button>
   );
 }

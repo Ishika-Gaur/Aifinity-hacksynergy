@@ -1,10 +1,11 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Section from "../components/Section";
 import Container from "../components/Container";
 import Card from "../components/Card";
 import Button from "../components/Button";
-import { getAssessmentById, formatType } from "../data/assessments";
+import { formatType } from "../data/assessments";
+import { assessmentApi } from "../services/api";
 
 const CONFIDENCE_OPTIONS = ["Low Confidence", "Medium Confidence", "High Confidence"];
 
@@ -147,7 +148,8 @@ function QuestionBody({ question, response, onAnswer }) {
 
 export default function AssessmentAttemptPage() {
   const { id } = useParams();
-  const assessment = useMemo(() => getAssessmentById(id), [id]);
+  const [assessment, setAssessment] = useState(null);
+  const [loadingAssessment, setLoadingAssessment] = useState(true);
 
   const [current, setCurrent] = useState(0);
   const [responses, setResponses] = useState({}); // { [questionId]: answer }
@@ -155,12 +157,25 @@ export default function AssessmentAttemptPage() {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [completed, setCompleted] = useState(false);
 
+  useEffect(() => {
+    let active = true;
+    assessmentApi.getById(id).then((result) => {
+      if (active && result.success) setAssessment(result.assessment);
+      if (active) setLoadingAssessment(false);
+    });
+    return () => { active = false; };
+  }, [id]);
+
   // Elapsed-time timer — starts the moment the attempt page mounts.
   useEffect(() => {
     if (completed) return;
     const interval = setInterval(() => setElapsedSeconds((s) => s + 1), 1000);
     return () => clearInterval(interval);
   }, [completed]);
+
+  if (loadingAssessment) {
+    return <Section className="py-24"><Container><p className="text-center text-[var(--color-text-muted)]">Loading assessment…</p></Container></Section>;
+  }
 
   if (!assessment) {
     return (

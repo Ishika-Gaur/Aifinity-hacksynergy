@@ -36,6 +36,7 @@ import AiAnalytics from './pages/admin/AiAnalytics';
 import ContentManagement from './pages/admin/ContentManagement';
 import ReportsPage from './pages/admin/ReportsPage';
 import AdminSettings from './pages/admin/AdminSettings';
+import AssessmentManagement from './pages/admin/AssessmentManagement';
 
 function PublicLayout() {
   return (
@@ -89,6 +90,8 @@ function App() {
               <Route path="dashboard" element={<AdminOverview />} />
 
               <Route path="users" element={<UserManagement />} />
+
+              <Route path="assessments" element={<AssessmentManagement />} />
 
               <Route path="analytics" element={<AiAnalytics />} />
 

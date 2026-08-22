@@ -1,5 +1,4 @@
 import {
-  INITIAL_USERS,
   INITIAL_ANALYTICS,
   INITIAL_CONTENT,
   INITIAL_REPORTS,
@@ -7,7 +6,6 @@ import {
 } from "../data/mockAdminData";
 
 const STORAGE_KEYS = {
-  USERS: "aifinity_admin_users",
   CONTENT: "aifinity_admin_content",
   SETTINGS: "aifinity_admin_settings",
 };
@@ -31,31 +29,6 @@ const setStored = (key, value) => {
 };
 
 export const adminService = {
-  getUsers: () => {
-    return getStored(STORAGE_KEYS.USERS, INITIAL_USERS);
-  },
-
-  updateUserRole: (userId, newRole) => {
-    const users = getStored(STORAGE_KEYS.USERS, INITIAL_USERS);
-    const updated = users.map((u) => (u.id === userId ? { ...u, role: newRole } : u));
-    setStored(STORAGE_KEYS.USERS, updated);
-    return updated;
-  },
-
-  updateUserStatus: (userId, newStatus) => {
-    const users = getStored(STORAGE_KEYS.USERS, INITIAL_USERS);
-    const updated = users.map((u) => (u.id === userId ? { ...u, status: newStatus } : u));
-    setStored(STORAGE_KEYS.USERS, updated);
-    return updated;
-  },
-
-  deleteUser: (userId) => {
-    const users = getStored(STORAGE_KEYS.USERS, INITIAL_USERS);
-    const updated = users.filter((u) => u.id !== userId);
-    setStored(STORAGE_KEYS.USERS, updated);
-    return updated;
-  },
-
   getAnalytics: () => {
     return INITIAL_ANALYTICS;
   },
