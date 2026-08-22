@@ -6,9 +6,23 @@ export default function ContentManagement() {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("All");
   const [itemToDelete, setItemToDelete] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const loadContent = async () => {
+    setLoading(true);
+    try {
+      const data = await adminService.getContent();
+      setContentList(data);
+    } catch (err) {
+      setError(err.message || "Failed to load content assets.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    setContentList(adminService.getContent());
+    loadContent();
   }, []);
 
   const filteredContent = contentList.filter((item) => {
@@ -19,11 +33,15 @@ export default function ContentManagement() {
     return matchesSearch && matchesType;
   });
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (!itemToDelete) return;
-    const updated = adminService.deleteContent(itemToDelete.id);
-    setContentList(updated);
-    setItemToDelete(null);
+    try {
+      const updated = await adminService.deleteContent(itemToDelete.id);
+      setContentList(updated);
+      setItemToDelete(null);
+    } catch (err) {
+      setError(err.message || "Failed to delete content asset.");
+    }
   };
 
   return (
@@ -37,6 +55,13 @@ export default function ContentManagement() {
           Review, publish, archive, or delete generated roadmaps, concept maps, and mistake maps across the system.
         </p>
       </div>
+
+      {/* Error banner */}
+      {error && (
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-bold text-rose-700 shadow-xs">
+          {error}
+        </div>
+      )}
 
       {/* Filter bar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
@@ -77,7 +102,16 @@ export default function ContentManagement() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs">
-              {filteredContent.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center text-slate-400">
+                    <span className="inline-flex items-center gap-2">
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+                      Loading content assets from database…
+                    </span>
+                  </td>
+                </tr>
+              ) : filteredContent.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="py-12 text-center text-slate-400">
                     No content items found.

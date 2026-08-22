@@ -22,18 +22,19 @@ function formatTime(totalSeconds) {
 
 function McqQuestion({ question, response, onAnswer }) {
   return (
-    <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
-      {question.options.map((option, index) => (
-        <button key={option} type="button" onClick={() => onAnswer(index)} className="text-left">
-          <Card
-            title={option}
-            hoverable={response !== index}
-            className={
-              response === index
-                ? "border-2 border-[var(--color-primary-600)] bg-[var(--color-primary-50)]"
-                : "border-[var(--color-border)]"
-            }
-          />
+    <div className="mt-6 flex flex-col gap-3">
+      {(question.options || []).map((option, index) => (
+        <button
+          key={index}
+          type="button"
+          onClick={() => onAnswer(index)}
+          className={`flex w-full items-center rounded-xl border px-4 py-3 text-left transition-colors ${
+            response === index
+              ? "border-[var(--color-primary-600)] bg-[var(--color-primary-50)] text-[var(--color-primary-700)]"
+              : "border-[var(--color-border)] bg-white hover:border-[var(--color-primary-600)]"
+          }`}
+        >
+          {option}
         </button>
       ))}
     </div>

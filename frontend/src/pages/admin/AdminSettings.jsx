@@ -5,18 +5,60 @@ export default function AdminSettings() {
   const [settings, setSettings] = useState(null);
   const [activeTab, setActiveTab] = useState("general");
   const [savedMsg, setSavedMsg] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    setSettings(adminService.getSettings());
+    async function loadSettings() {
+      setLoading(true);
+      try {
+        const data = await adminService.getSettings();
+        if (data) setSettings(data);
+        else setError("Could not load settings from server.");
+      } catch (err) {
+        setError(err.message || "Failed to load platform settings.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadSettings();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center rounded-3xl border border-slate-200 bg-white">
+        <div className="flex items-center gap-3 text-slate-500 font-semibold text-sm">
+          <span className="h-5 w-5 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+          Loading platform configuration from database…
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !settings) {
+    return (
+      <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-sm text-rose-700">
+        {error}
+      </div>
+    );
+  }
 
   if (!settings) return null;
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    adminService.updateSettings(settings);
-    setSavedMsg(true);
-    setTimeout(() => setSavedMsg(false), 3000);
+    setSaving(true);
+    setError("");
+    try {
+      await adminService.updateSettings(settings);
+      setSavedMsg(true);
+      setTimeout(() => setSavedMsg(false), 3000);
+    } catch (err) {
+      setError(err.message || "Failed to save settings.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -169,9 +211,10 @@ export default function AdminSettings() {
         <div className="pt-4 border-t border-slate-100 flex justify-end">
           <button
             type="submit"
-            className="rounded-xl bg-indigo-600 px-6 py-2.5 text-xs font-bold text-white shadow-md transition hover:bg-indigo-500 hover:scale-105 active:scale-95"
+            disabled={saving}
+            className="rounded-xl bg-indigo-600 px-6 py-2.5 text-xs font-bold text-white shadow-md transition hover:bg-indigo-500 hover:scale-105 active:scale-95 disabled:opacity-50"
           >
-            Save Settings
+            {saving ? "Saving…" : "Save Settings"}
           </button>
         </div>
       </form>
