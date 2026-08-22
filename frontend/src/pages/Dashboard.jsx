@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Container from "../components/Container";
 import DashboardHeader from "../components/dashboard/DashboardHeader";
 import StatCard from "../components/dashboard/StatCard";
@@ -9,29 +9,185 @@ import RoadmapSection from "../components/dashboard/RoadmapSection";
 import RecentAssessmentsTable from "../components/dashboard/RecentAssessmentsTable";
 import NextStepsCard from "../components/dashboard/NextStepsCard";
 import CareerGoalCard from "../components/dashboard/CareerGoalCard";
-import { careerGoalPresets, dashboardData } from "../data/dashboardData";
+import { dashboardApi } from "../services/api";
 
+// ─────────────────────────────────────────────────────────────────
+// Loading Skeleton — shown while the dashboard API call is in flight.
+// Preserves the layout so there's no content jump after data loads.
+// ─────────────────────────────────────────────────────────────────
+function DashboardSkeleton() {
+  return (
+    <div className="flex flex-col gap-8 animate-pulse">
+      {/* Header skeleton */}
+      <div className="rounded-md bg-[#FBF8F0] border border-[#2E4F42]/15 p-8 h-36" />
+
+      {/* Stat cards skeleton */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="rounded-md bg-[#FBF8F0] border border-[#2E4F42]/15 p-6 h-32" />
+        ))}
+      </div>
+
+      {/* Chart + insight skeleton */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 rounded-md bg-[#FBF8F0] border border-[#2E4F42]/15 p-6 h-72" />
+        <div className="lg:col-span-1 rounded-md bg-[#1B332C]/80 border border-[#C4952A]/20 p-6 h-72" />
+      </div>
+
+      {/* Modules skeleton */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="rounded-md bg-[#FBF8F0] border border-[#2E4F42]/15 p-6 h-64" />
+        ))}
+      </div>
+
+      {/* Roadmap skeleton */}
+      <div className="rounded-md bg-[#FBF8F0] border border-[#2E4F42]/15 p-8 h-52" />
+
+      {/* Assessments table skeleton */}
+      <div className="rounded-md bg-[#FBF8F0] border border-[#2E4F42]/15 p-8 h-48" />
+
+      {/* Bottom row skeleton */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 rounded-md bg-[#FBF8F0] border border-[#2E4F42]/15 p-6 h-48" />
+        <div className="lg:col-span-1 rounded-md bg-[#FBF8F0] border border-[#2E4F42]/15 p-6 h-48" />
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Error State — shown if the dashboard API returns an error.
+// ─────────────────────────────────────────────────────────────────
+function DashboardError({ onRetry }) {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[50vh] gap-6">
+      <div className="rounded-md bg-[#FBF8F0] border border-[#C1443C]/30 p-8 text-center max-w-md shadow-[var(--shadow-card)]">
+        <span className="text-4xl">⚠️</span>
+        <h2 className="mt-4 font-['Kalam'] text-2xl font-bold text-[#1B332C]">
+          Unable to load your dashboard.
+        </h2>
+        <p className="mt-2 text-sm text-[#5B6B5F]">
+          Something went wrong while fetching your data. Please try again.
+        </p>
+        <button
+          onClick={onRetry}
+          className="mt-6 inline-flex items-center gap-2 rounded-md bg-[#1B332C] px-5 py-2.5 text-sm font-semibold text-[#E8C547] border border-[#C4952A]/40 hover:bg-[#2E4F42] transition-colors cursor-pointer"
+        >
+          Try Again →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Empty Progress Chart — shown when user has no assessments yet.
+// Replaces the chart with a friendly call-to-action.
+// ─────────────────────────────────────────────────────────────────
+function EmptyProgressChart() {
+  return (
+    <div className="rounded-md bg-[#FBF8F0] p-6 border border-[#2E4F42]/12 shadow-[var(--shadow-card)] flex flex-col gap-4">
+      <div>
+        <h2 className="font-sans text-xl sm:text-2xl font-bold text-[#1B332C]">
+          YOUR LEARNING PROGRESS
+        </h2>
+        <p className="text-xs sm:text-sm text-[#5B6B5F] font-normal mt-0.5">
+          Accuracy & performance evolution over time
+        </p>
+      </div>
+      <div className="flex flex-col items-center justify-center rounded bg-[#F1EDE1]/50 border border-[#2E4F42]/08 p-10 gap-3 min-h-[200px]">
+        <span className="text-4xl">📊</span>
+        <p className="font-['Kalam'] text-xl text-[#1B332C] text-center">
+          No assessment history yet.
+        </p>
+        <p className="text-sm text-[#5B6B5F] text-center max-w-xs">
+          Complete your first assessment to start tracking your learning progress here.
+        </p>
+        <a
+          href="/assessment"
+          className="mt-2 inline-flex items-center gap-2 rounded-md bg-[#1B332C] px-4 py-2 text-sm font-semibold text-[#E8C547] border border-[#C4952A]/40 hover:bg-[#2E4F42] transition-colors"
+        >
+          Browse Assessments →
+        </a>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Dashboard — main page component
+// ─────────────────────────────────────────────────────────────────
 export default function Dashboard() {
-  const [selectedRole, setSelectedRole] = useState("Machine Learning Engineer");
-  const [customGoalOverride, setCustomGoalOverride] = useState(null);
+  const [dashData, setDashData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Retrieve active dataset matching the selected career goal pathway
-  const activePreset = careerGoalPresets[selectedRole] || dashboardData;
-
-  const activeDataset = customGoalOverride
-    ? {
-        ...activePreset,
-        careerGoal: customGoalOverride,
-        skillGap: {
-          ...activePreset.skillGap,
-          targetCareer: customGoalOverride.role,
-        },
+  const fetchDashboard = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await dashboardApi.get();
+      if (res.success && res.data) {
+        setDashData(res.data);
+      } else {
+        setError(res.error || "Failed to load dashboard data.");
       }
-    : activePreset;
+    } catch (err) {
+      setError("Failed to load dashboard data.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchDashboard();
+  }, [fetchDashboard]);
+
+  /**
+   * Persists the updated career goal to the backend, then re-fetches
+   * the dashboard so all components reflect the new goal immediately.
+   */
+  const handleUpdateGoal = async (updatedGoal) => {
+    if (!updatedGoal?.role) return;
+    try {
+      const res = await dashboardApi.updateCareerGoal({
+        role: updatedGoal.role,
+        tags: updatedGoal.tags || [],
+      });
+      if (res.success) {
+        // Re-fetch the whole dashboard so roadmap, skillGap, etc. reflect the new goal
+        await fetchDashboard();
+      }
+    } catch (err) {
+      console.error("[Dashboard] Career goal update failed:", err);
+    }
+  };
+
+  // ── Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen py-6 sm:py-10">
+        <Container size="wide">
+          <DashboardSkeleton />
+        </Container>
+      </div>
+    );
+  }
+
+  // ── Error state
+  if (error || !dashData) {
+    return (
+      <div className="min-h-screen py-6 sm:py-10">
+        <Container size="wide">
+          <DashboardError onRetry={fetchDashboard} />
+        </Container>
+      </div>
+    );
+  }
 
   const {
     user,
-    quotes = dashboardData.quotes,
     stats,
     progressSeries,
     aiInsight,
@@ -42,26 +198,20 @@ export default function Dashboard() {
     assessments,
     recommendations,
     careerGoal,
-  } = activeDataset;
+  } = dashData;
 
-  const handleUpdateGoal = (updatedGoal) => {
-    if (updatedGoal?.role) {
-      if (careerGoalPresets[updatedGoal.role]) {
-        setSelectedRole(updatedGoal.role);
-        setCustomGoalOverride(null);
-      } else {
-        setSelectedRole(updatedGoal.role);
-        setCustomGoalOverride(updatedGoal);
-      }
-    }
-  };
+  const hasAssessmentHistory =
+    progressSeries &&
+    (progressSeries["7D"]?.length > 0 ||
+      progressSeries["30D"]?.length > 0 ||
+      progressSeries["3M"]?.length > 0);
 
   return (
     <div className="min-h-screen py-6 sm:py-10">
       <Container size="wide">
         <div className="flex flex-col gap-8">
           {/* 1. DASHBOARD HEADER WITH ROTATING MOTIVATIONAL QUOTES */}
-          <DashboardHeader user={user} quotes={quotes} />
+          <DashboardHeader user={user} quotes={[]} />
 
           {/* 2. LEARNING OVERVIEW (4 STAT CARDS) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -114,7 +264,11 @@ export default function Dashboard() {
           {/* 3. LEARNING PROGRESS CHART & 4. AI LEARNING INSIGHT */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
             <div className="lg:col-span-2">
-              <LearningProgressChart key={selectedRole} seriesData={progressSeries} />
+              {hasAssessmentHistory ? (
+                <LearningProgressChart seriesData={progressSeries} />
+              ) : (
+                <EmptyProgressChart />
+              )}
             </div>
             <div className="lg:col-span-1 h-full">
               <AIInsightCard aiInsight={aiInsight} />

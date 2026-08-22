@@ -118,3 +118,23 @@ export const assessmentApi = {
   update: (id, assessment) => request(`/assessments/admin/${id}`, { method: "PUT", body: JSON.stringify(assessment) }),
   remove: (id) => request(`/assessments/admin/${id}`, { method: "DELETE" }),
 };
+
+export const dashboardApi = {
+  /**
+   * GET /api/dashboard
+   * Returns fully aggregated dashboard data for the authenticated user.
+   * All metrics are computed from real attempt history — no mock data.
+   */
+  get: () => request("/dashboard"),
+
+  /**
+   * PUT /api/dashboard/career-goal
+   * Persists the user's updated career goal to their profile in the database.
+   */
+  updateCareerGoal: (goal) =>
+    request("/dashboard/career-goal", {
+      method: "PUT",
+      body: JSON.stringify(goal),
+    }),
+};
+
