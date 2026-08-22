@@ -1,18 +1,15 @@
-import React, { useMemo, useState, useEffect, useRef } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import Section from "../components/Section";
 import SectionHeading from "../components/SectionHeading";
 import Button from "../components/Button";
 import { ArrowRight } from "lucide-react";
 import {
-  CATEGORIES,
   TYPE_FILTERS,
   DIFFICULTY_FILTERS,
-  ASSESSMENTS,
   getUserProfile,
-  getDailyAssessments,
-  getRecommendedAssessments,
   formatType,
 } from "../data/assessments";
+import { assessmentApi } from "../services/api";
 
 const DIFFICULTY_STYLES = {
   Easy: "text-green-600 bg-green-50 border-green-200",
@@ -490,11 +487,28 @@ export default function AssessmentPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [activeSection, setActiveSection] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [assessments, setAssessments] = useState([]);
+  const [loadError, setLoadError] = useState("");
   const ITEMS_PER_PAGE = 6;
 
   const profile = useMemo(() => getUserProfile(), []);
-  const recommended = useMemo(() => getRecommendedAssessments(profile), [profile]);
-  const dailyAssessments = useMemo(() => getDailyAssessments(profile), [profile]);
+  useEffect(() => {
+    assessmentApi.getPublished().then((result) => {
+      if (result.success) setAssessments(result.assessments);
+      else setLoadError(result.error || "Assessments could not be loaded.");
+    });
+  }, []);
+  const categories = useMemo(() => ["All", ...new Set(assessments.map((assessment) => assessment.category))], [assessments]);
+  const recommended = useMemo(() => {
+    const fieldMatches = assessments.filter((assessment) => assessment.field === profile.field);
+    return (fieldMatches.length ? fieldMatches : assessments).slice(0, 6);
+  }, [assessments, profile]);
+  const dailyAssessments = useMemo(() => assessments.map((assessment, index) => ({
+    ...assessment,
+    day: index + 1,
+    isToday: index === 0,
+    status: "Available",
+  })), [assessments]);
 
   const completedDays = dailyAssessments.filter((d) => d.status === "Completed").length;
   const todayDay = new Date().getDate();
@@ -523,7 +537,7 @@ export default function AssessmentPage() {
   }, []);
 
   const exploreList = useMemo(() => {
-    return ASSESSMENTS.filter((a) => {
+    return assessments.filter((a) => {
       if (category !== "All" && a.category !== category) return false;
       if (difficulty !== "All") {
         // Exact match for single-difficulty assessments, or "contains a
@@ -534,7 +548,7 @@ export default function AssessmentPage() {
       if (type !== "All" && !a.questions.some((q) => q.type === type)) return false;
       return true;
     });
-  }, [category, difficulty, type]);
+  }, [assessments, category, difficulty, type]);
 
   // Reset to page 1 when filters change
   React.useEffect(() => {
@@ -655,8 +669,8 @@ export default function AssessmentPage() {
               subtitle="Pick a track and work through it at your own pace."
             />
             <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-              {CATEGORIES.filter((c) => c !== "All").map((c, i) => {
-                const count = ASSESSMENTS.filter((a) => a.category === c).length;
+              {categories.filter((c) => c !== "All").map((c, i) => {
+                const count = assessments.filter((a) => a.category === c).length;
                 return (
                   <CategoryTile
                     key={c}
@@ -678,6 +692,12 @@ export default function AssessmentPage() {
               completedDays={completedDays}
             />
           </div>
+
+          {loadError && (
+            <div className="mb-8 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+              {loadError}
+            </div>
+          )}
 
           {/* RECOMMENDED FOR YOU */}
           <Section id="recommended" className="scroll-mt-24">
@@ -781,7 +801,7 @@ export default function AssessmentPage() {
                   Category
                 </span>
                 <div className="flex flex-wrap gap-2">
-                  {CATEGORIES.map((c) => (
+                  {categories.map((c) => (
                     <button
                       key={c}
                       type="button"

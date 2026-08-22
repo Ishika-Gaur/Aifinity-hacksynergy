@@ -121,6 +121,13 @@ export async function login(req, res) {
       });
     }
 
+    if (user.status === "suspended") {
+      return res.status(403).json({ success: false, message: "This account has been suspended." });
+    }
+
+    user.lastLoginAt = new Date();
+    await user.save();
+
     const token = generateToken(user._id, user.role);
     res.cookie("token", token, getCookieOptions());
 

@@ -1,21 +1,22 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { adminService } from "../../services/adminService";
+import { adminApi } from "../../services/api";
 
 export default function AdminOverview() {
   const [users, setUsers] = useState([]);
   const [analytics, setAnalytics] = useState(null);
 
   useEffect(() => {
-    setUsers(adminService.getUsers());
+    adminApi.getUsers().then((result) => setUsers(result.success ? result.users : []));
     setAnalytics(adminService.getAnalytics());
   }, []);
 
   if (!analytics) return null;
 
   const totalUsers = users.length;
-  const activeUsers = users.filter((u) => u.status === "Active").length;
-  const suspendedUsers = users.filter((u) => u.status === "Suspended").length;
+  const activeUsers = users.filter((u) => u.status === "active").length;
+  const suspendedUsers = users.filter((u) => u.status === "suspended").length;
 
   return (
     <div className="space-y-8">
