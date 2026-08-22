@@ -1,18 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import React, { useEffect, useState, useCallback, useRef } from "react";
+import { useParams, Link } from "react-router-dom";
 import Section from "../components/Section";
 import Container from "../components/Container";
 import Card from "../components/Card";
 import Button from "../components/Button";
 import { formatType } from "../data/assessments";
-import { assessmentApi } from "../services/api";
+import { createAttemptSession, submitAttemptSession } from "../services/assessmentService";
 
 const CONFIDENCE_OPTIONS = ["Low Confidence", "Medium Confidence", "High Confidence"];
-
-/* Types with a definite correct answer we can auto-grade.
-   "conceptual", "coding", and "problem-solving" are free text —
-   attempted only, not graded here (real grading comes with AI analysis later). */
-const GRADABLE_TYPES = ["mcq", "scenario", "logical-reasoning", "data-interpretation", "output"];
+const MAX_VIOLATIONS = 3;
 
 function formatTime(totalSeconds) {
   const m = Math.floor(totalSeconds / 60)
@@ -20,17 +16,6 @@ function formatTime(totalSeconds) {
     .padStart(2, "0");
   const s = (totalSeconds % 60).toString().padStart(2, "0");
   return `${m}:${s}`;
-}
-
-function isCorrect(question, response) {
-  if (!GRADABLE_TYPES.includes(question.type) || response === undefined) return false;
-  if (question.type === "output") {
-    return (
-      String(response).trim().toLowerCase() ===
-      String(question.answer).trim().toLowerCase()
-    );
-  }
-  return response === question.answer;
 }
 
 /* ---------------- Question type renderers ---------------- */
@@ -55,10 +40,6 @@ function McqQuestion({ question, response, onAnswer }) {
   );
 }
 
-/* Scenario, Logical Reasoning, and Data Interpretation questions all use
-   the same select-one-option interaction as MCQ — kept as separate
-   wrappers so each can get its own visual treatment later without
-   touching the others. */
 function ScenarioQuestion(props) {
   return <McqQuestion {...props} />;
 }
@@ -83,9 +64,6 @@ function ConceptualQuestion({ response, onAnswer }) {
   );
 }
 
-/* Problem Solving spans very different fields (algorithmic, case-study,
-   design-decision, campaign strategy...) so it stays free text — the
-   same open-ended shape works for all of them. */
 function ProblemSolvingQuestion({ response, onAnswer }) {
   return (
     <textarea
@@ -149,46 +127,244 @@ function QuestionBody({ question, response, onAnswer }) {
 export default function AssessmentAttemptPage() {
   const { id } = useParams();
   const [assessment, setAssessment] = useState(null);
+  const [attemptId, setAttemptId] = useState(null);
   const [loadingAssessment, setLoadingAssessment] = useState(true);
 
   const [current, setCurrent] = useState(0);
-  const [responses, setResponses] = useState({}); // { [questionId]: answer }
-  const [confidence, setConfidence] = useState({}); // { [questionId]: "Low" | "Medium" | "High" }
+  const [responses, setResponses] = useState({});
+  const [confidence, setConfidence] = useState({});
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const [completed, setCompleted] = useState(false);
 
-  useEffect(() => {
-    let active = true;
-    assessmentApi.getById(id).then((result) => {
-      if (active && result.success) setAssessment(result.assessment);
-      if (active) setLoadingAssessment(false);
-    });
-    return () => { active = false; };
+  // Security & Anti-Cheat States
+  const [violations, setViolations] = useState([]);
+  const [isBlurred, setIsBlurred] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [securityWarning, setSecurityWarning] = useState("");
+
+  // Submitting / Result States
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [completed, setCompleted] = useState(false);
+  const [resultData, setResultData] = useState(null);
+
+  const attemptContainerRef = useRef(null);
+
+  // Initialize fresh, randomized attempt session
+  const initAttempt = useCallback(async () => {
+    setLoadingAssessment(true);
+    setCompleted(false);
+    setResultData(null);
+    setResponses({});
+    setConfidence({});
+    setElapsedSeconds(0);
+    setViolations([]);
+    setCurrent(0);
+
+    const res = await createAttemptSession(id);
+    if (res.success) {
+      setAssessment(res.assessment);
+      setAttemptId(res.attemptId);
+    } else {
+      setAssessment(null);
+    }
+    setLoadingAssessment(false);
   }, [id]);
 
-  // Elapsed-time timer — starts the moment the attempt page mounts.
   useEffect(() => {
-    if (completed) return;
+    initAttempt();
+  }, [initAttempt]);
+
+  // Elapsed time timer
+  useEffect(() => {
+    if (completed || loadingAssessment || !assessment) return;
     const interval = setInterval(() => setElapsedSeconds((s) => s + 1), 1000);
     return () => clearInterval(interval);
-  }, [completed]);
+  }, [completed, loadingAssessment, assessment]);
+
+  const handleFinalSubmitRef = useRef(null);
+
+  // Submit assessment and evaluate answers securely
+  const handleFinalSubmit = useCallback(
+    async (overrideViolations) => {
+      if (isSubmitting || completed) return;
+      setIsSubmitting(true);
+
+      const activeViolations = overrideViolations || violations;
+      const result = await submitAttemptSession(
+        id,
+        attemptId,
+        responses,
+        elapsedSeconds,
+        activeViolations
+      );
+
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+      }
+
+      setResultData(result);
+      setCompleted(true);
+      setIsSubmitting(false);
+    },
+    [isSubmitting, completed, violations, id, attemptId, responses, elapsedSeconds]
+  );
+
+  useEffect(() => {
+    handleFinalSubmitRef.current = handleFinalSubmit;
+  }, [handleFinalSubmit]);
+
+  // Helper to record a security violation
+  const addViolation = useCallback(
+    (reason) => {
+      if (completed) return;
+      const newRecord = { timestamp: new Date().toLocaleTimeString(), reason };
+
+      setViolations((prev) => {
+        const nextViolations = [...prev, newRecord];
+        const count = nextViolations.length;
+
+        setSecurityWarning(
+          `⚠️ Security Notice (${count}/${MAX_VIOLATIONS}): ${reason}`
+        );
+
+        if (count >= MAX_VIOLATIONS) {
+          setTimeout(() => {
+            if (handleFinalSubmitRef.current) {
+              handleFinalSubmitRef.current(nextViolations);
+            }
+          }, 300);
+        }
+        return nextViolations;
+      });
+    },
+    [completed]
+  );
+
+  // ---------------- ANTI-CHEAT & SECURITY LISTENERS ----------------
+  useEffect(() => {
+    if (completed || loadingAssessment || !assessment) return;
+
+    // 1. Tab visibility and Window Blur Detection
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        setIsBlurred(true);
+        addViolation("Tab switched / hidden window detected");
+      }
+    };
+
+    const handleWindowBlur = () => {
+      setIsBlurred(true);
+      addViolation("Window focus lost or screen capture attempt");
+    };
+
+    // 2. Fullscreen status detection
+    const handleFullscreenChange = () => {
+      const isFS = !!document.fullscreenElement;
+      setIsFullscreen(isFS);
+      if (!isFS && !completed) {
+        addViolation("Exited fullscreen security mode");
+      }
+    };
+
+    // 3. Prohibited key shortcuts (PrintScreen, Ctrl+P, F12, DevTools)
+    const handleKeyDown = (e) => {
+      // PrintScreen Key
+      if (e.key === "PrintScreen") {
+        e.preventDefault();
+        try {
+          navigator.clipboard?.writeText("");
+        } catch (_) {}
+        addViolation("Screenshot command (PrintScreen) intercepted");
+      }
+
+      // Ctrl/Cmd + P (Print)
+      if ((e.ctrlKey || e.metaKey) && (e.key === "p" || e.key === "P")) {
+        e.preventDefault();
+        addViolation("Print command (Ctrl+P) blocked");
+      }
+
+      // Ctrl/Cmd + S (Save)
+      if ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "S")) {
+        e.preventDefault();
+        addViolation("Save page command blocked");
+      }
+
+      // DevTools Shortcuts: F12, Ctrl+Shift+I/J/C, Ctrl+U
+      if (
+        e.key === "F12" ||
+        ((e.ctrlKey || e.metaKey) && e.shiftKey && ["I", "J", "C", "i", "j", "c"].includes(e.key)) ||
+        ((e.ctrlKey || e.metaKey) && (e.key === "u" || e.key === "U"))
+      ) {
+        e.preventDefault();
+        addViolation("Inspect/DevTools key shortcut blocked");
+      }
+    };
+
+    // 4. Copy / Cut / ContextMenu Prevention
+    const handleCopyCut = (e) => {
+      e.preventDefault();
+      setSecurityWarning("⚠️ Copying and cutting text is disabled during assessments.");
+    };
+
+    const handleContextMenu = (e) => {
+      e.preventDefault();
+      setSecurityWarning("⚠️ Right-click context menu is disabled during assessments.");
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("blur", handleWindowBlur);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    window.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("copy", handleCopyCut);
+    document.addEventListener("cut", handleCopyCut);
+    document.addEventListener("contextmenu", handleContextMenu);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("blur", handleWindowBlur);
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      window.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("copy", handleCopyCut);
+      document.removeEventListener("cut", handleCopyCut);
+      document.removeEventListener("contextmenu", handleContextMenu);
+    };
+  }, [completed, loadingAssessment, assessment, addViolation]);
+
+  // Request Fullscreen
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  };
+
+
 
   if (loadingAssessment) {
-    return <Section className="py-24"><Container><p className="text-center text-[var(--color-text-muted)]">Loading assessment…</p></Container></Section>;
+    return (
+      <Section className="py-24">
+        <Container>
+          <div className="mx-auto max-w-md text-center">
+            <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-[#1B332C] border-t-transparent"></div>
+            <p className="font-medium text-[var(--color-text-muted)]">
+              Generating fresh randomized assessment attempt...
+            </p>
+          </div>
+        </Container>
+      </Section>
+    );
   }
 
   if (!assessment) {
     return (
-      <Section  className="py-24">
+      <Section className="py-24">
         <Container>
           <div className="mx-auto max-w-md text-center">
-            <h1 className="text-2xl font-bold text-[var(--color-text-h)]">
-              Assessment not found
-            </h1>
+            <h1 className="text-2xl font-bold text-[var(--color-text-h)]">Assessment not found</h1>
             <p className="mt-2 text-sm text-[var(--color-text-muted)]">
               This assessment may have been moved or doesn't exist.
             </p>
-            <Button as="a" href="/assessment" className="mt-6">
+            <Button as={Link} to="/assessment" className="mt-6">
               Back to Assessments
             </Button>
           </div>
@@ -197,8 +373,8 @@ export default function AssessmentAttemptPage() {
     );
   }
 
-  const questions = assessment.questions;
-  const question = questions[current];
+  const questions = assessment.questions || [];
+  const question = questions[current] || {};
   const answeredCount = Object.keys(responses).length;
 
   function setAnswer(value) {
@@ -213,196 +389,323 @@ export default function AssessmentAttemptPage() {
     setCurrent(Math.max(0, Math.min(index, questions.length - 1)));
   }
 
-  function handleSubmit() {
-    setCompleted(true);
-  }
-
-  /* ---------------- Results ---------------- */
-  if (completed) {
-    const gradableQuestions = questions.filter((q) => GRADABLE_TYPES.includes(q.type));
-    const correctCount = gradableQuestions.filter((q) =>
-      isCorrect(q, responses[q.id])
-    ).length;
-    const scorePercent = gradableQuestions.length
-      ? Math.round((correctCount / gradableQuestions.length) * 100)
-      : 0;
+  /* ---------------- RESULTS VIEW ---------------- */
+  if (completed && resultData) {
+    const { scorePercent, correctCount, gradableCount, autoSubmitted } = resultData;
 
     return (
-      <Section  className="py-16">
+      <Section className="py-16 bg-[#FBF8F0] min-h-screen">
         <Container>
           <div className="mx-auto flex max-w-lg flex-col items-center gap-6 text-center">
-            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-primary-50)] text-3xl">
-              ✓
+            <span
+              className={`flex h-16 w-16 items-center justify-center rounded-full text-3xl shadow-md ${
+                autoSubmitted
+                  ? "bg-red-100 text-red-600 border border-red-200"
+                  : "bg-emerald-100 text-emerald-700 border border-emerald-200"
+              }`}
+            >
+              {autoSubmitted ? "⚠️" : "✓"}
             </span>
-            <h1 className="text-4xl font-bold tracking-tight text-[var(--color-text-h)] sm:text-5xl">
-              Assessment Completed!
-            </h1>
+
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-[#1B332C] sm:text-4xl">
+                {autoSubmitted ? "Assessment Auto-Submitted" : "Assessment Completed!"}
+              </h1>
+              {autoSubmitted && (
+                <p className="mt-2 text-xs font-semibold uppercase tracking-wider text-red-600 bg-red-50 px-3 py-1 rounded-full border border-red-200 inline-block">
+                  Auto-Submitted due to 3 Security Violations
+                </p>
+              )}
+            </div>
 
             <div className="mt-2 grid w-full grid-cols-2 gap-4 sm:grid-cols-4">
               <StatBlock label="Score" value={`${scorePercent}%`} />
               <StatBlock label="Attempted" value={`${answeredCount}/${questions.length}`} />
-              <StatBlock label="Correct" value={`${correctCount}/${gradableQuestions.length}`} />
+              <StatBlock label="Correct" value={`${correctCount}/${gradableCount}`} />
               <StatBlock label="Time Taken" value={formatTime(elapsedSeconds)} />
             </div>
 
-            <p className="mt-4 max-w-sm text-sm leading-relaxed text-[var(--color-text-muted)]">
-              Your detailed learning analysis will appear on your Dashboard.
+            {/* Violation History Summary */}
+            {violations.length > 0 && (
+              <div className="w-full text-left rounded-xl border border-amber-200 bg-amber-50/70 p-4">
+                <p className="text-xs font-bold uppercase tracking-wider text-amber-800 mb-2">
+                  Security Log ({violations.length} Warning{violations.length > 1 ? "s" : ""})
+                </p>
+                <ul className="space-y-1 text-xs text-amber-900">
+                  {violations.map((v, i) => (
+                    <li key={i} className="flex justify-between border-b border-amber-200/50 pb-1">
+                      <span>• {v.reason}</span>
+                      <span className="font-mono text-amber-700">{v.timestamp}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <p className="mt-2 max-w-sm text-sm leading-relaxed text-[#5B6B5F]">
+              Your performance telemetry has been evaluated securely. Answers were validated on the server.
             </p>
 
-            <Button as="a" href="/dashboard" size="lg" className="mt-2">
-              Go to Dashboard
-            </Button>
+            <div className="flex flex-wrap justify-center gap-3 w-full">
+              <Button onClick={initAttempt} variant="outline" size="md">
+                🔄 Start Fresh Attempt
+              </Button>
+              <Button as={Link} to="/dashboard" size="md">
+                Go to Dashboard
+              </Button>
+            </div>
           </div>
         </Container>
       </Section>
     );
   }
 
-  /* ---------------- Attempt UI ---------------- */
+  /* ---------------- ATTEMPT VIEW ---------------- */
   return (
-    <Section background="white" className="py-10">
-      <Container>
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_280px]">
-          {/* Main question area */}
-          <div>
-            <div className="mb-6 flex items-center justify-between">
-              <button
-                type="button"
-                onClick={() => goTo(current - 1)}
-                disabled={current === 0}
-                className="text-sm font-medium text-[var(--color-primary-600)] disabled:opacity-30"
-              >
-                ← Previous
-              </button>
-              <span className="text-sm font-medium text-[var(--color-text-muted)]">
-                Question {current + 1} of {questions.length}
-              </span>
-            </div>
+    <div
+      ref={attemptContainerRef}
+      className="relative min-h-screen bg-white select-none"
+      style={{
+        WebkitUserSelect: "none",
+        MozUserSelect: "none",
+        msUserSelect: "none",
+        userSelect: "none",
+      }}
+    >
+      {/* Print stylesheet deterrence */}
+      <style>{`
+        @media print {
+          body { display: none !important; }
+        }
+      `}</style>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-primary-600)]">
-                {formatType(question.type)}
-              </span>
-              {question.difficulty && (
-                <span className="rounded-full border border-[var(--color-border)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
-                  {question.difficulty}
-                </span>
-              )}
-            </div>
+      {/* SCREEN BLUR / FOCUS LOST PROTECTION SHIELD */}
+      {isBlurred && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#1B332C]/95 backdrop-blur-md p-6 text-center text-white">
+          <div className="rounded-2xl border border-[#D9A62B]/40 bg-[#1B332C] p-8 shadow-2xl max-w-md">
+            <span className="text-4xl">⚠️</span>
+            <h2 className="mt-4 text-2xl font-bold text-[#E8C547]">Assessment Content Protected</h2>
+            <p className="mt-2 text-sm text-slate-300 leading-relaxed">
+              Window focus lost or tab switched. Assessment content is hidden for security deterrence.
+            </p>
+            <p className="mt-4 text-xs font-mono text-[#D9A62B]">
+              Return to window and click Resume Assessment.
+            </p>
+            <Button
+              onClick={() => setIsBlurred(false)}
+              className="mt-6 w-full shadow-lg"
+            >
+              Resume Assessment
+            </Button>
+          </div>
+        </div>
+      )}
 
-            {question.context && (
-              <p className="mt-3 rounded-lg bg-[var(--color-surface-secondary)] px-4 py-3 text-sm leading-relaxed text-[var(--color-text-muted)]">
-                {question.context}
-              </p>
-            )}
-
-            <h1 className="mt-2 text-2xl font-bold leading-snug tracking-tight text-[var(--color-text-h)] sm:text-3xl">
-              {question.question}
-            </h1>
-
-            <QuestionBody
-              question={question}
-              response={responses[question.id]}
-              onAnswer={setAnswer}
-            />
-
-            {/* Confidence level — shown once the question has a response */}
-            {responses[question.id] !== undefined && responses[question.id] !== "" && (
-              <div className="mt-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-secondary)] p-4">
-                <p className="mb-3 text-sm font-medium text-[var(--color-text-h)]">
-                  How confident are you?
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {CONFIDENCE_OPTIONS.map((level) => (
-                    <button
-                      key={level}
-                      type="button"
-                      onClick={() => setQuestionConfidence(level)}
-                      className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-                        confidence[question.id] === level
-                          ? "border-[var(--color-primary-600)] bg-[var(--color-primary-600)] text-white"
-                          : "border-[var(--color-border)] bg-white text-[var(--color-text-muted)] hover:border-[var(--color-primary-300)]"
-                      }`}
-                    >
-                      {level}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Bottom nav */}
-            <div className="mt-10 flex items-center justify-between border-t border-[var(--color-border)] pt-6">
-              <Button
-                variant="outline"
-                onClick={() => goTo(current - 1)}
-                disabled={current === 0}
-              >
-                Previous
-              </Button>
-
-              {current === questions.length - 1 ? (
-                <Button onClick={handleSubmit}>Submit Assessment</Button>
-              ) : (
-                <Button onClick={() => goTo(current + 1)}>Next</Button>
-              )}
-            </div>
+      {/* TOP SECURITY BAR */}
+      <div className="border-b border-[#2E4F42]/15 bg-[#1B332C] px-4 py-2.5 text-white">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 text-xs">
+          <div className="flex items-center gap-3">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 px-2.5 py-1 font-mono font-semibold text-emerald-300 border border-emerald-500/30">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Anti-Cheat Active
+            </span>
+            <span className="hidden sm:inline text-slate-300">
+              🔒 Dynamic Questions · Copy & Screenshot Protection Active
+            </span>
           </div>
 
-          {/* Side panel — nav, progress, timer */}
-          <aside className="lg:sticky lg:top-8 lg:self-start">
-            <div className="rounded-xl border border-[var(--color-border)] p-5">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-[var(--color-text-h)]">
-                  Time Elapsed
-                </span>
-                <span className="font-mono text-sm font-semibold text-[var(--color-primary-600)]">
-                  {formatTime(elapsedSeconds)}
+          <div className="flex items-center gap-3 font-mono">
+            {/* Warning Counter */}
+            <span
+              className={`rounded-full px-2.5 py-1 font-bold ${
+                violations.length >= 2
+                  ? "bg-red-500/30 text-red-300 border border-red-400/40"
+                  : violations.length === 1
+                  ? "bg-amber-500/30 text-amber-300 border border-amber-400/40"
+                  : "bg-slate-800 text-slate-300 border border-slate-700"
+              }`}
+            >
+              Warnings: {violations.length}/{MAX_VIOLATIONS}
+            </span>
+
+            {/* Fullscreen Button */}
+            <button
+              type="button"
+              onClick={toggleFullscreen}
+              className="rounded bg-slate-800 px-2.5 py-1 text-slate-200 hover:bg-slate-700 transition"
+            >
+              {isFullscreen ? "Exit Fullscreen" : "⛶ Fullscreen"}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* SECURITY WARNING TOAST */}
+      {securityWarning && (
+        <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-center text-xs font-semibold text-amber-900 flex items-center justify-center gap-2">
+          <span>{securityWarning}</span>
+          <button
+            onClick={() => setSecurityWarning("")}
+            className="ml-2 font-bold text-amber-700 hover:text-amber-950"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* MAIN QUESTION SECTION */}
+      <Section background="white" className="py-8">
+        <Container>
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_280px]">
+            <div>
+              <div className="mb-6 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => goTo(current - 1)}
+                  disabled={current === 0}
+                  className="text-sm font-medium text-[var(--color-primary-600)] disabled:opacity-30"
+                >
+                  ← Previous
+                </button>
+                <span className="text-sm font-medium text-[var(--color-text-muted)]">
+                  Question {current + 1} of {questions.length}
                 </span>
               </div>
 
-              <div className="mt-4">
-                <div className="mb-1.5 flex items-center justify-between text-xs text-[var(--color-text-muted)]">
-                  <span>Progress</span>
-                  <span>
-                    {answeredCount}/{questions.length}
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-primary-600)]">
+                  {formatType(question.type)}
+                </span>
+                {question.difficulty && (
+                  <span className="rounded-full border border-[var(--color-border)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
+                    {question.difficulty}
                   </span>
-                </div>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--color-surface-secondary)]">
-                  <div
-                    className="h-full rounded-full bg-[var(--color-primary-600)] transition-all duration-300"
-                    style={{ width: `${(answeredCount / questions.length) * 100}%` }}
-                  />
-                </div>
+                )}
               </div>
 
-              <div className="mt-5 grid grid-cols-5 gap-2">
-                {questions.map((q, index) => {
-                  const answered = responses[q.id] !== undefined && responses[q.id] !== "";
-                  const isCurrent = index === current;
-                  return (
-                    <button
-                      key={q.id}
-                      type="button"
-                      onClick={() => goTo(index)}
-                      className={`flex h-9 w-9 items-center justify-center rounded-md text-xs font-semibold transition-colors ${
-                        isCurrent
-                          ? "bg-[var(--color-primary-600)] text-white"
-                          : answered
-                          ? "bg-[var(--color-primary-50)] text-[var(--color-primary-600)] border border-[var(--color-primary-100)]"
-                          : "bg-[var(--color-surface-secondary)] text-[var(--color-text-muted)] border border-[var(--color-border)]"
-                      }`}
-                    >
-                      {index + 1}
-                    </button>
-                  );
-                })}
+              {question.context && (
+                <p className="mt-3 rounded-lg bg-[var(--color-surface-secondary)] px-4 py-3 text-sm leading-relaxed text-[var(--color-text-muted)]">
+                  {question.context}
+                </p>
+              )}
+
+              <h1 className="mt-2 text-2xl font-bold leading-snug tracking-tight text-[var(--color-text-h)] sm:text-3xl">
+                {question.question}
+              </h1>
+
+              <QuestionBody
+                question={question}
+                response={responses[question.id]}
+                onAnswer={setAnswer}
+              />
+
+              {/* Confidence level */}
+              {responses[question.id] !== undefined && responses[question.id] !== "" && (
+                <div className="mt-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-secondary)] p-4">
+                  <p className="mb-3 text-sm font-medium text-[var(--color-text-h)]">
+                    How confident are you?
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {CONFIDENCE_OPTIONS.map((level) => (
+                      <button
+                        key={level}
+                        type="button"
+                        onClick={() => setQuestionConfidence(level)}
+                        className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                          confidence[question.id] === level
+                            ? "border-[var(--color-primary-600)] bg-[var(--color-primary-600)] text-white"
+                            : "border-[var(--color-border)] bg-white text-[var(--color-text-muted)] hover:border-[var(--color-primary-300)]"
+                        }`}
+                      >
+                        {level}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Bottom nav */}
+              <div className="mt-10 flex items-center justify-between border-t border-[var(--color-border)] pt-6">
+                <Button
+                  variant="outline"
+                  onClick={() => goTo(current - 1)}
+                  disabled={current === 0}
+                >
+                  Previous
+                </Button>
+
+                {current === questions.length - 1 ? (
+                  <Button onClick={() => handleFinalSubmit()} disabled={isSubmitting}>
+                    {isSubmitting ? "Evaluating..." : "Submit Assessment"}
+                  </Button>
+                ) : (
+                  <Button onClick={() => goTo(current + 1)}>Next</Button>
+                )}
               </div>
             </div>
-          </aside>
-        </div>
-      </Container>
-    </Section>
+
+            {/* Side panel */}
+            <aside className="lg:sticky lg:top-8 lg:self-start">
+              <div className="rounded-xl border border-[var(--color-border)] p-5">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-[var(--color-text-h)]">
+                    Time Elapsed
+                  </span>
+                  <span className="font-mono text-sm font-semibold text-[var(--color-primary-600)]">
+                    {formatTime(elapsedSeconds)}
+                  </span>
+                </div>
+
+                <div className="mt-4">
+                  <div className="mb-1.5 flex items-center justify-between text-xs text-[var(--color-text-muted)]">
+                    <span>Progress</span>
+                    <span>
+                      {answeredCount}/{questions.length}
+                    </span>
+                  </div>
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--color-surface-secondary)]">
+                    <div
+                      className="h-full rounded-full bg-[var(--color-primary-600)] transition-all duration-300"
+                      style={{ width: `${(answeredCount / (questions.length || 1)) * 100}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-5 grid grid-cols-5 gap-2">
+                  {questions.map((q, index) => {
+                    const answered = responses[q.id] !== undefined && responses[q.id] !== "";
+                    const isCurrent = index === current;
+                    return (
+                      <button
+                        key={q.id}
+                        type="button"
+                        onClick={() => goTo(index)}
+                        className={`flex h-9 w-9 items-center justify-center rounded-md text-xs font-semibold transition-colors ${
+                          isCurrent
+                            ? "bg-[var(--color-primary-600)] text-white"
+                            : answered
+                            ? "bg-[var(--color-primary-50)] text-[var(--color-primary-600)] border border-[var(--color-primary-100)]"
+                            : "bg-[var(--color-surface-secondary)] text-[var(--color-text-muted)] border border-[var(--color-border)]"
+                        }`}
+                      >
+                        {index + 1}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-6 rounded-lg bg-slate-50 border border-slate-200 p-3 text-[11px] text-slate-600">
+                  <p className="font-bold text-slate-800 mb-1">🔒 Protection Rules</p>
+                  <p>• Do not switch tabs or minimize window.</p>
+                  <p>• Copying, screenshot shortcuts, & right click are disabled.</p>
+                  <p>• Exceeding 3 warnings causes automatic submission.</p>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </Container>
+      </Section>
+    </div>
   );
 }
 

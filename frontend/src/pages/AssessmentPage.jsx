@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import Section from "../components/Section";
 import SectionHeading from "../components/SectionHeading";
 import Button from "../components/Button";
@@ -248,7 +249,7 @@ function AssessmentCard({ assessment }) {
             </span>
           ))}
         </div>
-        <Button as="a" href={`/assessment/${assessment.id}`} size="sm" className="mt-4 w-full">
+        <Button as={Link} to={`/assessment/${assessment.id}`} size="sm" className="mt-4 w-full">
           Start Assessment
         </Button>
       </div>
@@ -338,9 +339,9 @@ function DayCell({ daily }) {
   }
 
   return (
-    <a href={`/assessment/${daily.id}`} className="block" title={daily.title}>
+    <Link to={`/assessment/${daily.id}`} className="block" title={daily.title}>
       {content}
-    </a>
+    </Link>
   );
 }
 
@@ -722,8 +723,8 @@ export default function AssessmentPage() {
                     Keep your streak alive — finish today's challenge before it locks tomorrow.
                   </p>
                   <Button
-                    as="a"
-                    href={`/assessment/${todayAssessment.id}`}
+                    as={Link}
+                    to={`/assessment/${todayAssessment.id}`}
                     size="sm"
                     className="mt-6 !bg-white !text-[var(--color-text-h)] hover:!bg-white/90"
                   >
