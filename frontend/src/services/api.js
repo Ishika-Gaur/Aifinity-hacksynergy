@@ -62,3 +62,17 @@ export const authApi = {
       method: "GET",
     }),
 };
+
+export const adminApi = {
+  getUsers: () => request("/admin/users"),
+  deleteUser: (id) => request(`/admin/users/${id}`, { method: "DELETE" }),
+};
+
+export const assessmentApi = {
+  getPublished: () => request("/assessments"),
+  getById: (id) => request(`/assessments/${id}`),
+  getAllForAdmin: () => request("/assessments/admin/all"),
+  create: (assessment) => request("/assessments/admin", { method: "POST", body: JSON.stringify(assessment) }),
+  update: (id, assessment) => request(`/assessments/admin/${id}`, { method: "PUT", body: JSON.stringify(assessment) }),
+  remove: (id) => request(`/assessments/admin/${id}`, { method: "DELETE" }),
+};
