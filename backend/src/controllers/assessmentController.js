@@ -167,7 +167,6 @@ export async function submitAttempt(req, res) {
         completedAt: new Date(),
       });
     } catch (saveErr) {
-      // Non-fatal: log but don't block the response
       console.error("[Dashboard] Failed to persist attempt result:", saveErr.message);
     }
   }

@@ -1,8 +1,13 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
-export default function StatCard({ label, value, unit = "", change, icon }) {
+export default function StatCard({ label, value, unit = "", change, icon, href }) {
   return (
-    <div className="relative flex flex-col justify-between rounded-md bg-[#FBF8F0] p-6 border border-[#2E4F42]/12 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] hover:border-[#C4952A]/40 hover:-translate-y-1 transition-all duration-300 group cursor-default">
+    <Link
+      to={href}
+      aria-label={`View ${label.toLowerCase()} details`}
+      className="relative flex flex-col justify-between rounded-md bg-[#FBF8F0] p-6 border border-[#2E4F42]/12 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] hover:border-[#C4952A]/40 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C4952A] focus-visible:ring-offset-2 transition-all duration-300 group cursor-pointer"
+    >
       {/* Subtle top indicator bar */}
       <div className="absolute top-0 inset-x-0 h-1 bg-[#D9A62B]/30 group-hover:bg-[#D9A62B] transition-colors rounded-t-md" />
 
@@ -34,6 +39,6 @@ export default function StatCard({ label, value, unit = "", change, icon }) {
           <span className="font-sans text-xs font-normal text-[#5B6B5F]">{change}</span>
         </div>
       )}
-    </div>
+    </Link>
   );
 }

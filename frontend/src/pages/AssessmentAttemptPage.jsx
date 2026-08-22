@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import Section from "../components/Section";
 import Container from "../components/Container";
-import Card from "../components/Card";
 import Button from "../components/Button";
 import { formatType } from "../data/assessments";
 import { createAttemptSession, submitAttemptSession } from "../services/assessmentService";
@@ -21,13 +20,26 @@ function formatTime(totalSeconds) {
 /* ---------------- Question type renderers ---------------- */
 
 function McqQuestion({ question, response, onAnswer }) {
+  if (!Array.isArray(question.options) || question.options.length === 0) {
+    return (
+      <TextAnswerQuestion
+        response={response}
+        onAnswer={onAnswer}
+        rows={5}
+        label="Answer"
+        placeholder="Type your answer here..."
+      />
+    );
+  }
+
   return (
-    <div className="mt-6 flex flex-col gap-3">
+    <div className="mt-6 flex flex-col gap-3 select-auto">
       {(question.options || []).map((option, index) => (
         <button
           key={index}
           type="button"
           onClick={() => onAnswer(index)}
+          aria-pressed={response === index}
           className={`flex w-full items-center rounded-xl border px-4 py-3 text-left transition-colors ${
             response === index
               ? "border-[var(--color-primary-600)] bg-[var(--color-primary-50)] text-[var(--color-primary-700)]"
@@ -38,6 +50,51 @@ function McqQuestion({ question, response, onAnswer }) {
         </button>
       ))}
     </div>
+  );
+}
+
+function TrueFalseQuestion({ question, response, onAnswer }) {
+  const suppliedOptions = Array.isArray(question.options) && question.options.length >= 2;
+  const choices = suppliedOptions
+    ? question.options.slice(0, 2)
+    : ["True", "False"];
+
+  return (
+    <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 select-auto">
+      {choices.map((choice, index) => {
+        const value = suppliedOptions ? index : choice;
+        const selected = response === value || String(response).toLowerCase() === String(choice).toLowerCase();
+
+        return (
+          <button
+            key={choice}
+            type="button"
+            onClick={() => onAnswer(value)}
+            aria-pressed={selected}
+            className={`flex min-h-14 w-full items-center justify-center rounded-xl border px-4 py-3 font-semibold transition-colors ${
+              selected
+                ? "border-[var(--color-primary-600)] bg-[var(--color-primary-50)] text-[var(--color-primary-700)]"
+                : "border-[var(--color-border)] bg-white text-[var(--color-text-h)] hover:border-[var(--color-primary-600)]"
+            }`}
+          >
+            {choice}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function TextAnswerQuestion({ response, onAnswer, rows, placeholder, label }) {
+  return (
+    <textarea
+      value={response || ""}
+      onChange={(e) => onAnswer(e.target.value)}
+      rows={rows}
+      aria-label={label}
+      placeholder={placeholder}
+      className="mt-6 block min-h-32 w-full resize-y rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm leading-relaxed text-[var(--color-text-h)] placeholder:text-[var(--color-text-light)] shadow-sm select-auto focus:border-[var(--color-primary-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-100)]"
+    />
   );
 }
 
@@ -54,27 +111,11 @@ function DataInterpretationQuestion(props) {
 }
 
 function ConceptualQuestion({ response, onAnswer }) {
-  return (
-    <textarea
-      value={response || ""}
-      onChange={(e) => onAnswer(e.target.value)}
-      rows={6}
-      placeholder="Type your explanation here..."
-      className="mt-6 w-full resize-none rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm leading-relaxed text-[var(--color-text-h)] placeholder:text-[var(--color-text-light)] focus:border-[var(--color-primary-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-100)]"
-    />
-  );
+  return <TextAnswerQuestion response={response} onAnswer={onAnswer} rows={6} label="Conceptual answer" placeholder="Type your explanation here..." />;
 }
 
 function ProblemSolvingQuestion({ response, onAnswer }) {
-  return (
-    <textarea
-      value={response || ""}
-      onChange={(e) => onAnswer(e.target.value)}
-      rows={7}
-      placeholder="Walk through your approach here..."
-      className="mt-6 w-full resize-none rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm leading-relaxed text-[var(--color-text-h)] placeholder:text-[var(--color-text-light)] focus:border-[var(--color-primary-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-100)]"
-    />
-  );
+  return <TextAnswerQuestion response={response} onAnswer={onAnswer} rows={7} label="Problem-solving answer" placeholder="Walk through your approach here..." />;
 }
 
 function CodingQuestion({ response, onAnswer }) {
@@ -102,10 +143,35 @@ function OutputQuestion({ response, onAnswer }) {
   );
 }
 
+function normalizeQuestionType(type) {
+  const normalized = String(type || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[_/]+/g, " ")
+    .replace(/[\s-]+/g, "-");
+
+  const aliases = {
+    "multiple-choice": "mcq",
+    "multiple-choice-question": "mcq",
+    "multiple-choice-questions": "mcq",
+    "true-false": "true-false",
+    "short-answer": "short-answer",
+    "long-answer": "long-answer",
+  };
+
+  return aliases[normalized] || normalized;
+}
+
 function QuestionBody({ question, response, onAnswer }) {
-  switch (question.type) {
+  switch (normalizeQuestionType(question.type)) {
     case "mcq":
       return <McqQuestion question={question} response={response} onAnswer={onAnswer} />;
+    case "true-false":
+      return <TrueFalseQuestion question={question} response={response} onAnswer={onAnswer} />;
+    case "short-answer":
+      return <TextAnswerQuestion response={response} onAnswer={onAnswer} rows={5} label="Short answer" placeholder="Type your answer here..." />;
+    case "long-answer":
+      return <TextAnswerQuestion response={response} onAnswer={onAnswer} rows={9} label="Long answer" placeholder="Type your answer here..." />;
     case "scenario":
       return <ScenarioQuestion question={question} response={response} onAnswer={onAnswer} />;
     case "logical-reasoning":
@@ -121,7 +187,7 @@ function QuestionBody({ question, response, onAnswer }) {
     case "output":
       return <OutputQuestion response={response} onAnswer={onAnswer} />;
     default:
-      return null;
+      return <TextAnswerQuestion response={response} onAnswer={onAnswer} rows={6} label="Answer" placeholder="Type your answer here..." />;
   }
 }
 
@@ -555,10 +621,9 @@ export default function AssessmentAttemptPage() {
       )}
 
       {/* MAIN QUESTION SECTION */}
-      <Section background="white" className="py-8">
-        <Container>
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_280px]">
-            <div>
+      <Section background="white" containerSize="wide" className="py-8">
+          <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(220px,260px)] xl:grid-cols-[minmax(0,1fr)_280px]">
+            <main className="min-w-0">
               <div className="mb-6 flex items-center justify-between">
                 <button
                   type="button"
@@ -643,11 +708,11 @@ export default function AssessmentAttemptPage() {
                   <Button onClick={() => goTo(current + 1)}>Next</Button>
                 )}
               </div>
-            </div>
+            </main>
 
             {/* Side panel */}
-            <aside className="lg:sticky lg:top-8 lg:self-start">
-              <div className="rounded-xl border border-[var(--color-border)] p-5">
+            <aside className="min-w-0 w-full lg:sticky lg:top-8 lg:self-start">
+              <div className="w-full rounded-xl border border-[var(--color-border)] p-4 sm:p-5">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-[var(--color-text-h)]">
                     Time Elapsed
@@ -704,7 +769,6 @@ export default function AssessmentAttemptPage() {
               </div>
             </aside>
           </div>
-        </Container>
       </Section>
     </div>
   );
