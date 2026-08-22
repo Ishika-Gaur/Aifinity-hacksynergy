@@ -73,6 +73,12 @@ export const authApi = {
     request("/auth/me", {
       method: "GET",
     }),
+
+  completeOnboarding: (data) =>
+    request("/auth/onboarding", {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
 };
 
 export const adminApi = {
