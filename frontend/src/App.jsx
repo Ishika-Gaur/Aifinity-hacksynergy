@@ -9,6 +9,7 @@ import About from './pages/About';
 const AssessmentPage = lazy(() => import('./pages/AssessmentPage'));
 const AssessmentAttemptPage = lazy(() => import('./pages/AssessmentAttemptPage'));
 import Dashboard from './pages/Dashboard';
+import DashboardMetricPage from './pages/DashboardMetricPage';
 import ConceptRoot from './pages/ConceptRoot';
 import MistakeMap from './pages/MistakeMap';
 import SkillGap from './pages/SkillGap';
@@ -125,6 +126,15 @@ function App() {
               element={
                 <StudentAuthGuard requireOnboardingCompleted>
                   <Dashboard />
+                </StudentAuthGuard>
+              }
+            />
+
+            <Route
+              path="/dashboard/:metric"
+              element={
+                <StudentAuthGuard requireOnboardingCompleted>
+                  <DashboardMetricPage />
                 </StudentAuthGuard>
               }
             />

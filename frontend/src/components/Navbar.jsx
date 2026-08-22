@@ -6,11 +6,11 @@ import logo from "../assets/logo.svg";
 const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
-  { label: "Concept Root", href: "/concept-root" },
-  { label: "Mistake Map", href: "/mistake-map" },
-  { label: "Skill Gap", href: "/skill-gap" },
-  { label: "Roadmap", href: "/roadmap" },
-  { label: "Contact", href: "/contact" },
+  // { label: "Concept Root", href: "/concept-root" },
+  // { label: "Mistake Map", href: "/mistake-map" },
+  // { label: "Skill Gap", href: "/skill-gap" },
+  // { label: "Roadmap", href: "/roadmap" },
+  // { label: "Contact", href: "/contact" },
   {label: "FAQS", href: "/faq"},
 ];
 
