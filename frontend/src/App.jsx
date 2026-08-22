@@ -19,6 +19,7 @@ import Signup from './pages/Signup';
 import NotFound from './pages/NotFound';
 import OnboardingPage from './pages/OnboardingPage';
 import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Faq from './pages/Faq';
 
 // Admin Auth & Protection
@@ -156,6 +157,8 @@ function App() {
               path="/forgot-password"
               element={<ForgotPassword />}
             />
+
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
 
             <Route path="*" element={<NotFound />} />
 

@@ -52,6 +52,18 @@ export const authApi = {
       body: JSON.stringify({ name, email, password }),
     }),
 
+  forgotPassword: (email) =>
+    request("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    }),
+
+  resetPassword: (token, password) =>
+    request(`/auth/reset-password/${token}`, {
+      method: "POST",
+      body: JSON.stringify({ password }),
+    }),
+
   logout: () =>
     request("/auth/logout", {
       method: "POST",
@@ -89,6 +101,12 @@ export const adminApi = {
 export const assessmentApi = {
   getPublished: () => request("/assessments"),
   getById: (id) => request(`/assessments/${id}`),
+  startAttempt: (id) => request(`/assessments/${id}/start`),
+  submitAttempt: (id, payload) =>
+    request(`/assessments/${id}/submit`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
   getAllForAdmin: () => request("/assessments/admin/all"),
   create: (assessment) => request("/assessments/admin", { method: "POST", body: JSON.stringify(assessment) }),
   update: (id, assessment) => request(`/assessments/admin/${id}`, { method: "PUT", body: JSON.stringify(assessment) }),

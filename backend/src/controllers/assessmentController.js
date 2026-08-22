@@ -1,5 +1,17 @@
 import Assessment from "../models/Assessment.js";
 
+// Active in-memory attempt sessions cache for server-side evaluation
+const activeAttemptSessions = new Map();
+
+function shuffleArray(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 const serialize = (assessment, includeAnswers = false) => {
   const data = assessment.toObject ? assessment.toObject() : assessment;
   const questions = data.questions.map((question) => {
@@ -13,13 +25,141 @@ const serialize = (assessment, includeAnswers = false) => {
 
 export async function listPublished(req, res) {
   const assessments = await Assessment.find({ status: "published" }).sort({ publishedAt: -1, createdAt: -1 });
-  res.json({ success: true, assessments: assessments.map((a) => serialize(a)) });
+  res.json({ success: true, assessments: assessments.map((a) => serialize(a, false)) });
 }
 
 export async function getPublished(req, res) {
   const assessment = await Assessment.findOne({ _id: req.params.id, status: "published" });
   if (!assessment) return res.status(404).json({ success: false, message: "Assessment not found." });
-  res.json({ success: true, assessment: serialize(assessment, true) });
+  res.json({ success: true, assessment: serialize(assessment, false) });
+}
+
+export async function startAttempt(req, res) {
+  const assessment = await Assessment.findOne({ _id: req.params.id, status: "published" });
+  if (!assessment) return res.status(404).json({ success: false, message: "Assessment not found." });
+
+  const rawData = assessment.toObject ? assessment.toObject() : assessment;
+  const attemptId = `att_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+  const answersMap = new Map();
+
+  // Shuffle questions order
+  const shuffledQuestions = shuffleArray(rawData.questions || []).map((q) => {
+    const qId = String(q._id);
+    const originalAnswer = q.answer;
+    const originalOptions = q.options ? [...q.options] : null;
+
+    answersMap.set(qId, {
+      type: q.type,
+      answer: originalAnswer,
+      options: originalOptions,
+    });
+
+    const questionItem = {
+      id: qId,
+      type: q.type,
+      difficulty: q.difficulty,
+      question: q.question,
+      context: q.context,
+    };
+
+    if (Array.isArray(originalOptions) && originalOptions.length > 0) {
+      const shuffledOptions = shuffleArray(originalOptions);
+      questionItem.options = shuffledOptions;
+      answersMap.get(qId).shuffledOptions = shuffledOptions;
+    }
+
+    return questionItem;
+  });
+
+  activeAttemptSessions.set(attemptId, {
+    assessmentId: String(assessment._id),
+    createdAt: Date.now(),
+    answersMap,
+  });
+
+  const assessmentMeta = serialize(assessment, false);
+  assessmentMeta.questions = shuffledQuestions;
+
+  res.json({
+    success: true,
+    attemptId,
+    assessment: assessmentMeta,
+  });
+}
+
+export async function submitAttempt(req, res) {
+  const { attemptId, responses, elapsedSeconds, violations = [] } = req.body;
+  const assessment = await Assessment.findById(req.params.id);
+  if (!assessment) return res.status(404).json({ success: false, message: "Assessment not found." });
+
+  const session = activeAttemptSessions.get(attemptId);
+  const rawQuestions = assessment.questions || [];
+  const GRADABLE_TYPES = ["mcq", "scenario", "logical-reasoning", "data-interpretation", "output"];
+  const gradableQuestions = rawQuestions.filter((q) => GRADABLE_TYPES.includes(q.type));
+
+  let correctCount = 0;
+
+  gradableQuestions.forEach((q) => {
+    const qId = String(q._id);
+    const userResp = responses ? responses[qId] : undefined;
+    if (userResp === undefined || userResp === null || userResp === "") return;
+
+    if (session && session.answersMap.has(qId)) {
+      const sessionQ = session.answersMap.get(qId);
+      const originalAnswer = sessionQ.answer;
+
+      if (q.type === "output") {
+        if (String(userResp).trim().toLowerCase() === String(originalAnswer).trim().toLowerCase()) {
+          correctCount++;
+        }
+      } else if (Array.isArray(sessionQ.shuffledOptions)) {
+        const selectedText = typeof userResp === "number" ? sessionQ.shuffledOptions[userResp] : String(userResp);
+        let correctText = originalAnswer;
+        if (typeof originalAnswer === "number" && sessionQ.options) {
+          correctText = sessionQ.options[originalAnswer];
+        }
+        if (String(selectedText).trim().toLowerCase() === String(correctText).trim().toLowerCase()) {
+          correctCount++;
+        }
+      }
+    } else {
+      // Fallback check against raw database question
+      if (q.type === "output") {
+        if (String(userResp).trim().toLowerCase() === String(q.answer).trim().toLowerCase()) {
+          correctCount++;
+        }
+      } else if (Array.isArray(q.options)) {
+        const selectedText = typeof userResp === "number" ? q.options[userResp] : String(userResp);
+        let correctText = q.answer;
+        if (typeof q.answer === "number" && q.options[q.answer]) {
+          correctText = q.options[q.answer];
+        }
+        if (String(selectedText).trim().toLowerCase() === String(correctText).trim().toLowerCase()) {
+          correctCount++;
+        }
+      }
+    }
+  });
+
+  const scorePercent = gradableQuestions.length
+    ? Math.round((correctCount / gradableQuestions.length) * 100)
+    : 0;
+
+  if (attemptId) {
+    activeAttemptSessions.delete(attemptId);
+  }
+
+  res.json({
+    success: true,
+    scorePercent,
+    correctCount,
+    gradableCount: gradableQuestions.length,
+    answeredCount: Object.keys(responses || {}).length,
+    elapsedSeconds,
+    violationsCount: violations.length,
+    violations,
+    autoSubmitted: violations.length >= 3,
+  });
 }
 
 export async function listAdmin(req, res) {
