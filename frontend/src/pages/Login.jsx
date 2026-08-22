@@ -1,5 +1,7 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Button from "../components/Button";
+import { authApi } from "../services/api";
 
 const BENEFITS = [
   "Pick up your Skill Gap right where you left off",
@@ -11,6 +13,33 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [locked, setLocked] = useState(true); // readOnly trick against autofill
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    if (!email || !password) {
+      setError("Please enter both email and password.");
+      return;
+    }
+
+    setLoading(true);
+    const res = await authApi.login(email, password);
+    setLoading(false);
+
+    if (!res.success) {
+      setError(res.error || "Login failed.");
+    } else {
+      if (res.user?.role === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/dashboard");
+      }
+    }
+  };
 
   return (
     <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
@@ -33,10 +62,16 @@ export default function LoginPage() {
             Log in to pick up where you left off.
           </p>
 
+          {error && (
+            <div className="mt-4 rounded-md bg-rose-50 p-3 text-xs font-medium text-rose-700 border border-rose-200">
+              {error}
+            </div>
+          )}
+
           <form
             className="mt-6 flex flex-col gap-4"
             autoComplete="off"
-            onSubmit={(e) => e.preventDefault()}
+            onSubmit={handleSubmit}
           >
             <div>
               <label
@@ -88,28 +123,10 @@ export default function LoginPage() {
               />
             </div>
 
-            <Button type="submit" size="lg" className="mt-1 w-full">
-              Log In
+            <Button type="submit" size="lg" className="mt-1 w-full" disabled={loading}>
+              {loading ? "Logging in..." : "Log In"}
             </Button>
           </form>
-
-          <div className="my-5 flex items-center gap-3">
-            <span className="h-px flex-1 bg-[var(--color-border)]" />
-            <span className="text-xs font-medium uppercase text-[var(--color-text-light)]">
-              or
-            </span>
-            <span className="h-px flex-1 bg-[var(--color-border)]" />
-          </div>
-
-          <Button
-            as="a"
-            href="/auth/google"
-            variant="outline"
-            size="md"
-            className="w-full"
-          >
-            Continue with Google
-          </Button>
 
           <p className="mt-6 text-center text-sm text-[var(--color-text-muted)]">
             Don't have an account?{" "}

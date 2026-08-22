@@ -1,4 +1,5 @@
 import Container from "../components/Container";
+import logo from "../assets/logo.svg";
 
 const FOOTER_COLUMNS = [
   {
@@ -17,6 +18,7 @@ const FOOTER_COLUMNS = [
     links: [
       { label: "About Us", href: "/about" },
       { label: "Contact", href: "/contact" },
+      {label: "FAQS", href: "/faq"},
     ],
   },
   {
@@ -60,42 +62,18 @@ export default function Footer() {
           {/* Brand Col */}
           <div className="flex flex-col gap-4 sm:col-span-2">
             <a href="/" className="group flex items-center gap-3 w-fit">
-              {/* Emblem Badge */}
-              <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-[#2E4F42] p-2 text-[#E8C547] shadow-sm border border-[#C4952A]/40 transition-transform duration-300 group-hover:scale-105 group-hover:border-[#E8C547]">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  className="w-full h-full transition-transform duration-300 group-hover:rotate-6"
-                >
-                  <path
-                    d="M12 3L2 8L12 13L22 8L12 3Z"
-                    strokeWidth="1.75"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="stroke-[#E8C547]"
-                  />
-                  <path
-                    d="M5 9.5V15.5C5 15.5 8.5 18 12 18C15.5 18 19 15.5 19 15.5V9.5"
-                    strokeWidth="1.75"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="stroke-[#D9A62B]"
-                  />
-                  <path
-                    d="M20 9V14"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    className="stroke-[#E8C547]"
-                  />
-                  <circle cx="20" cy="14.5" r="1" fill="#E8C547" />
-                  <circle cx="12" cy="8" r="1.5" fill="#E8C547" />
-                </svg>
+              {/* Logo Image */}
+              <div className="relative flex h-14 w-14 items-center justify-center rounded-xl bg-white p-1.5 shadow-sm transition-transform duration-300 group-hover:scale-105">
+                <img
+                  src={logo}
+                  alt="AIFinity Logo"
+                  className="w-full h-full object-contain transition-transform duration-300 group-hover:rotate-6"
+                />
               </div>
 
               <div className="flex flex-col">
                 <span className="font-['Kalam'] text-xl font-bold tracking-tight text-[#FBF8F0] leading-none group-hover:text-[#E8C547] transition-colors">
-                  AFINITY<span className="ml-1 font-['Space_Mono'] text-xs font-bold uppercase tracking-widest text-[#E8C547]">AI</span>
+                  AIFINITY<span className="ml-1 font-['Space_Mono'] text-xs font-bold uppercase tracking-widest text-[#E8C547]"></span>
                 </span>
                 <span className="text-[9px] font-['Space_Mono'] font-bold uppercase tracking-widest text-[#8B9690] leading-tight mt-0.5">
                   Learning Intelligence
@@ -168,7 +146,7 @@ export default function Footer() {
         {/* Bottom copyright */}
         <div className="flex flex-col items-center justify-between gap-4 border-t border-[#2E4F42]/50 py-6 sm:flex-row font-['Space_Mono'] text-xs text-[#8B9690]">
           <p>
-            © {new Date().getFullYear()} Afinity AI. All rights reserved. Developed by Faiz, Isika, and Aman Negi.
+            © {new Date().getFullYear()} AIFinity. All rights reserved. Developed by Faiz, Isika, and Aman Negi.
           </p>
           <div className="flex gap-6">
             <a href="/privacy" className="transition-colors hover:text-[#E8C547]">

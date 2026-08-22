@@ -138,7 +138,8 @@ h1, h2, h3, h4, .font-display {
   position: fixed;
   inset: 0;
   background: radial-gradient(circle at 50% 15%, rgba(46, 79, 66, 0.08), transparent 55%);
-  z-index: 0;
+  z-index: -1;
+  pointer-events: none;
 }
 
 @keyframes card-float {

@@ -1,7 +1,6 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import Section from "../components/Section";
 import SectionHeading from "../components/SectionHeading";
-import Card from "../components/Card";
 import Button from "../components/Button";
 import {
   CATEGORIES,
@@ -22,60 +21,278 @@ const DIFFICULTY_STYLES = {
     "text-[var(--color-primary-600)] bg-[var(--color-primary-50)] border-[var(--color-primary-100)]",
 };
 
-/* One assessment, shown the same way in "Recommended" and "Explore". */
+/* ---------------- Category palette (gradient tiles + Quest-style cards) ---------------- */
+
+const CATEGORY_GRADIENTS = [
+  "from-[#2563eb] to-[#4f46e5]", // blue -> indigo
+  "from-[#0d9488] to-[#059669]", // teal -> emerald (brand teal)
+  "from-[#9333ea] to-[#c026d3]", // purple -> fuchsia
+  "from-[#d97706] to-[#ea580c]", // amber -> orange (brand amber)
+  "from-[#e11d48] to-[#db2777]", // rose -> pink
+  "from-[#0891b2] to-[#2563eb]", // cyan -> blue
+];
+
+const CATEGORY_ICON_STYLES = [
+  "bg-blue-50 text-blue-600",
+  "bg-teal-50 text-teal-600",
+  "bg-purple-50 text-purple-600",
+  "bg-amber-50 text-amber-600",
+  "bg-rose-50 text-rose-600",
+  "bg-cyan-50 text-cyan-600",
+];
+
+// A small rotating set of generic outline icons for category tiles.
+const CATEGORY_ICON_PATHS = [
+  <path key="layers" d="M12 3l8 4-8 4-8-4 8-4zM4 12l8 4 8-4M4 16l8 4 8-4" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />,
+  <>
+    <ellipse key="db1" cx="12" cy="6" rx="7" ry="2.5" strokeWidth="1.6" />
+    <path key="db2" d="M5 6v12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V6" strokeWidth="1.6" />
+    <path key="db3" d="M5 12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5" strokeWidth="1.6" />
+  </>,
+  <path key="pencil" d="M4 20l1-4L16 5l3 3L8 19l-4 1z" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />,
+  <>
+    <circle key="tg1" cx="12" cy="12" r="8" strokeWidth="1.6" />
+    <circle key="tg2" cx="12" cy="12" r="4" strokeWidth="1.6" />
+    <circle key="tg3" cx="12" cy="12" r="0.6" fill="currentColor" />
+  </>,
+  <path key="spark" d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />,
+  <path key="puzzle" d="M9 4h4v2.2a1.8 1.8 0 003.6 0V4H20v4.2a1.8 1.8 0 000 3.6V16h-4.2a1.8 1.8 0 00-3.6 0V20H8v-4.2a1.8 1.8 0 00-3.6 0H4V12h2.2a1.8 1.8 0 000-3.6H4V4h5z" strokeWidth="1.4" strokeLinejoin="round" />,
+];
+
+function getCategoryIndex(cat) {
+  const list = CATEGORIES.filter((c) => c !== "All");
+  const i = list.indexOf(cat);
+  return i === -1 ? 0 : i % CATEGORY_GRADIENTS.length;
+}
+
+/* ---------------- Left sidebar nav (LeetCode-style rail) ---------------- */
+
+const NAV_ITEMS = [
+  {
+    id: "overview",
+    label: "Overview",
+    icon: (
+      <path d="M4 12l8-8 8 8M6 10v10h12V10" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    ),
+  },
+  {
+    id: "categories",
+    label: "Categories",
+    icon: (
+      <>
+        <rect x="4" y="4" width="7" height="7" rx="1.5" strokeWidth="1.6" />
+        <rect x="13" y="4" width="7" height="7" rx="1.5" strokeWidth="1.6" />
+        <rect x="4" y="13" width="7" height="7" rx="1.5" strokeWidth="1.6" />
+        <rect x="13" y="13" width="7" height="7" rx="1.5" strokeWidth="1.6" />
+      </>
+    ),
+  },
+  {
+    id: "recommended",
+    label: "Recommended",
+    icon: (
+      <path
+        d="M12 3l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.2-5.4 3.2 1.3-6-4.6-4.1 6.1-.6L12 3z"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    ),
+  },
+  {
+    id: "daily",
+    label: "Daily Challenge",
+    icon: (
+      <>
+        <rect x="4" y="5" width="16" height="16" rx="2" strokeWidth="1.6" />
+        <path d="M4 9h16M8 3v4M16 3v4" strokeWidth="1.6" strokeLinecap="round" />
+      </>
+    ),
+  },
+  {
+    id: "explore",
+    label: "Explore",
+    icon: (
+      <>
+        <circle cx="11" cy="11" r="7" strokeWidth="1.6" />
+        <path d="M20 20l-3.6-3.6" strokeWidth="1.6" strokeLinecap="round" />
+      </>
+    ),
+  },
+];
+
+function SidebarNav({ active, open, onToggle }) {
+  return (
+    <nav className="flex flex-col gap-1">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
+        className="mb-2 flex items-center gap-3 rounded-lg px-3 py-2.5 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-surface-secondary)] hover:text-[var(--color-text-h)]"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="h-5 w-5 shrink-0">
+          <path d="M4 6h16M4 12h16M4 18h16" strokeWidth="1.8" strokeLinecap="round" />
+        </svg>
+        {open && <span className="text-sm font-medium">Menu</span>}
+      </button>
+
+      {NAV_ITEMS.map((item) => {
+        const isActive = active === item.id;
+        return (
+          <a
+            key={item.id}
+            href={`#${item.id}`}
+            title={item.label}
+            className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+              isActive
+                ? "bg-[var(--color-primary-50)] text-[var(--color-primary-600)]"
+                : "text-[var(--color-text-muted)] hover:bg-[var(--color-surface-secondary)] hover:text-[var(--color-text-h)]"
+            }`}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              className={`h-5 w-5 shrink-0 ${isActive ? "text-[var(--color-primary-600)]" : "text-[var(--color-text-light)] group-hover:text-[var(--color-text-h)]"}`}
+            >
+              {item.icon}
+            </svg>
+            {open && <span>{item.label}</span>}
+          </a>
+        );
+      })}
+    </nav>
+  );
+}
+
+/* Themed hero illustration — mountain + flag, in the app's teal/amber
+   palette. Mirrors the "reach the summit" motif without reusing any
+   third-party artwork. */
+function HeroIllustration({ className }) {
+  return (
+    <svg viewBox="0 0 160 130" className={className} aria-hidden="true">
+      <path
+        d="M0 108 L28 70 L52 92 L78 48 L108 86 L134 62 L160 108 Z"
+        fill="var(--color-primary-100)"
+        opacity="0.6"
+      />
+      <path
+        d="M0 116 L36 88 L60 104 L92 68 L118 96 L160 116 Z"
+        fill="var(--color-primary-200)"
+        opacity="0.5"
+      />
+      <path d="M38 108 L80 48 L122 108 Z" fill="var(--color-primary-600)" />
+      <path d="M64 78 L80 48 L96 78 L88 72 L80 82 L72 72 Z" fill="white" opacity="0.9" />
+      <line x1="80" y1="48" x2="80" y2="14" stroke="#8a6a3a" strokeWidth="2.5" strokeLinecap="round" />
+      <circle cx="80" cy="12" r="2.5" fill="#d97706" />
+      <path d="M80 17 L104 26 L80 35 Z" fill="#d97706" />
+      <path d="M85 26 L89 30 L97 20" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+/* One assessment, shown the same way in "Recommended" and "Explore".
+   Gradient banner on top (colored per category, like LeetCode's Explore /
+   Study Plan tiles) with a plain white footer for stats + CTA below. */
 function AssessmentCard({ assessment }) {
   const questionTypes = useMemo(
     () => Array.from(new Set(assessment.questions.map((q) => q.type))),
     [assessment]
   );
+  const gradient = CATEGORY_GRADIENTS[getCategoryIndex(assessment.category)];
 
   return (
-    <Card
-      icon={
-        <span className="text-lg font-bold text-[var(--color-primary-600)]">
-          {assessment.icon || "◆"}
-        </span>
-      }
-      eyebrow={assessment.category}
-      title={assessment.title}
-      footer={
-        <Button as="a" href={`/assessment/${assessment.id}`} size="sm" className="w-full">
+    <div className="group flex flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-white shadow-sm transition-shadow hover:shadow-md">
+      <div className={`relative flex aspect-[4/3] flex-col justify-between bg-gradient-to-br ${gradient} p-5 text-white`}>
+        <div>
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-white/70">
+            {assessment.category}
+          </span>
+          <h3 className="mt-1 text-lg font-bold leading-snug">{assessment.title}</h3>
+        </div>
+        <div className="flex items-end justify-between">
+          <span
+            className={`rounded-full px-2.5 py-1 text-[11px] font-semibold backdrop-blur-sm ${
+              assessment.difficulty === "Easy"
+                ? "bg-white/90 text-green-700"
+                : assessment.difficulty === "Hard"
+                ? "bg-white/90 text-red-700"
+                : "bg-white/90 text-amber-700"
+            }`}
+          >
+            {assessment.difficulty}
+          </span>
+          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white/20 text-lg font-bold backdrop-blur-sm">
+            {assessment.icon || "◆"}
+          </span>
+        </div>
+      </div>
+
+      <div className="flex flex-1 flex-col p-4">
+        <p className="line-clamp-2 text-sm leading-relaxed text-[var(--color-text-muted)]">
+          {assessment.description}
+        </p>
+        <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[var(--color-text-muted)]">
+          <span>{assessment.questions.length} questions</span>
+          <span>·</span>
+          <span>~{assessment.duration} min</span>
+          {questionTypes.slice(0, 2).map((t) => (
+            <span key={t} className="rounded-md bg-[var(--color-surface-secondary)] px-2 py-0.5 font-medium">
+              {formatType(t)}
+            </span>
+          ))}
+        </div>
+        <Button as="a" href={`/assessment/${assessment.id}`} size="sm" className="mt-4 w-full">
           Start Assessment
         </Button>
-      }
-    >
-      <p className="text-sm leading-relaxed text-[var(--color-text-muted)]">
-        {assessment.description}
-      </p>
-      <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
-        <span
-          className={`rounded-full border px-2.5 py-0.5 font-semibold ${DIFFICULTY_STYLES[assessment.difficulty] || DIFFICULTY_STYLES.Mixed}`}
-        >
-          {assessment.difficulty}
-        </span>
-        <span className="rounded-full border border-[var(--color-border)] px-2.5 py-0.5 font-medium text-[var(--color-text-muted)]">
-          {assessment.questions.length} questions
-        </span>
-        <span className="rounded-full border border-[var(--color-border)] px-2.5 py-0.5 font-medium text-[var(--color-text-muted)]">
-          ~{assessment.duration} min
+      </div>
+    </div>
+  );
+}
+
+/* Quest-style category tile: colored icon chip + a dotted "level path" that
+   communicates count, not fake progress (we don't track per-assessment
+   completion, so every dot stays open/unfilled — same as LeetCode's own
+   "0/35 Levels" untouched state). */
+function CategoryTile({ category, count, index, onSelect }) {
+  const gradient = CATEGORY_GRADIENTS[index % CATEGORY_GRADIENTS.length];
+  const iconStyle = CATEGORY_ICON_STYLES[index % CATEGORY_ICON_STYLES.length];
+  const iconPath = CATEGORY_ICON_PATHS[index % CATEGORY_ICON_PATHS.length];
+  const dotCount = Math.max(1, Math.min(count, 10));
+
+  return (
+    <div className="rounded-2xl border border-[var(--color-border)] bg-white p-5 shadow-sm">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h3 className="truncate text-base font-bold text-[var(--color-text-h)]">{category}</h3>
+          <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
+            {count} assessment{count === 1 ? "" : "s"}
+          </p>
+        </div>
+        <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${iconStyle}`}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="h-6 w-6">
+            {iconPath}
+          </svg>
         </span>
       </div>
-      <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px]">
-        {questionTypes.slice(0, 3).map((t) => (
-          <span
-            key={t}
-            className="rounded-md bg-[var(--color-surface-secondary)] px-2 py-0.5 font-medium text-[var(--color-text-muted)]"
-          >
-            {formatType(t)}
-          </span>
+
+      <div className="mt-5 flex items-center gap-1.5">
+        {Array.from({ length: dotCount }).map((_, i) => (
+          <React.Fragment key={i}>
+            {i > 0 && <span className="h-px flex-1 bg-[var(--color-border)]" />}
+            <span className="h-2.5 w-2.5 shrink-0 rounded-full border-2 border-[var(--color-border)] bg-white" />
+          </React.Fragment>
         ))}
-        {questionTypes.length > 3 && (
-          <span className="rounded-md bg-[var(--color-surface-secondary)] px-2 py-0.5 font-medium text-[var(--color-text-muted)]">
-            +{questionTypes.length - 3}
-          </span>
-        )}
       </div>
-    </Card>
+
+      <a
+        href="#explore"
+        onClick={() => onSelect(category)}
+        className={`mt-5 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r ${gradient} px-4 py-1.5 text-sm font-semibold text-white`}
+      >
+        Start
+      </a>
+    </div>
   );
 }
 
@@ -124,11 +341,141 @@ function DayCell({ daily }) {
 }
 
 const WEEKDAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
+const MONTH_LABELS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+/* Streak flame icon — used in the sidebar streak card. */
+function FlameIcon({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className}>
+      <path
+        d="M12 2c1 3-2.5 4.2-2.5 7.2 0 1.4 1 2.3 2 2.3.4-1.6-.4-2-.1-3.2C12.9 10 15 11.6 15 14.3c0 2.9-2.2 5.2-5 5.7-3.4-.4-6-3-6-6.3C4 9.9 7.3 7 9.2 5c-.4 1.3-.2 2 .5 2.5C9.4 5.6 10.3 3.6 12 2z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+/* ---------------- Right sidebar: streak calendar + stats ---------------- */
+
+function StreakSidebar({ profile, dailyAssessments, completedDays }) {
+  const now = new Date();
+  const monthLabel = `${MONTH_LABELS[now.getMonth()]} ${now.getFullYear()}`;
+
+  const firstWeekdayOffset = useMemo(
+    () => new Date(now.getFullYear(), now.getMonth(), 1).getDay(),
+    [now]
+  );
+
+  const currentStreak = useMemo(() => {
+    let streak = 0;
+    for (let i = dailyAssessments.length - 1; i >= 0; i--) {
+      const d = dailyAssessments[i];
+      if (d.status === "Completed") streak++;
+      else if (d.isToday) continue;
+      else break;
+    }
+    return streak;
+  }, [dailyAssessments]);
+
+  const completionPct = dailyAssessments.length
+    ? Math.round((completedDays / dailyAssessments.length) * 100)
+    : 0;
+
+  return (
+    <div className="flex flex-col gap-4">
+      {/* Streak calendar card */}
+      <div className="p-0">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <FlameIcon className="h-5 w-5 text-amber-500" />
+            <span className="text-lg font-bold text-[var(--color-text-h)]">
+              {currentStreak} day{currentStreak === 1 ? "" : "s"}
+            </span>
+          </div>
+          <span className="rounded-full border border-[var(--color-primary-100)] bg-[var(--color-primary-50)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-primary-600)]">
+            {profile.field}
+          </span>
+        </div>
+        <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
+          {monthLabel} · {completedDays}/{dailyAssessments.length} days completed
+        </p>
+
+        {/* Weekday header */}
+        <div className="mt-4 grid grid-cols-7 text-center text-[11px] font-medium text-[var(--color-text-light)]">
+          {WEEKDAY_LABELS.map((d, i) => (
+            <span key={i}>{d}</span>
+          ))}
+        </div>
+
+        {/* Day grid — leading blanks align "Day 1" to its real weekday */}
+        <div className="mt-2 grid grid-cols-7 gap-y-2 text-center">
+          {Array.from({ length: firstWeekdayOffset }).map((_, i) => (
+            <div key={`pad-${i}`} />
+          ))}
+          {dailyAssessments.map((daily) => (
+            <DayCell key={daily.id} daily={daily} />
+          ))}
+        </div>
+
+        {/* Legend */}
+        <div className="mt-4 flex flex-wrap gap-4 border-t border-[var(--color-border)] pt-3 text-[11px] text-[var(--color-text-muted)]">
+          <span className="flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-primary-600)]" /> Available
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-green-500" /> Completed
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-text-light)]" /> Locked
+          </span>
+        </div>
+      </div>
+
+      {/* Progress card */}
+      <div className="border-t border-[var(--color-border)] pt-5">
+        <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-light)]">
+          This month
+        </span>
+        <div className="mt-3 flex items-center gap-4">
+          <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-full">
+            <svg viewBox="0 0 36 36" className="h-16 w-16 -rotate-90">
+              <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--color-border)" strokeWidth="3" />
+              <circle
+                cx="18"
+                cy="18"
+                r="15.5"
+                fill="none"
+                stroke="var(--color-primary-600)"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeDasharray={`${(completionPct / 100) * 97.4} 97.4`}
+              />
+            </svg>
+            <span className="absolute text-sm font-bold text-[var(--color-text-h)]">
+              {completionPct}%
+            </span>
+          </div>
+          <div className="text-sm text-[var(--color-text-muted)]">
+            <p className="font-semibold text-[var(--color-text-h)]">{profile.careerGoal}</p>
+            <p className="mt-0.5">{profile.skills.length} tracked skills</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function AssessmentPage() {
   const [category, setCategory] = useState("All");
   const [difficulty, setDifficulty] = useState("All");
   const [type, setType] = useState("All");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [activeSection, setActiveSection] = useState("overview");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const ITEMS_PER_PAGE = 6;
 
   const profile = useMemo(() => getUserProfile(), []);
   const recommended = useMemo(() => getRecommendedAssessments(profile), [profile]);
@@ -136,6 +483,21 @@ export default function AssessmentPage() {
 
   const completedDays = dailyAssessments.filter((d) => d.status === "Completed").length;
   const todayDay = new Date().getDate();
+
+  // Today's featured challenge + a Mon–Sun strip for the week it falls in,
+  // so the Daily Assessment section has real content of its own instead of
+  // just pointing at the calendar in the sidebar.
+  const todayAssessment = useMemo(
+    () => dailyAssessments.find((d) => d.isToday),
+    [dailyAssessments]
+  );
+  const weekDays = useMemo(() => {
+    const now = new Date();
+    const todayIndex = dailyAssessments.findIndex((d) => d.isToday);
+    if (todayIndex === -1) return dailyAssessments.slice(0, 7);
+    const weekStart = Math.max(0, todayIndex - now.getDay());
+    return dailyAssessments.slice(weekStart, weekStart + 7);
+  }, [dailyAssessments]);
 
   // Which weekday (0=Sun..6=Sat) the 1st of the current month falls on,
   // so "Day 1" lines up under the correct column instead of always
@@ -159,200 +521,350 @@ export default function AssessmentPage() {
     });
   }, [category, difficulty, type]);
 
+  // Reset to page 1 when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [category, difficulty, type]);
+
+  // Paginated explore list
+  const paginatedList = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    const end = start + ITEMS_PER_PAGE;
+    return exploreList.slice(start, end);
+  }, [exploreList, currentPage]);
+
+  const totalPages = Math.ceil(exploreList.length / ITEMS_PER_PAGE);
+
+  // Scroll-spy: highlight the sidebar nav item for the section in view.
+  useEffect(() => {
+    const sectionEls = NAV_ITEMS.map((item) => document.getElementById(item.id)).filter(Boolean);
+    if (!sectionEls.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter((e) => e.isIntersecting);
+        if (visible.length > 0) {
+          const top = visible.reduce((a, b) => (a.boundingClientRect.top < b.boundingClientRect.top ? a : b));
+          setActiveSection(top.target.id);
+        }
+      },
+      { rootMargin: "-15% 0px -70% 0px", threshold: 0 }
+    );
+
+    sectionEls.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="flex min-h-screen flex-col">
-      {/* ---------------- HEADER ---------------- */}
-      <Section  className="pt-14 pb-10">
-        <h1 className="text-4xl font-bold tracking-tight text-[var(--color-text-h)] sm:text-5xl">
-          Assess Your Skills
-        </h1>
-        <p className="mt-3 max-w-xl text-lg leading-relaxed text-[var(--color-text-muted)]">
-          Practice what matters for your field and discover where you can improve.
-        </p>
+    <div
+      className="w-full"
+      style={{
+        backgroundColor: "#F5F1E7",
+        backgroundImage:
+          "linear-gradient(rgba(90,74,58,0.14) 1px, transparent 1px), linear-gradient(90deg, rgba(90,74,58,0.14) 1px, transparent 1px)",
+        backgroundSize: "24px 24px",
+      }}
+    >
+      <div className="mx-auto flex max-w-[1400px] gap-6 px-4 pb-16 lg:px-8">
+      {/* ---------------- LEFT SIDEBAR ---------------- */}
+      <aside
+        className={`sticky top-20 hidden h-fit shrink-0 self-start pt-14 transition-all duration-200 md:block ${
+          sidebarOpen ? "w-44" : "w-12"
+        }`}
+      >
+        <SidebarNav active={activeSection} open={sidebarOpen} onToggle={() => setSidebarOpen((v) => !v)} />
+      </aside>
 
-        <div className="mt-6 flex flex-wrap gap-3">
-          <div className="inline-flex flex-col gap-0.5 rounded-xl border border-[var(--color-primary-100)] bg-white px-4 py-3">
-            <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-primary-600)]">
-              Career Goal
-            </span>
-            <span className="text-base font-semibold text-[var(--color-text-h)]">
-              {profile.careerGoal}
-            </span>
-          </div>
-          <div className="inline-flex flex-col gap-0.5 rounded-xl border border-[var(--color-border)] bg-white px-4 py-3">
-            <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
-              Field
-            </span>
-            <span className="text-base font-semibold text-[var(--color-text-h)]">
-              {profile.field}
-            </span>
-          </div>
-        </div>
-      </Section>
+      {/* ---------------- MAIN CONTENT ---------------- */}
+      <div className="min-w-0 flex-1">
+        {/* HEADER */}
+        <Section id="overview" className="scroll-mt-24 pt-14 pb-10">
+          <div className="relative mx-auto max-w-3xl overflow-hidden rounded-3xl border border-[var(--color-border)] bg-gradient-to-b from-[var(--color-primary-50)] to-white px-6 py-12 text-center shadow-sm">
+            <svg
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-24 w-full"
+              viewBox="0 0 400 100"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M0 100 L60 45 L110 80 L170 25 L230 70 L290 35 L350 78 L400 100 Z"
+                fill="var(--color-primary-100)"
+                opacity="0.45"
+              />
+            </svg>
 
-      {/* ---------------- RECOMMENDED FOR YOU ---------------- */}
-      <Section >
-        <SectionHeading
-          title="Recommended for You"
-          subtitle={`Recommended for your ${profile.careerGoal} goal — based on your field (${profile.field}) and skills: ${profile.skills.join(", ")}.`}
-        />
-        <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {recommended.map((assessment) => (
-            <AssessmentCard key={assessment.id} assessment={assessment} />
-          ))}
-          {recommended.length === 0 && (
-            <p className="col-span-full text-center text-sm text-[var(--color-text-muted)]">
-              No recommendations yet — complete onboarding to get personalized picks.
-            </p>
-          )}
-        </div>
-      </Section>
-
-      {/* ---------------- DAILY ASSESSMENT ---------------- */}
-      <Section >
-        <SectionHeading
-          title="Daily Assessment"
-          subtitle={`A fresh ${profile.field} challenge, every day this month.`}
-        />
-
-        <div className="mx-auto max-w-sm overflow-hidden rounded-2xl border border-[var(--color-border)] bg-white p-5 shadow-sm">
-          {/* Header: streak + month label */}
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-lg font-bold text-[var(--color-text-h)]">
-                Day {todayDay}
-              </p>
-              <p className="text-xs text-[var(--color-text-muted)]">
-                {completedDays}/{dailyAssessments.length} days completed
+            <div className="relative">
+              <HeroIllustration className="mx-auto h-20 w-20" />
+              <h1 className="mt-4 text-4xl font-bold tracking-tight text-[var(--color-text-h)] sm:text-5xl">
+                Assess Your Skills
+              </h1>
+              <p className="mx-auto mt-3 max-w-xl text-lg leading-relaxed text-[var(--color-text-muted)]">
+                Practice what matters for your field and discover where you can improve.
               </p>
             </div>
-            <span className="rounded-full border border-[var(--color-primary-100)] bg-[var(--color-primary-50)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-primary-600)]">
-              {profile.field}
-            </span>
           </div>
 
-          {/* Weekday header */}
-          <div className="mt-4 grid grid-cols-7 text-center text-[11px] font-medium text-[var(--color-text-light)]">
-            {WEEKDAY_LABELS.map((d, i) => (
-              <span key={i}>{d}</span>
-            ))}
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <div className="inline-flex flex-col gap-0.5 rounded-xl border border-[var(--color-primary-100)] bg-white px-4 py-3">
+              <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-primary-600)]">
+                Career Goal
+              </span>
+              <span className="text-base font-semibold text-[var(--color-text-h)]">
+                {profile.careerGoal}
+              </span>
+            </div>
+            <div className="inline-flex flex-col gap-0.5 rounded-xl border border-[var(--color-border)] bg-white px-4 py-3">
+              <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
+                Field
+              </span>
+              <span className="text-base font-semibold text-[var(--color-text-h)]">
+                {profile.field}
+              </span>
+            </div>
           </div>
+        </Section>
 
-          {/* Day grid — leading blanks align "Day 1" to its real weekday */}
-          <div className="mt-2 grid grid-cols-7 gap-y-2 text-center">
-            {Array.from({ length: firstWeekdayOffset }).map((_, i) => (
-              <div key={`pad-${i}`} />
-            ))}
-            {dailyAssessments.map((daily) => (
-              <DayCell key={daily.id} daily={daily} />
-            ))}
-          </div>
-
-          {/* Legend */}
-          <div className="mt-4 flex flex-wrap gap-4 border-t border-[var(--color-border)] pt-3 text-[11px] text-[var(--color-text-muted)]">
-            <span className="flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-primary-600)]" /> Available
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-green-500" /> Completed
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-text-light)]" /> Locked
-            </span>
-          </div>
-        </div>
-      </Section>
-
-      {/* ---------------- EXPLORE ASSESSMENTS ---------------- */}
-      <Section >
-        <SectionHeading
-          title="Explore Assessments"
-          subtitle="Browse across every field — new ones are added as you progress."
-        />
-
-        <div className="mt-8 space-y-4">
-          {/* Category filter */}
-          <div>
-            <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text-light)]">
-              Category
-            </span>
-            <div className="flex flex-wrap gap-2">
-              {CATEGORIES.map((c) => (
-                <button
+        {/* PRACTICE BY CATEGORY — Quest-style tiles */}
+        <Section id="categories" className="scroll-mt-24">
+          <SectionHeading
+            title="Practice by Category"
+            subtitle="Pick a track and work through it at your own pace."
+          />
+          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            {CATEGORIES.filter((c) => c !== "All").map((c, i) => {
+              const count = ASSESSMENTS.filter((a) => a.category === c).length;
+              return (
+                <CategoryTile
                   key={c}
-                  type="button"
-                  onClick={() => setCategory(c)}
-                  className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
-                    category === c
-                      ? "border-[var(--color-primary-600)] bg-[var(--color-primary-600)] text-white"
-                      : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-primary-300)]"
-                  }`}
-                >
-                  {c}
-                </button>
-              ))}
-            </div>
+                  category={c}
+                  count={count}
+                  index={i}
+                  onSelect={setCategory}
+                />
+              );
+            })}
           </div>
+        </Section>
 
-          {/* Difficulty + Type filters */}
-          <div className="flex flex-wrap gap-8">
-            <div>
-              <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text-light)]">
-                Difficulty
-              </span>
-              <div className="flex flex-wrap gap-2">
-                {DIFFICULTY_FILTERS.map((d) => (
-                  <button
-                    key={d}
-                    type="button"
-                    onClick={() => setDifficulty(d)}
-                    className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                      difficulty === d
-                        ? "border-[var(--color-primary-600)] bg-[var(--color-primary-600)] text-white"
-                        : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-primary-300)]"
-                    }`}
-                  >
-                    {d}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text-light)]">
-                Type
-              </span>
-              <div className="flex flex-wrap gap-2">
-                {TYPE_FILTERS.map((t) => (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => setType(t)}
-                    className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                      type === t
-                        ? "border-[var(--color-primary-600)] bg-[var(--color-primary-600)] text-white"
-                        : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-primary-300)]"
-                    }`}
-                  >
-                    {t === "All" ? "All" : formatType(t)}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+        {/* MOBILE-ONLY: streak card sits inline since the right rail is hidden below xl */}
+        <div className="mb-10 xl:hidden">
+          <StreakSidebar
+            profile={profile}
+            dailyAssessments={dailyAssessments}
+            completedDays={completedDays}
+          />
         </div>
 
-        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {exploreList.map((assessment) => (
-            <AssessmentCard key={assessment.id} assessment={assessment} />
-          ))}
-          {exploreList.length === 0 && (
-            <p className="col-span-full text-center text-sm text-[var(--color-text-muted)]">
-              No assessments match these filters yet.
+        {/* RECOMMENDED FOR YOU */}
+        <Section id="recommended" className="scroll-mt-24">
+          <SectionHeading
+            title="Recommended for You"
+            subtitle={`Recommended for your ${profile.careerGoal} goal — based on your field (${profile.field}) and skills: ${profile.skills.join(", ")}.`}
+          />
+          <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            {recommended.map((assessment) => (
+              <AssessmentCard key={assessment.id} assessment={assessment} />
+            ))}
+            {recommended.length === 0 && (
+              <p className="col-span-full text-center text-sm text-[var(--color-text-muted)]">
+                No recommendations yet — complete onboarding to get personalized picks.
+              </p>
+            )}
+          </div>
+        </Section>
+
+        {/* DAILY ASSESSMENT */}
+        <Section id="daily" className="scroll-mt-24">
+          <SectionHeading
+            title="Daily Assessment"
+            subtitle={`A fresh ${profile.field} challenge, every day this month.`}
+          />
+
+          <div className="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-[1.4fr_1fr]">
+            {/* Today's challenge */}
+            {todayAssessment ? (
+              <div className="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-gradient-to-br from-[var(--color-primary-600)] to-[#d97706] p-6 text-white shadow-sm">
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-white/70">
+                  Day {todayDay} · {profile.field}
+                </span>
+                <h3 className="mt-2 text-2xl font-bold leading-snug">{todayAssessment.title}</h3>
+                <p className="mt-2 max-w-md text-sm text-white/80">
+                  Keep your streak alive — finish today's challenge before it locks tomorrow.
+                </p>
+                <Button
+                  as="a"
+                  href={`/assessment/${todayAssessment.id}`}
+                  size="sm"
+                  className="mt-6 !bg-white !text-[var(--color-text-h)] hover:!bg-white/90"
+                >
+                  Start Today's Challenge
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center rounded-2xl border border-dashed border-[var(--color-border)] p-6 text-sm text-[var(--color-text-muted)]">
+                No challenge is scheduled for today — check back tomorrow.
+              </div>
+            )}
+
+            {/* This week */}
+            <div className="rounded-2xl border border-[var(--color-border)] p-6">
+              <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-light)]">
+                This week
+              </span>
+              <div className="mt-4 grid grid-cols-7 gap-1.5 text-center">
+                {weekDays.map((d) => (
+                  <div key={d.id} className="flex flex-col items-center gap-1">
+                    <span
+                      className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold ${
+                        d.isToday
+                          ? "bg-[var(--color-primary-600)] text-white"
+                          : d.status === "Completed"
+                          ? "bg-green-50 text-green-700"
+                          : d.status === "Locked"
+                          ? "text-[var(--color-text-light)]"
+                          : "text-[var(--color-text-h)]"
+                      }`}
+                    >
+                      {d.day}
+                    </span>
+                    <span
+                      className={`h-1 w-1 rounded-full ${
+                        d.status === "Completed" ? "bg-green-500" : d.status === "Locked" ? "bg-transparent" : "bg-[var(--color-primary-600)]"
+                      }`}
+                    />
+                  </div>
+                ))}
+              </div>
+              <p className="mt-4 text-xs text-[var(--color-text-muted)] xl:hidden">
+                Full calendar is above.
+              </p>
+              <p className="mt-4 hidden text-xs text-[var(--color-text-muted)] xl:block">
+                Full calendar is pinned to the right.
+              </p>
+            </div>
+          </div>
+        </Section>
+
+        {/* EXPLORE ASSESSMENTS */}
+        <Section id="explore" className="scroll-mt-24">
+          <SectionHeading
+            title="Explore Assessments"
+            subtitle="Browse across every field — new ones are added as you progress."
+          />
+
+          <div className="mt-8 space-y-4">
+            {/* Category filter */}
+            <div>
+              <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text-light)]">
+                Category
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {CATEGORIES.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setCategory(c)}
+                    className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
+                      category === c
+                        ? "border-[var(--color-primary-600)] bg-[var(--color-primary-600)] text-white"
+                        : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-primary-300)]"
+                    }`}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Difficulty + Type filters */}
+            <div className="flex flex-wrap gap-8">
+              <div>
+                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text-light)]">
+                  Difficulty
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {DIFFICULTY_FILTERS.map((d) => (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => setDifficulty(d)}
+                      className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                        difficulty === d
+                          ? "border-[var(--color-primary-600)] bg-[var(--color-primary-600)] text-white"
+                          : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-primary-300)]"
+                      }`}
+                    >
+                      {d}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text-light)]">
+                  Type
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {TYPE_FILTERS.map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setType(t)}
+                      className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                        type === t
+                          ? "border-[var(--color-primary-600)] bg-[var(--color-primary-600)] text-white"
+                          : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-primary-300)]"
+                      }`}
+                    >
+                      {t === "All" ? "All" : formatType(t)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            {paginatedList.map((assessment) => (
+              <AssessmentCard key={assessment.id} assessment={assessment} />
+            ))}
+            {paginatedList.length === 0 && (
+              <p className="col-span-full text-center text-sm text-[var(--color-text-muted)]">
+                No assessments match these filters yet.
+              </p>
+            )}
+          </div>
+
+          {/* Pagination - Load More button */}
+          {totalPages > 1 && currentPage < totalPages && (
+            <div className="mt-8 flex justify-center">
+              <Button
+                onClick={() => setCurrentPage(currentPage + 1)}
+                variant="outline"
+                size="md"
+              >
+                Load More Assessments ({currentPage} of {totalPages})
+              </Button>
+            </div>
+          )}
+
+          {currentPage === totalPages && exploreList.length > 0 && (
+            <p className="mt-8 text-center text-sm text-[var(--color-text-muted)]">
+              Showing all {exploreList.length} assessments
             </p>
           )}
-        </div>
-      </Section>
+        </Section>
+      </div>
+
+      {/* ---------------- RIGHT SIDEBAR (streak calendar) ---------------- */}
+      <aside className="sticky top-20 hidden h-fit w-64 shrink-0 self-start pt-14 xl:block">
+        <StreakSidebar
+          profile={profile}
+          dailyAssessments={dailyAssessments}
+          completedDays={completedDays}
+        />
+      </aside>
+      </div>
     </div>
   );
 }

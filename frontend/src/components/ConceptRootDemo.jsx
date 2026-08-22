@@ -10,16 +10,12 @@ export default function ConceptRootDemo({ className = "" }) {
   const [mode, setMode] = useState("normal"); // 'normal' | 'code'
 
   // Normal answer state
-  const [normalPresetId, setNormalPresetId] = useState("binary-search");
-  const [questionText, setQuestionText] = useState(
-    NORMAL_ANSWER_PRESETS[0].question
-  );
-  const [userAnswerText, setUserAnswerText] = useState(
-    NORMAL_ANSWER_PRESETS[0].userAnswer
-  );
+  const [normalPresetId, setNormalPresetId] = useState(NORMAL_ANSWER_PRESETS[0].id);
+  const [questionText, setQuestionText] = useState(NORMAL_ANSWER_PRESETS[0].question);
+  const [userAnswerText, setUserAnswerText] = useState(NORMAL_ANSWER_PRESETS[0].userAnswer);
 
   // Code submission state
-  const [codePresetId, setCodePresetId] = useState("array-max");
+  const [codePresetId, setCodePresetId] = useState(CODE_SUBMISSION_PRESETS[0].id);
   const [codeText, setCodeText] = useState(CODE_SUBMISSION_PRESETS[0].code);
 
   // Interactive flow state
@@ -65,7 +61,7 @@ export default function ConceptRootDemo({ className = "" }) {
     setHasAnalyzed(true);
   };
 
-  // Run mock analysis
+  // Run diagnostic analysis
   const handleRunAnalysis = () => {
     setIsLoading(true);
     setHasAnalyzed(false);
@@ -85,7 +81,7 @@ export default function ConceptRootDemo({ className = "" }) {
       setResult(res);
       setIsLoading(false);
       setHasAnalyzed(true);
-    }, 600);
+    }, 450);
   };
 
   // Reset form
@@ -97,10 +93,50 @@ export default function ConceptRootDemo({ className = "" }) {
       setNormalPresetId(preset.id);
       setQuestionText(preset.question);
       setUserAnswerText(preset.userAnswer);
+      setResult(preset.analysis);
     } else {
       const preset = CODE_SUBMISSION_PRESETS[0];
       setCodePresetId(preset.id);
       setCodeText(preset.code);
+      setResult(preset.analysis);
+    }
+    setHasAnalyzed(true);
+  };
+
+  // Verdict Badge Helper (Supports 5 Verdict States)
+  const renderVerdictBadge = (verdict) => {
+    switch (verdict) {
+      case "Correct":
+        return (
+          <span className="inline-flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            ✓ Correct
+          </span>
+        );
+      case "Partially Correct":
+        return (
+          <span className="inline-flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
+            ~ Partially Correct
+          </span>
+        );
+      case "Correct with Weakness":
+        return (
+          <span className="inline-flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+            ⚠ Correct with Weakness
+          </span>
+        );
+      case "Incorrect":
+        return (
+          <span className="inline-flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-bold bg-red-50 text-red-700 border border-red-200">
+            ✕ Incorrect
+          </span>
+        );
+      case "Ambiguous":
+      default:
+        return (
+          <span className="inline-flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200">
+            ? Ambiguous Input
+          </span>
+        );
     }
   };
 
@@ -108,22 +144,22 @@ export default function ConceptRootDemo({ className = "" }) {
     <div
       className={`rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-card-hover)] overflow-hidden ${className}`}
     >
-      {/* Card Header & Mode Switcher */}
+      {/* Header & Mode Switcher */}
       <div className="border-b border-[var(--color-border)] bg-[var(--color-primary-50)]/50 p-6 sm:p-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-primary-100)] px-3 py-1 text-xs font-semibold text-[var(--color-primary-700)]">
-              Interactive Demo
+              Interactive ConceptRoot AI Diagnostic
             </span>
             <h3 className="mt-2 text-xl font-bold text-[var(--color-text-h)]">
-              Test ConceptRoot Analysis
+              Test ConceptRoot Diagnostic Engine
             </h3>
             <p className="text-sm text-[var(--color-text-muted)]">
-              Select a submission type below to analyze root causes and missing prerequisites.
+              Submit an explanation or code snippet to receive 8-field root cause analysis.
             </p>
           </div>
 
-          {/* Mode Switcher Tabs */}
+          {/* Mode Tabs */}
           <div className="inline-flex items-center rounded-xl bg-white p-1.5 border border-[var(--color-border)] shadow-sm shrink-0">
             <button
               type="button"
@@ -134,7 +170,7 @@ export default function ConceptRootDemo({ className = "" }) {
                   : "text-[var(--color-text-muted)] hover:text-[var(--color-text-h)]"
               }`}
             >
-              Normal Answer
+              Conceptual Answer
             </button>
             <button
               type="button"
@@ -153,7 +189,7 @@ export default function ConceptRootDemo({ className = "" }) {
         {/* Preset Selector Pills */}
         <div className="mt-6 flex flex-wrap items-center gap-2">
           <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">
-            Sample Presets:
+            Test Scenarios:
           </span>
           {mode === "normal"
             ? NORMAL_ANSWER_PRESETS.map((preset) => (
@@ -163,11 +199,11 @@ export default function ConceptRootDemo({ className = "" }) {
                   onClick={() => handleSelectNormalPreset(preset)}
                   className={`rounded-lg px-3 py-1.5 text-xs font-medium border transition-all ${
                     normalPresetId === preset.id
-                      ? "border-[var(--color-primary-600)] bg-[var(--color-primary-50)] text-[var(--color-primary-700)]"
+                      ? "border-[var(--color-primary-600)] bg-[var(--color-primary-50)] text-[var(--color-primary-700)] font-semibold shadow-xs"
                       : "border-[var(--color-border)] bg-white text-[var(--color-text-muted)] hover:border-[var(--color-primary-300)]"
                   }`}
                 >
-                  {preset.title}
+                  {preset.category || preset.title}
                 </button>
               ))
             : CODE_SUBMISSION_PRESETS.map((preset) => (
@@ -177,17 +213,17 @@ export default function ConceptRootDemo({ className = "" }) {
                   onClick={() => handleSelectCodePreset(preset)}
                   className={`rounded-lg px-3 py-1.5 text-xs font-medium border transition-all ${
                     codePresetId === preset.id
-                      ? "border-[var(--color-primary-600)] bg-[var(--color-primary-50)] text-[var(--color-primary-700)]"
+                      ? "border-[var(--color-primary-600)] bg-[var(--color-primary-50)] text-[var(--color-primary-700)] font-semibold shadow-xs"
                       : "border-[var(--color-border)] bg-white text-[var(--color-text-muted)] hover:border-[var(--color-primary-300)]"
                   }`}
                 >
-                  {preset.title}
+                  {preset.category || preset.title}
                 </button>
               ))}
         </div>
       </div>
 
-      {/* Main Interactive Body */}
+      {/* Main Form & Output Grid */}
       <div className="p-6 sm:p-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Input Form Column */}
@@ -196,7 +232,7 @@ export default function ConceptRootDemo({ className = "" }) {
               <div className="space-y-4">
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
-                    Question
+                    Question / Problem
                   </label>
                   <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-primary-50)]/40 p-4 text-sm font-medium text-[var(--color-text-h)]">
                     {questionText}
@@ -204,16 +240,19 @@ export default function ConceptRootDemo({ className = "" }) {
                 </div>
 
                 <div>
-                  <label htmlFor="user-answer-input" className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
-                    Student Answer
+                  <label
+                    htmlFor="user-answer-input"
+                    className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-2"
+                  >
+                    Student Explanation / Response
                   </label>
-                  <input
+                  <textarea
                     id="user-answer-input"
-                    type="text"
                     value={userAnswerText}
                     onChange={(e) => setUserAnswerText(e.target.value)}
-                    placeholder="Enter student answer..."
-                    className="w-full rounded-xl border border-[var(--color-border)] bg-white p-3.5 text-sm font-medium text-[var(--color-text-h)] placeholder-[var(--color-text-light)] focus:border-[var(--color-primary-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-100)] transition-all"
+                    rows={4}
+                    placeholder="Enter student reasoning or explanation..."
+                    className="w-full rounded-xl border border-[var(--color-border)] bg-white p-3.5 text-sm font-medium text-[var(--color-text-h)] placeholder-[var(--color-text-light)] focus:border-[var(--color-primary-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-100)] transition-all resize-none"
                   />
                 </div>
               </div>
@@ -221,7 +260,10 @@ export default function ConceptRootDemo({ className = "" }) {
               <div className="space-y-4">
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label htmlFor="code-textarea" className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+                    <label
+                      htmlFor="code-textarea"
+                      className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]"
+                    >
                       Submitted JavaScript Code
                     </label>
                     <span className="text-xs font-mono text-[var(--color-text-muted)]">
@@ -235,13 +277,13 @@ export default function ConceptRootDemo({ className = "" }) {
                         <span className="h-2.5 w-2.5 rounded-full bg-yellow-500 inline-block" />
                         <span className="h-2.5 w-2.5 rounded-full bg-green-500 inline-block" />
                       </div>
-                      <span>JS Function</span>
+                      <span>JS Code Submission</span>
                     </div>
                     <textarea
                       id="code-textarea"
                       value={codeText}
                       onChange={(e) => setCodeText(e.target.value)}
-                      rows={9}
+                      rows={11}
                       className="w-full bg-transparent p-4 font-mono text-sm leading-relaxed text-emerald-400 focus:outline-none resize-none"
                       spellCheck={false}
                     />
@@ -280,12 +322,10 @@ export default function ConceptRootDemo({ className = "" }) {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       ></path>
                     </svg>
-                    Analyzing Concept...
+                    Analyzing Concept Root...
                   </span>
-                ) : mode === "normal" ? (
-                  "Analyze Submission"
                 ) : (
-                  "Analyze Code"
+                  "Run ConceptRoot AI Diagnostic"
                 )}
               </Button>
               <Button
@@ -299,14 +339,14 @@ export default function ConceptRootDemo({ className = "" }) {
             </div>
           </div>
 
-          {/* Analysis Output Column */}
+          {/* Analysis Output Column (Rendering 8 Schema Fields) */}
           <div className="flex flex-col">
             <div className="flex items-center justify-between mb-4">
               <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
-                ConceptRoot Analysis Output
+                ConceptRoot Diagnostic Output
               </h4>
               <span className="text-xs font-mono text-[var(--color-primary-600)]">
-                {isLoading ? "Analyzing..." : "Real-time Breakdown"}
+                {isLoading ? "Diagnosing..." : "8-Field Schema"}
               </span>
             </div>
 
@@ -315,100 +355,100 @@ export default function ConceptRootDemo({ className = "" }) {
                 <div className="h-10 w-10 rounded-full border-2 border-[var(--color-primary-600)] border-t-transparent animate-spin" />
                 <div>
                   <p className="text-sm font-semibold text-[var(--color-text-h)]">
-                    Analyzing submission mechanics...
+                    Analyzing student understanding...
                   </p>
                   <p className="text-xs text-[var(--color-text-muted)] mt-1">
-                    Identifying root cause, missing prerequisite, and targeted learning path.
+                    Identifying correct reasoning, missing prerequisites, root breakdown, and personalized guidance.
                   </p>
                 </div>
               </div>
             ) : hasAnalyzed && result ? (
-              <div className="flex-1 flex flex-col justify-between space-y-5 rounded-xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
-                {/* Result Status Header */}
-                <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-[var(--color-text-muted)]">
-                      Submission Status:
-                    </span>
-                    <span
-                      className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-bold ${
-                        result.statusType === "error"
-                          ? "bg-red-50 text-red-700 border border-red-200"
-                          : "bg-amber-50 text-amber-700 border border-amber-200"
-                      }`}
-                    >
-                      ✕ {result.status}
-                    </span>
-                  </div>
+              <div className="flex-1 flex flex-col justify-between space-y-4 rounded-xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
+                {/* 1. Verdict & Status Header */}
+                <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+                    Diagnostic Verdict:
+                  </span>
+                  {renderVerdictBadge(result.verdict)}
                 </div>
 
-                {/* Key Insights Grid */}
-                <div className="space-y-4 text-sm">
-                  {/* Issue */}
-                  <div>
-                    <span className="text-xs font-semibold text-[var(--color-text-muted)] block uppercase tracking-wider mb-1">
-                      Detected Issue
-                    </span>
-                    <p className="font-medium text-[var(--color-text-h)] bg-slate-50 rounded-lg p-2.5 border border-slate-100">
-                      {result.detectedIssue}
-                    </p>
-                  </div>
-
-                  {/* Root Concept & Prerequisite Badges */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="rounded-xl border border-[var(--color-primary-100)] bg-[var(--color-primary-50)] p-3">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-primary-700)] block mb-1">
-                        Root Concept
+                <div className="space-y-3 text-xs leading-relaxed">
+                  {/* 2. What You Got Right (Preserving correct understanding) */}
+                  {result.whatYouGotRight && (
+                    <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-3">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 block mb-1">
+                        ✓ What You Got Right
                       </span>
-                      <p className="text-xs font-semibold text-[var(--color-primary-900)]">
-                        {result.rootConcept}
+                      <p className="text-emerald-900 font-medium">
+                        {result.whatYouGotRight}
                       </p>
                     </div>
+                  )}
 
-                    <div className="rounded-xl border border-indigo-100 bg-indigo-50/70 p-3">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-700 block mb-1">
-                        Missing Prerequisite
+                  {/* 3. What Needs Attention (Specific flaw / anti-pattern) */}
+                  {result.whatNeedsAttention && (
+                    <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800 block mb-1">
+                        ⚠️ What Needs Attention
                       </span>
-                      <p className="text-xs font-semibold text-indigo-900">
-                        {result.missingPrerequisite}
+                      <p className="text-amber-900 font-medium">
+                        {result.whatNeedsAttention}
                       </p>
                     </div>
-                  </div>
+                  )}
 
-                  {/* Explanation */}
-                  <div>
-                    <span className="text-xs font-semibold text-[var(--color-text-muted)] block uppercase tracking-wider mb-1">
-                      Why It Happened (Explanation)
-                    </span>
-                    <p className="text-xs leading-relaxed text-[var(--color-text-body)]">
-                      {result.explanation}
-                    </p>
-                  </div>
-
-                  {/* Recommendations */}
-                  <div className="space-y-2 border-t border-[var(--color-border)] pt-3">
-                    <div className="flex items-start gap-2 text-xs">
-                      <span className="shrink-0 font-bold text-[var(--color-primary-600)]">
-                        👉 Recommended Study:
+                  {/* 4. Focus First (Single minimum prerequisite concept) */}
+                  {result.focusFirst && (
+                    <div className="rounded-xl border border-[var(--color-primary-200)] bg-[var(--color-primary-50)] p-3">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-primary-700)] block mb-0.5">
+                        🎯 Focus First (Highest Priority Concept)
                       </span>
-                      <span className="text-[var(--color-text-muted)]">
-                        {result.recommendedNext}
+                      <p className="text-sm font-bold text-[var(--color-primary-900)]">
+                        {result.focusFirst}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* 5. Why You're Getting Stuck */}
+                  {result.whyYoureGettingStuck && (
+                    <div>
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] block mb-1">
+                        Why You're Getting Stuck
+                      </span>
+                      <p className="text-[var(--color-text-body)] bg-slate-50 p-2.5 rounded-lg border border-slate-100 font-medium">
+                        {result.whyYoureGettingStuck}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* 6. Personalized Explanation */}
+                  {result.personalizedExplanation && (
+                    <div>
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] block mb-1">
+                        Personalized Explanation (Tailored to your submission)
+                      </span>
+                      <p className="text-[var(--color-text-body)] leading-relaxed">
+                        {result.personalizedExplanation}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* 7. Optional Next Step */}
+                  {result.optionalNextStep && (
+                    <div className="border-t border-[var(--color-border)] pt-3 flex items-start gap-2">
+                      <span className="shrink-0 font-bold text-[var(--color-primary-600)]">
+                        👉 Actionable Next Step:
+                      </span>
+                      <span className="text-[var(--color-text-h)] font-medium">
+                        {result.optionalNextStep}
                       </span>
                     </div>
-                    <div className="flex items-start gap-2 text-xs">
-                      <span className="shrink-0 font-bold text-[var(--color-primary-600)]">
-                        🎯 Practice Focus:
-                      </span>
-                      <span className="text-[var(--color-text-muted)]">
-                        {result.recommendedPractice}
-                      </span>
-                    </div>
-                  </div>
+                  )}
                 </div>
               </div>
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center rounded-xl border border-dashed border-[var(--color-border)] p-8 text-center text-sm text-[var(--color-text-muted)]">
-                Click "Analyze Submission" or "Analyze Code" above to run the ConceptRoot diagnostic.
+                Select a scenario or type custom text above and click "Run ConceptRoot AI Diagnostic".
               </div>
             )}
           </div>

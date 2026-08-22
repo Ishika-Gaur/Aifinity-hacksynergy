@@ -1,0 +1,73 @@
+import express from "express";
+import mongoose from "mongoose";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+import dotenv from "dotenv";
+import authRoutes from "./routes/authRoutes.js";
+import { authenticate, isAdmin } from "./middleware/authMiddleware.js";
+
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.01:27017/aifinity";
+const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
+
+// Middleware
+app.use(
+  cors({
+    origin: CLIENT_URL,
+    credentials: true,
+  })
+);
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+// Routes
+app.use("/api/auth", authRoutes);
+
+// Protected Admin Test Route
+app.get("/api/admin/test", authenticate, isAdmin, (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Admin authorization verified successfully.",
+    user: {
+      id: req.user._id,
+      name: req.user.name,
+      email: req.user.email,
+      role: req.user.role,
+    },
+  });
+});
+
+// Health check endpoint
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ status: "OK", timestamp: new Date().toISOString() });
+});
+
+// MongoDB Connection & Server Launch
+export async function startServer() {
+  try {
+    await mongoose.connect(MONGODB_URI);
+    console.log(`Connected to MongoDB successfully at ${MONGODB_URI}`);
+
+    // Ensure Mongoose models sync indexes (e.g. partial unique index on role: "admin")
+    await mongoose.model("User").syncIndexes();
+    console.log("MongoDB User indexes synchronized successfully.");
+
+    const server = app.listen(PORT, () => {
+      console.log(`AIFinity Express server running on port ${PORT}`);
+    });
+    return server;
+  } catch (err) {
+    console.error("Failed to start server:", err.message);
+    process.exit(1);
+  }
+}
+
+if (process.env.NODE_ENV !== "test" && import.meta.url === `file:///${process.argv[1].replace(/\\/g, "/")}`) {
+  startServer();
+}
+
+export default app;

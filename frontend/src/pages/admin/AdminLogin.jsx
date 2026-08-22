@@ -8,7 +8,7 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { login, adminExists } = useAdminAuth();
+  const { login } = useAdminAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -46,7 +46,7 @@ export default function AdminLogin() {
             Admin Authentication
           </h2>
           <p className="mt-1 text-xs text-slate-400">
-            Sign in with your Firebase admin credentials to access the console.
+            Sign in with your administrator credentials to access the console.
           </p>
         </div>
 
@@ -59,22 +59,6 @@ export default function AdminLogin() {
               </svg>
               <span>{error}</span>
             </div>
-          </div>
-        )}
-
-        {/* Setup Notice if no admin account bootstrapped yet */}
-        {!adminExists && (
-          <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/10 p-4 text-xs text-cyan-300">
-            <p className="font-bold">Initial Setup Required</p>
-            <p className="mt-1 text-[11px] text-cyan-200/80 leading-relaxed">
-              No administrator account has been established yet. Create the initial admin account using the bootstrap setup.
-            </p>
-            <Link
-              to="/admin/signup"
-              className="mt-2.5 inline-block font-bold text-cyan-400 underline hover:text-cyan-300"
-            >
-              Establish Admin Account →
-            </Link>
           </div>
         )}
 
