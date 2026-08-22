@@ -1,59 +1,45 @@
-import {
-  INITIAL_ANALYTICS,
-  INITIAL_CONTENT,
-  INITIAL_REPORTS,
-  INITIAL_SETTINGS,
-} from "../data/mockAdminData";
-
-const STORAGE_KEYS = {
-  CONTENT: "aifinity_admin_content",
-  SETTINGS: "aifinity_admin_settings",
-};
-
-// Helper for local storage persistent state
-const getStored = (key, fallback) => {
-  try {
-    const item = localStorage.getItem(key);
-    return item ? JSON.parse(item) : fallback;
-  } catch {
-    return fallback;
-  }
-};
-
-const setStored = (key, value) => {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch (err) {
-    console.error("Failed to persist admin state:", err);
-  }
-};
+import { adminApi } from "./api";
 
 export const adminService = {
-  getAnalytics: () => {
-    return INITIAL_ANALYTICS;
+  getAnalytics: async () => {
+    const res = await adminApi.getAnalytics();
+    if (res.success) return res.analytics;
+    return null;
   },
 
-  getContent: () => {
-    return getStored(STORAGE_KEYS.CONTENT, INITIAL_CONTENT);
+  getContent: async () => {
+    const res = await adminApi.getContent();
+    if (res.success) return res.content;
+    return [];
   },
 
-  deleteContent: (contentId) => {
-    const content = getStored(STORAGE_KEYS.CONTENT, INITIAL_CONTENT);
-    const updated = content.filter((c) => c.id !== contentId);
-    setStored(STORAGE_KEYS.CONTENT, updated);
-    return updated;
+  createContent: async (contentData) => {
+    const res = await adminApi.createContent(contentData);
+    if (res.success) return res.content;
+    throw new Error(res.error || "Failed to create content asset");
   },
 
-  getReports: () => {
-    return INITIAL_REPORTS;
+  deleteContent: async (contentId) => {
+    const res = await adminApi.deleteContent(contentId);
+    if (res.success) return res.content;
+    throw new Error(res.error || "Failed to delete content asset");
   },
 
-  getSettings: () => {
-    return getStored(STORAGE_KEYS.SETTINGS, INITIAL_SETTINGS);
+  getReports: async () => {
+    const res = await adminApi.getReports();
+    if (res.success) return res.reports;
+    return [];
   },
 
-  updateSettings: (newSettings) => {
-    setStored(STORAGE_KEYS.SETTINGS, newSettings);
-    return newSettings;
+  getSettings: async () => {
+    const res = await adminApi.getSettings();
+    if (res.success) return res.settings;
+    return null;
+  },
+
+  updateSettings: async (newSettings) => {
+    const res = await adminApi.updateSettings(newSettings);
+    if (res.success) return res.settings;
+    throw new Error(res.error || "Failed to update platform settings");
   },
 };

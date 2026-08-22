@@ -66,6 +66,24 @@ export const authApi = {
 export const adminApi = {
   getUsers: () => request("/admin/users"),
   deleteUser: (id) => request(`/admin/users/${id}`, { method: "DELETE" }),
+  getAnalytics: () => request("/admin/analytics"),
+  getContent: () => request("/admin/content"),
+  createContent: (content) =>
+    request("/admin/content", {
+      method: "POST",
+      body: JSON.stringify(content),
+    }),
+  deleteContent: (id) =>
+    request(`/admin/content/${id}`, {
+      method: "DELETE",
+    }),
+  getReports: () => request("/admin/reports"),
+  getSettings: () => request("/admin/settings"),
+  updateSettings: (settings) =>
+    request("/admin/settings", {
+      method: "PUT",
+      body: JSON.stringify(settings),
+    }),
 };
 
 export const assessmentApi = {
