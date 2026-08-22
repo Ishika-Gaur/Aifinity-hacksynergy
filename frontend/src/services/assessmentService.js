@@ -154,11 +154,15 @@ export async function submitAttemptSession(assessmentId, attemptId, responses, e
   const GRADABLE_TYPES = ["mcq", "scenario", "logical-reasoning", "data-interpretation", "output"];
   const gradableQuestions = questions.filter((q) => GRADABLE_TYPES.includes(q.type));
   let correctCount = 0;
+  let attemptedGradableCount = 0;
 
   gradableQuestions.forEach((q) => {
     const userResp = responses[q.id];
-    let isCorrect = false;
+    if (userResp === undefined || userResp === null || userResp === "") return;
 
+    attemptedGradableCount++;
+
+    let isCorrect = false;
     if (answersMap && answersMap.has(q.id)) {
       const cached = answersMap.get(q.id);
       isCorrect = checkAnswerMatch(q, userResp, cached.answer);
@@ -169,6 +173,12 @@ export async function submitAttemptSession(assessmentId, attemptId, responses, e
 
     if (isCorrect) correctCount++;
   });
+
+  const incorrectCount = attemptedGradableCount - correctCount;
+  const unansweredCount = gradableQuestions.length - attemptedGradableCount;
+  const totalQuestions = questions.length;
+  const attemptedCount = Object.keys(responses || {}).length;
+  const unansweredTotalCount = totalQuestions - attemptedCount;
 
   const scorePercent = gradableQuestions.length
     ? Math.round((correctCount / gradableQuestions.length) * 100)
@@ -182,10 +192,14 @@ export async function submitAttemptSession(assessmentId, attemptId, responses, e
   return {
     success: true,
     scorePercent,
+    totalQuestions,
+    attemptedCount,
     correctCount,
+    incorrectCount,
+    unansweredCount,
+    unansweredTotalCount,
     gradableCount: gradableQuestions.length,
-    answeredCount: Object.keys(responses || {}).length,
-    totalQuestions: questions.length,
+    attemptedGradableCount,
     elapsedSeconds,
     violationsCount: violations.length,
     violations,
