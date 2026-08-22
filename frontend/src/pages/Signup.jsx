@@ -39,6 +39,11 @@ export default function SignupPage() {
     if (!res.success) {
       setError(res.error || "Registration failed.");
     } else {
+      if (res.user) {
+        try {
+          localStorage.setItem("user", JSON.stringify(res.user));
+        } catch {}
+      }
       navigate("/dashboard");
     }
   };

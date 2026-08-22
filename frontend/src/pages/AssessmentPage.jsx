@@ -2,6 +2,7 @@ import React, { useMemo, useState, useEffect, useRef } from "react";
 import Section from "../components/Section";
 import SectionHeading from "../components/SectionHeading";
 import Button from "../components/Button";
+import { ArrowRight } from "lucide-react";
 import {
   CATEGORIES,
   TYPE_FILTERS,
@@ -143,11 +144,10 @@ function SidebarNav({ active, open, onToggle }) {
             key={item.id}
             href={`#${item.id}`}
             title={item.label}
-            className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-              isActive
-                ? "bg-[var(--color-primary-50)] text-[var(--color-primary-600)]"
-                : "text-[var(--color-text-muted)] hover:bg-[var(--color-surface-secondary)] hover:text-[var(--color-text-h)]"
-            }`}
+            className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive
+              ? "bg-[var(--color-primary-50)] text-[var(--color-primary-600)]"
+              : "text-[var(--color-text-muted)] hover:bg-[var(--color-surface-secondary)] hover:text-[var(--color-text-h)]"
+              }`}
           >
             <svg
               viewBox="0 0 24 24"
@@ -165,29 +165,47 @@ function SidebarNav({ active, open, onToggle }) {
   );
 }
 
-/* Themed hero illustration — mountain + flag, in the app's teal/amber
-   palette. Mirrors the "reach the summit" motif without reusing any
-   third-party artwork. */
-function HeroIllustration({ className }) {
+/* ---------------- Hero signature visual: one clean skill-score ring ----------------
+   Deliberately minimal — a single ring is the "characteristic thing" for an
+   assessment tool (a score), so it carries the whole visual instead of
+   stacking a card, a question, options, a meter, and a floating pill. */
+function AssessmentHeroVisual({ className = "" }) {
+  const pct = 88;
+  const circumference = 2 * Math.PI * 54;
+  const dash = (pct / 100) * circumference;
+
   return (
-    <svg viewBox="0 0 160 130" className={className} aria-hidden="true">
-      <path
-        d="M0 108 L28 70 L52 92 L78 48 L108 86 L134 62 L160 108 Z"
-        fill="var(--color-primary-100)"
-        opacity="0.6"
-      />
-      <path
-        d="M0 116 L36 88 L60 104 L92 68 L118 96 L160 116 Z"
-        fill="var(--color-primary-200)"
-        opacity="0.5"
-      />
-      <path d="M38 108 L80 48 L122 108 Z" fill="var(--color-primary-600)" />
-      <path d="M64 78 L80 48 L96 78 L88 72 L80 82 L72 72 Z" fill="white" opacity="0.9" />
-      <line x1="80" y1="48" x2="80" y2="14" stroke="#8a6a3a" strokeWidth="2.5" strokeLinecap="round" />
-      <circle cx="80" cy="12" r="2.5" fill="#d97706" />
-      <path d="M80 17 L104 26 L80 35 Z" fill="#d97706" />
-      <path d="M85 26 L89 30 L97 20" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
+    <div
+      className={`relative flex flex-col items-center gap-4 rounded-2xl border border-[#2E4F42]/15 bg-[#FBF8F0] px-8 py-9 text-center shadow-[var(--shadow-card)] ${className}`}
+    >
+      <span className="font-['Space_Mono'] text-[10px] font-bold uppercase tracking-[0.15em] text-[#C4952A]">
+        Skill Snapshot
+      </span>
+
+      <div className="relative flex h-32 w-32 items-center justify-center">
+        <svg viewBox="0 0 120 120" className="h-32 w-32 -rotate-90">
+          <circle cx="60" cy="60" r="54" fill="none" stroke="#1B332C1A" strokeWidth="8" />
+          <circle
+            cx="60"
+            cy="60"
+            r="54"
+            fill="none"
+            stroke="#D9A62B"
+            strokeWidth="8"
+            strokeLinecap="round"
+            strokeDasharray={`${dash} ${circumference}`}
+          />
+        </svg>
+        <div className="absolute flex flex-col items-center">
+          <span className="text-3xl font-bold text-[#1B332C]">{pct}%</span>
+          <span className="text-[10px] text-[#5B6B5F]">Mastery</span>
+        </div>
+      </div>
+
+      <p className="max-w-[220px] text-sm text-[#24413A]">
+        Your average score across completed assessments this month.
+      </p>
+    </div>
   );
 }
 
@@ -212,13 +230,12 @@ function AssessmentCard({ assessment }) {
         </div>
         <div className="flex items-end justify-between">
           <span
-            className={`rounded-full px-2.5 py-1 text-[11px] font-semibold backdrop-blur-sm ${
-              assessment.difficulty === "Easy"
-                ? "bg-white/90 text-green-700"
-                : assessment.difficulty === "Hard"
+            className={`rounded-full px-2.5 py-1 text-[11px] font-semibold backdrop-blur-sm ${assessment.difficulty === "Easy"
+              ? "bg-white/90 text-green-700"
+              : assessment.difficulty === "Hard"
                 ? "bg-white/90 text-red-700"
                 : "bg-white/90 text-amber-700"
-            }`}
+              }`}
           >
             {assessment.difficulty}
           </span>
@@ -307,24 +324,22 @@ function DayCell({ daily }) {
   const content = (
     <div className="flex flex-col items-center justify-center gap-0.5 py-0.5">
       <span
-        className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium transition-colors ${
-          daily.isToday
-            ? "bg-[var(--color-primary-600)] text-white"
-            : isLocked
+        className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium transition-colors ${daily.isToday
+          ? "bg-[var(--color-primary-600)] text-white"
+          : isLocked
             ? "text-[var(--color-text-light)]"
             : "text-[var(--color-text-h)] hover:bg-[var(--color-surface-secondary)]"
-        }`}
+          }`}
       >
         {daily.day}
       </span>
       <span
-        className={`h-1 w-1 rounded-full ${
-          !hasActivity
-            ? "bg-transparent"
-            : daily.status === "Completed"
+        className={`h-1 w-1 rounded-full ${!hasActivity
+          ? "bg-transparent"
+          : daily.status === "Completed"
             ? "bg-green-500"
             : "bg-[var(--color-primary-600)]"
-        }`}
+          }`}
       />
     </div>
   );
@@ -396,7 +411,7 @@ function StreakSidebar({ profile, dailyAssessments, completedDays }) {
             </span>
           </div>
           <span className="rounded-full border border-[var(--color-primary-100)] bg-[var(--color-primary-50)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-primary-600)]">
-            {profile.field}
+            {profile.field || "Not set"}
           </span>
         </div>
         <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
@@ -459,7 +474,7 @@ function StreakSidebar({ profile, dailyAssessments, completedDays }) {
             </span>
           </div>
           <div className="text-sm text-[var(--color-text-muted)]">
-            <p className="font-semibold text-[var(--color-text-h)]">{profile.careerGoal}</p>
+            <p className="font-semibold text-[var(--color-text-h)]">{profile.careerGoal || "Not set"}</p>
             <p className="mt-0.5">{profile.skills.length} tracked skills</p>
           </div>
         </div>
@@ -566,304 +581,308 @@ export default function AssessmentPage() {
       }}
     >
       <div className="mx-auto flex max-w-[1400px] gap-6 px-4 pb-16 lg:px-8">
-      {/* ---------------- LEFT SIDEBAR ---------------- */}
-      <aside
-        className={`sticky top-20 hidden h-fit shrink-0 self-start pt-14 transition-all duration-200 md:block ${
-          sidebarOpen ? "w-44" : "w-12"
-        }`}
-      >
-        <SidebarNav active={activeSection} open={sidebarOpen} onToggle={() => setSidebarOpen((v) => !v)} />
-      </aside>
+        {/* ---------------- LEFT SIDEBAR ---------------- */}
+        <aside
+          className={`sticky top-20 hidden h-fit shrink-0 self-start pt-14 transition-all duration-200 md:block ${sidebarOpen ? "w-44" : "w-12"
+            }`}
+        >
+          <SidebarNav active={activeSection} open={sidebarOpen} onToggle={() => setSidebarOpen((v) => !v)} />
+        </aside>
 
-      {/* ---------------- MAIN CONTENT ---------------- */}
-      <div className="min-w-0 flex-1">
-        {/* HEADER */}
-        <Section id="overview" className="scroll-mt-24 pt-14 pb-10">
-          <div className="relative mx-auto max-w-3xl overflow-hidden rounded-3xl border border-[var(--color-border)] bg-gradient-to-b from-[var(--color-primary-50)] to-white px-6 py-12 text-center shadow-sm">
-            <svg
-              className="pointer-events-none absolute inset-x-0 bottom-0 h-24 w-full"
-              viewBox="0 0 400 100"
-              preserveAspectRatio="none"
-              aria-hidden="true"
-            >
-              <path
-                d="M0 100 L60 45 L110 80 L170 25 L230 70 L290 35 L350 78 L400 100 Z"
-                fill="var(--color-primary-100)"
-                opacity="0.45"
-              />
-            </svg>
+        {/* ---------------- MAIN CONTENT ---------------- */}
+        <div className="min-w-0 flex-1">
+          {/* HEADER / HERO SECTION — two-column: pitch + live diagnostic preview */}
+          <Section id="overview" className="scroll-mt-24 pt-8 pb-8 sm:pt-12 sm:pb-10">
+            <div className="relative overflow-hidden rounded-3xl border border-[#2E4F42]/15 bg-[#FBF8F0] p-6 sm:p-8 lg:p-10 shadow-[var(--shadow-card)] transition-all duration-300">
+              {/* Decorative top gold accent bar */}
+              <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-[#D9A62B] via-[#E8C547] to-[#1B332C]" />
 
-            <div className="relative">
-              <HeroIllustration className="mx-auto h-20 w-20" />
-              <h1 className="mt-4 text-4xl font-bold tracking-tight text-[var(--color-text-h)] sm:text-5xl">
-                Assess Your Skills
-              </h1>
-              <p className="mx-auto mt-3 max-w-xl text-lg leading-relaxed text-[var(--color-text-muted)]">
-                Practice what matters for your field and discover where you can improve.
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+                {/* Left Column: Eyebrow, Heading, Description, CTA, Pillars & Context Cards */}
+                <div className="lg:col-span-7 flex flex-col gap-4">
+                  {/* Eyebrow badge */}
+                  <span className="font-['Space_Mono'] text-xs font-bold uppercase tracking-[0.15em] text-[#C4952A] w-fit">
+                    Skill Assessment Center
+                  </span>
+
+                  {/* Main Heading */}
+                  <div>
+                    <h1 className="font-['Kalam'] text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#1B332C] leading-[1.15]">
+                      Test Your Skills. <br className="hidden sm:inline" />
+                      <span className="text-[#C4952A]">Discover Your Strengths.</span>
+                    </h1>
+                    <p className="mt-3 text-sm sm:text-base text-[#24413A] leading-relaxed max-w-xl font-normal">
+                      Take personalized assessments to measure your knowledge, identify skill gaps, and understand where you can improve.
+                    </p>
+                  </div>
+
+                  {/* CTA */}
+                  <div className="mt-1">
+                    <Button
+                      as="a"
+                      href="#recommended"
+                      size="md"
+                      className="inline-flex items-center gap-2 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-transform"
+                    >
+                      <span>Start Assessment</span>
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {/* Career Goal & Field — dynamic from profile, neutral fallback */}
+                  <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-1 border-t border-[#2E4F42]/10 pt-4 text-sm">
+                    <span className="text-[#5B6B5F]">
+                      Career Goal <span className="ml-1.5 font-semibold text-[#1B332C]">{profile.careerGoal || "Not set"}</span>
+                    </span>
+                    <span className="text-[#5B6B5F]">
+                      Field <span className="ml-1.5 font-semibold text-[#1B332C]">{profile.field || "Not set"}</span>
+                    </span>
+                  </div>
+                </div>
+
+                {/* Right Column: Assessment Diagnostic Preview Visual */}
+                <div className="lg:col-span-5 w-full">
+                  <AssessmentHeroVisual />
+                </div>
+              </div>
+            </div>
+          </Section>
+
+          {/* PRACTICE BY CATEGORY — Quest-style tiles */}
+          <Section id="categories" className="scroll-mt-24">
+            <SectionHeading
+              title="Practice by Category"
+              subtitle="Pick a track and work through it at your own pace."
+            />
+            <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              {CATEGORIES.filter((c) => c !== "All").map((c, i) => {
+                const count = ASSESSMENTS.filter((a) => a.category === c).length;
+                return (
+                  <CategoryTile
+                    key={c}
+                    category={c}
+                    count={count}
+                    index={i}
+                    onSelect={setCategory}
+                  />
+                );
+              })}
+            </div>
+          </Section>
+
+          {/* MOBILE-ONLY: streak card sits inline since the right rail is hidden below xl */}
+          <div className="mb-10 xl:hidden">
+            <StreakSidebar
+              profile={profile}
+              dailyAssessments={dailyAssessments}
+              completedDays={completedDays}
+            />
+          </div>
+
+          {/* RECOMMENDED FOR YOU */}
+          <Section id="recommended" className="scroll-mt-24">
+            <SectionHeading
+              title="Recommended for You"
+              subtitle={`Recommended for your ${profile.careerGoal || "goal"} — based on your field (${profile.field || "Not set"}) and skills: ${profile.skills.join(", ")}.`}
+            />
+            <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+              {recommended.map((assessment) => (
+                <AssessmentCard key={assessment.id} assessment={assessment} />
+              ))}
+              {recommended.length === 0 && (
+                <p className="col-span-full text-center text-sm text-[var(--color-text-muted)]">
+                  No recommendations yet — complete onboarding to get personalized picks.
+                </p>
+              )}
+            </div>
+          </Section>
+
+          {/* DAILY ASSESSMENT */}
+          <Section id="daily" className="scroll-mt-24">
+            <SectionHeading
+              title="Daily Assessment"
+              subtitle={`A fresh ${profile.field || "skill"} challenge, every day this month.`}
+            />
+
+            <div className="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-[1.4fr_1fr]">
+              {/* Today's challenge */}
+              {todayAssessment ? (
+                <div className="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-gradient-to-br from-[var(--color-primary-600)] to-[#d97706] p-6 text-white shadow-sm">
+                  <span className="text-[11px] font-semibold uppercase tracking-wide text-white/70">
+                    Day {todayDay} · {profile.field || "Not set"}
+                  </span>
+                  <h3 className="mt-2 text-2xl font-bold leading-snug">{todayAssessment.title}</h3>
+                  <p className="mt-2 max-w-md text-sm text-white/80">
+                    Keep your streak alive — finish today's challenge before it locks tomorrow.
+                  </p>
+                  <Button
+                    as="a"
+                    href={`/assessment/${todayAssessment.id}`}
+                    size="sm"
+                    className="mt-6 !bg-white !text-[var(--color-text-h)] hover:!bg-white/90"
+                  >
+                    Start Today's Challenge
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center rounded-2xl border border-dashed border-[var(--color-border)] p-6 text-sm text-[var(--color-text-muted)]">
+                  No challenge is scheduled for today — check back tomorrow.
+                </div>
+              )}
+
+              {/* This week */}
+              <div className="rounded-2xl border border-[var(--color-border)] p-6">
+                <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-light)]">
+                  This week
+                </span>
+                <div className="mt-4 grid grid-cols-7 gap-1.5 text-center">
+                  {weekDays.map((d) => (
+                    <div key={d.id} className="flex flex-col items-center gap-1">
+                      <span
+                        className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold ${d.isToday
+                          ? "bg-[var(--color-primary-600)] text-white"
+                          : d.status === "Completed"
+                            ? "bg-green-50 text-green-700"
+                            : d.status === "Locked"
+                              ? "text-[var(--color-text-light)]"
+                              : "text-[var(--color-text-h)]"
+                          }`}
+                      >
+                        {d.day}
+                      </span>
+                      <span
+                        className={`h-1 w-1 rounded-full ${d.status === "Completed" ? "bg-green-500" : d.status === "Locked" ? "bg-transparent" : "bg-[var(--color-primary-600)]"
+                          }`}
+                      />
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-4 text-xs text-[var(--color-text-muted)] xl:hidden">
+                  Full calendar is above.
+                </p>
+                <p className="mt-4 hidden text-xs text-[var(--color-text-muted)] xl:block">
+                  Full calendar is pinned to the right.
+                </p>
+              </div>
+            </div>
+          </Section>
+
+          {/* EXPLORE ASSESSMENTS */}
+          <Section id="explore" className="scroll-mt-24">
+            <SectionHeading
+              title="Explore Assessments"
+              subtitle="Browse across every field — new ones are added as you progress."
+            />
+
+            <div className="mt-8 space-y-4">
+              {/* Category filter */}
+              <div>
+                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text-light)]">
+                  Category
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {CATEGORIES.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => setCategory(c)}
+                      className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${category === c
+                        ? "border-[var(--color-primary-600)] bg-[var(--color-primary-600)] text-white"
+                        : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-primary-300)]"
+                        }`}
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Difficulty + Type filters */}
+              <div className="flex flex-wrap gap-8">
+                <div>
+                  <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text-light)]">
+                    Difficulty
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {DIFFICULTY_FILTERS.map((d) => (
+                      <button
+                        key={d}
+                        type="button"
+                        onClick={() => setDifficulty(d)}
+                        className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${difficulty === d
+                          ? "border-[var(--color-primary-600)] bg-[var(--color-primary-600)] text-white"
+                          : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-primary-300)]"
+                          }`}
+                      >
+                        {d}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text-light)]">
+                    Type
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {TYPE_FILTERS.map((t) => (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => setType(t)}
+                        className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${type === t
+                          ? "border-[var(--color-primary-600)] bg-[var(--color-primary-600)] text-white"
+                          : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-primary-300)]"
+                          }`}
+                      >
+                        {t === "All" ? "All" : formatType(t)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+              {paginatedList.map((assessment) => (
+                <AssessmentCard key={assessment.id} assessment={assessment} />
+              ))}
+              {paginatedList.length === 0 && (
+                <p className="col-span-full text-center text-sm text-[var(--color-text-muted)]">
+                  No assessments match these filters yet.
+                </p>
+              )}
+            </div>
+
+            {/* Pagination - Load More button */}
+            {totalPages > 1 && currentPage < totalPages && (
+              <div className="mt-8 flex justify-center">
+                <Button
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  variant="outline"
+                  size="md"
+                >
+                  Load More Assessments ({currentPage} of {totalPages})
+                </Button>
+              </div>
+            )}
+
+            {currentPage === totalPages && exploreList.length > 0 && (
+              <p className="mt-8 text-center text-sm text-[var(--color-text-muted)]">
+                Showing all {exploreList.length} assessments
               </p>
-            </div>
-          </div>
+            )}
+          </Section>
+        </div>
 
-          <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <div className="inline-flex flex-col gap-0.5 rounded-xl border border-[var(--color-primary-100)] bg-white px-4 py-3">
-              <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-primary-600)]">
-                Career Goal
-              </span>
-              <span className="text-base font-semibold text-[var(--color-text-h)]">
-                {profile.careerGoal}
-              </span>
-            </div>
-            <div className="inline-flex flex-col gap-0.5 rounded-xl border border-[var(--color-border)] bg-white px-4 py-3">
-              <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
-                Field
-              </span>
-              <span className="text-base font-semibold text-[var(--color-text-h)]">
-                {profile.field}
-              </span>
-            </div>
-          </div>
-        </Section>
-
-        {/* PRACTICE BY CATEGORY — Quest-style tiles */}
-        <Section id="categories" className="scroll-mt-24">
-          <SectionHeading
-            title="Practice by Category"
-            subtitle="Pick a track and work through it at your own pace."
-          />
-          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-            {CATEGORIES.filter((c) => c !== "All").map((c, i) => {
-              const count = ASSESSMENTS.filter((a) => a.category === c).length;
-              return (
-                <CategoryTile
-                  key={c}
-                  category={c}
-                  count={count}
-                  index={i}
-                  onSelect={setCategory}
-                />
-              );
-            })}
-          </div>
-        </Section>
-
-        {/* MOBILE-ONLY: streak card sits inline since the right rail is hidden below xl */}
-        <div className="mb-10 xl:hidden">
+        {/* ---------------- RIGHT SIDEBAR (streak calendar) ---------------- */}
+        <aside className="sticky top-20 hidden h-fit w-64 shrink-0 self-start pt-14 xl:block">
           <StreakSidebar
             profile={profile}
             dailyAssessments={dailyAssessments}
             completedDays={completedDays}
           />
-        </div>
-
-        {/* RECOMMENDED FOR YOU */}
-        <Section id="recommended" className="scroll-mt-24">
-          <SectionHeading
-            title="Recommended for You"
-            subtitle={`Recommended for your ${profile.careerGoal} goal — based on your field (${profile.field}) and skills: ${profile.skills.join(", ")}.`}
-          />
-          <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            {recommended.map((assessment) => (
-              <AssessmentCard key={assessment.id} assessment={assessment} />
-            ))}
-            {recommended.length === 0 && (
-              <p className="col-span-full text-center text-sm text-[var(--color-text-muted)]">
-                No recommendations yet — complete onboarding to get personalized picks.
-              </p>
-            )}
-          </div>
-        </Section>
-
-        {/* DAILY ASSESSMENT */}
-        <Section id="daily" className="scroll-mt-24">
-          <SectionHeading
-            title="Daily Assessment"
-            subtitle={`A fresh ${profile.field} challenge, every day this month.`}
-          />
-
-          <div className="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-[1.4fr_1fr]">
-            {/* Today's challenge */}
-            {todayAssessment ? (
-              <div className="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-gradient-to-br from-[var(--color-primary-600)] to-[#d97706] p-6 text-white shadow-sm">
-                <span className="text-[11px] font-semibold uppercase tracking-wide text-white/70">
-                  Day {todayDay} · {profile.field}
-                </span>
-                <h3 className="mt-2 text-2xl font-bold leading-snug">{todayAssessment.title}</h3>
-                <p className="mt-2 max-w-md text-sm text-white/80">
-                  Keep your streak alive — finish today's challenge before it locks tomorrow.
-                </p>
-                <Button
-                  as="a"
-                  href={`/assessment/${todayAssessment.id}`}
-                  size="sm"
-                  className="mt-6 !bg-white !text-[var(--color-text-h)] hover:!bg-white/90"
-                >
-                  Start Today's Challenge
-                </Button>
-              </div>
-            ) : (
-              <div className="flex items-center rounded-2xl border border-dashed border-[var(--color-border)] p-6 text-sm text-[var(--color-text-muted)]">
-                No challenge is scheduled for today — check back tomorrow.
-              </div>
-            )}
-
-            {/* This week */}
-            <div className="rounded-2xl border border-[var(--color-border)] p-6">
-              <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-light)]">
-                This week
-              </span>
-              <div className="mt-4 grid grid-cols-7 gap-1.5 text-center">
-                {weekDays.map((d) => (
-                  <div key={d.id} className="flex flex-col items-center gap-1">
-                    <span
-                      className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold ${
-                        d.isToday
-                          ? "bg-[var(--color-primary-600)] text-white"
-                          : d.status === "Completed"
-                          ? "bg-green-50 text-green-700"
-                          : d.status === "Locked"
-                          ? "text-[var(--color-text-light)]"
-                          : "text-[var(--color-text-h)]"
-                      }`}
-                    >
-                      {d.day}
-                    </span>
-                    <span
-                      className={`h-1 w-1 rounded-full ${
-                        d.status === "Completed" ? "bg-green-500" : d.status === "Locked" ? "bg-transparent" : "bg-[var(--color-primary-600)]"
-                      }`}
-                    />
-                  </div>
-                ))}
-              </div>
-              <p className="mt-4 text-xs text-[var(--color-text-muted)] xl:hidden">
-                Full calendar is above.
-              </p>
-              <p className="mt-4 hidden text-xs text-[var(--color-text-muted)] xl:block">
-                Full calendar is pinned to the right.
-              </p>
-            </div>
-          </div>
-        </Section>
-
-        {/* EXPLORE ASSESSMENTS */}
-        <Section id="explore" className="scroll-mt-24">
-          <SectionHeading
-            title="Explore Assessments"
-            subtitle="Browse across every field — new ones are added as you progress."
-          />
-
-          <div className="mt-8 space-y-4">
-            {/* Category filter */}
-            <div>
-              <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text-light)]">
-                Category
-              </span>
-              <div className="flex flex-wrap gap-2">
-                {CATEGORIES.map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => setCategory(c)}
-                    className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
-                      category === c
-                        ? "border-[var(--color-primary-600)] bg-[var(--color-primary-600)] text-white"
-                        : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-primary-300)]"
-                    }`}
-                  >
-                    {c}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Difficulty + Type filters */}
-            <div className="flex flex-wrap gap-8">
-              <div>
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text-light)]">
-                  Difficulty
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  {DIFFICULTY_FILTERS.map((d) => (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => setDifficulty(d)}
-                      className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                        difficulty === d
-                          ? "border-[var(--color-primary-600)] bg-[var(--color-primary-600)] text-white"
-                          : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-primary-300)]"
-                      }`}
-                    >
-                      {d}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text-light)]">
-                  Type
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  {TYPE_FILTERS.map((t) => (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => setType(t)}
-                      className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                        type === t
-                          ? "border-[var(--color-primary-600)] bg-[var(--color-primary-600)] text-white"
-                          : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-primary-300)]"
-                      }`}
-                    >
-                      {t === "All" ? "All" : formatType(t)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            {paginatedList.map((assessment) => (
-              <AssessmentCard key={assessment.id} assessment={assessment} />
-            ))}
-            {paginatedList.length === 0 && (
-              <p className="col-span-full text-center text-sm text-[var(--color-text-muted)]">
-                No assessments match these filters yet.
-              </p>
-            )}
-          </div>
-
-          {/* Pagination - Load More button */}
-          {totalPages > 1 && currentPage < totalPages && (
-            <div className="mt-8 flex justify-center">
-              <Button
-                onClick={() => setCurrentPage(currentPage + 1)}
-                variant="outline"
-                size="md"
-              >
-                Load More Assessments ({currentPage} of {totalPages})
-              </Button>
-            </div>
-          )}
-
-          {currentPage === totalPages && exploreList.length > 0 && (
-            <p className="mt-8 text-center text-sm text-[var(--color-text-muted)]">
-              Showing all {exploreList.length} assessments
-            </p>
-          )}
-        </Section>
-      </div>
-
-      {/* ---------------- RIGHT SIDEBAR (streak calendar) ---------------- */}
-      <aside className="sticky top-20 hidden h-fit w-64 shrink-0 self-start pt-14 xl:block">
-        <StreakSidebar
-          profile={profile}
-          dailyAssessments={dailyAssessments}
-          completedDays={completedDays}
-        />
-      </aside>
+        </aside>
       </div>
     </div>
   );

@@ -33,6 +33,11 @@ export default function LoginPage() {
     if (!res.success) {
       setError(res.error || "Login failed.");
     } else {
+      if (res.user) {
+        try {
+          localStorage.setItem("user", JSON.stringify(res.user));
+        } catch {}
+      }
       if (res.user?.role === "admin") {
         navigate("/admin/dashboard");
       } else {

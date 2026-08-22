@@ -1,7 +1,7 @@
 export const careerGoalPresets = {
   "Machine Learning Engineer": {
     user: {
-      name: "Faiz",
+      name: "",
       greeting: "Good evening",
       subtitle: "Here's where your Machine Learning journey stands today.",
       streak: 7,
@@ -167,7 +167,7 @@ export const careerGoalPresets = {
 
   "Full Stack AI Developer": {
     user: {
-      name: "Faiz",
+      name: "",
       greeting: "Good evening",
       subtitle: "Here's where your Full Stack AI journey stands today.",
       streak: 12,
@@ -333,7 +333,7 @@ export const careerGoalPresets = {
 
   "Data Scientist & AI Analyst": {
     user: {
-      name: "Faiz",
+      name: "",
       greeting: "Good evening",
       subtitle: "Here's where your Data Science journey stands today.",
       streak: 5,
@@ -499,7 +499,7 @@ export const careerGoalPresets = {
 
   "AI Research Engineer": {
     user: {
-      name: "Faiz",
+      name: "",
       greeting: "Good evening",
       subtitle: "Here's where your AI Research journey stands today.",
       streak: 9,
@@ -665,7 +665,7 @@ export const careerGoalPresets = {
 
   "GenAI & Prompt Engineer": {
     user: {
-      name: "Faiz",
+      name: "",
       greeting: "Good evening",
       subtitle: "Here's where your Generative AI journey stands today.",
       streak: 15,

@@ -1,9 +1,57 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { authApi } from "../../services/api";
+
+import { LogOut } from 'lucide-react';
 import DashboardLogo from "./DashboardLogo";
 
 export default function DashboardHeader({ user, quotes = [] }) {
+  const navigate = useNavigate();
+
+  // Retrieve authenticated user from localStorage cache or authApi.getMe()
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const cached = localStorage.getItem("user");
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  useEffect(() => {
+    let isMounted = true;
+    authApi
+      .getMe()
+      .then((res) => {
+        if (isMounted && res.success && res.user) {
+          setCurrentUser(res.user);
+          try {
+            localStorage.setItem("user", JSON.stringify(res.user));
+          } catch {}
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      localStorage.removeItem("user");
+    } catch {}
+    const res = await authApi.logout();
+    if (res.success) {
+      navigate('/login');
+    } else {
+      console.error('Logout failed', res.error);
+      navigate('/login');
+    }
+  };
+
+  const dynamicName = currentUser?.name?.trim() || (user?.name && user.name.trim() !== "Learner" ? user.name.trim() : "");
   const greeting = user?.greeting || "Good evening";
-  const name = user?.name || "Learner";
   const subtitle = user?.subtitle || "Here's where your learning journey stands today.";
   const streak = user?.streak ?? 7;
 
@@ -44,14 +92,25 @@ export default function DashboardHeader({ user, quotes = [] }) {
       {/* Decorative top chalk gold accent bar */}
       <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#D9A62B] via-[#E8C547] to-[#1B332C]" />
 
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+      {/* Logout Button in Top-Right Corner */}
+      <button
+        onClick={handleLogout}
+        type="button"
+        title="Sign out of your account"
+        className="absolute top-4 right-4 sm:top-6 sm:right-8 z-10 inline-flex items-center gap-2 rounded-md border border-[#2E4F42]/20 bg-[#FBF8F0]/90 px-3 py-1.5 text-xs font-semibold text-[#1B332C] shadow-2xs hover:border-[#C4952A]/60 hover:bg-[#EDE6D3] hover:text-[#1B332C] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#C4952A]/50 transition-all duration-200 cursor-pointer"
+      >
+        <LogOut className="h-3.5 w-3.5 text-[#2E4F42]" />
+        <span>Logout</span>
+      </button>
+
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between pt-6 sm:pt-0">
         {/* Left branding, heading & rotating quote */}
         <div className="flex flex-col gap-3 max-w-2xl">
           <DashboardLogo />
 
           <div className="mt-1">
             <h1 className="font-['Kalam'] text-3xl sm:text-4xl lg:text-5xl font-bold text-[#1B332C] leading-tight">
-              {greeting}, {name} 👋
+              {dynamicName ? `${greeting}, ${dynamicName} 👋` : `${greeting} 👋`}
             </h1>
             <p className="mt-1 text-sm sm:text-base text-[#24413A] font-normal leading-relaxed">
               {subtitle}
