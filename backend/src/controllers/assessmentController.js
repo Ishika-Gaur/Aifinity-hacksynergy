@@ -1,4 +1,5 @@
 import Assessment from "../models/Assessment.js";
+import AttemptResult from "../models/AttemptResult.js";
 
 // Active in-memory attempt sessions cache for server-side evaluation
 const activeAttemptSessions = new Map();
@@ -147,6 +148,28 @@ export async function submitAttempt(req, res) {
 
   if (attemptId) {
     activeAttemptSessions.delete(attemptId);
+  }
+
+  // Persist the attempt result for the authenticated user (dashboard analytics)
+  if (req.user) {
+    try {
+      await AttemptResult.create({
+        userId: req.user._id,
+        assessmentId: assessment._id,
+        assessmentTitle: assessment.title,
+        assessmentCategory: assessment.category || "General",
+        assessmentField: assessment.field || "",
+        scorePercent,
+        correctCount,
+        gradableCount: gradableQuestions.length,
+        totalQuestions: rawQuestions.length,
+        elapsedSeconds: elapsedSeconds || 0,
+        completedAt: new Date(),
+      });
+    } catch (saveErr) {
+      // Non-fatal: log but don't block the response
+      console.error("[Dashboard] Failed to persist attempt result:", saveErr.message);
+    }
   }
 
   res.json({

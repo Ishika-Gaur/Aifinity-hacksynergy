@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import assessmentRoutes from "./routes/assessmentRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
 import { authenticate, isAdmin } from "./middleware/authMiddleware.js";
 
 dotenv.config();
@@ -30,6 +31,7 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/assessments", assessmentRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 // Protected Admin Test Route
 app.get("/api/admin/test", authenticate, isAdmin, (req, res) => {

@@ -18,7 +18,8 @@ router.post("/admin", authenticate, isAdmin, createAssessment);
 router.put("/admin/:id", authenticate, isAdmin, updateAssessment);
 router.delete("/admin/:id", authenticate, isAdmin, removeAssessment);
 router.get("/:id", getPublished);
-router.get("/:id/start", startAttempt);
-router.post("/:id/submit", submitAttempt);
+// authenticate on start/submit so req.user is available for attempt persistence
+router.get("/:id/start", authenticate, startAttempt);
+router.post("/:id/submit", authenticate, submitAttempt);
 
 export default router;

@@ -4,7 +4,8 @@ export default function LearningProgressChart({ seriesData }) {
   const [timeframe, setTimeframe] = useState("7D");
   const [activePoint, setActivePoint] = useState(null);
 
-  const data = seriesData[timeframe] || seriesData["7D"];
+  const safeSeries = seriesData || {};
+  const data = safeSeries[timeframe] || safeSeries["7D"] || safeSeries["30D"] || safeSeries["3M"] || [];
   const maxScore = 100;
   const minScore = 0;
 

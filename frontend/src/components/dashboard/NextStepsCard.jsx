@@ -2,12 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 export default function NextStepsCard({ recommendations }) {
-  const items = recommendations || [
-    { id: "r1", num: "01", text: "Review recursion fundamentals", href: "/concept-root" },
-    { id: "r2", num: "02", text: "Complete 5 recursion problems", href: "/assessment" },
-    { id: "r3", num: "03", text: "Analyze your repeated mistakes", href: "/mistake-map" },
-    { id: "r4", num: "04", text: "Continue the Deep Learning roadmap", href: "/roadmap" },
-  ];
+  const items = Array.isArray(recommendations) ? recommendations : [];
 
   return (
     <div className="rounded-md bg-[#FBF8F0] p-6 border border-[#2E4F42]/12 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 flex flex-col gap-4">
