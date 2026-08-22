@@ -7,54 +7,71 @@ import Button from "../components/Button";
 import Card from "../components/Card";
 import CtaBanner from "../components/CtaBanner";
 import HeroSection from "../components/HeroSection";
+import { analyticsApi } from "../services/api";
 
 /* =========================================================
    REUSABLE SVG ICONS
 ========================================================= */
-function CheckIcon({ className = "w-4 h-4" }) {
+function CheckIcon({ className = "w-4 h-4", style }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <svg className={className} style={style} fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
     </svg>
   );
 }
 
-function LockIcon({ className = "w-4 h-4" }) {
+function LockIcon({ className = "w-4 h-4", style }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <svg className={className} style={style} fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
     </svg>
   );
 }
 
-function ClockIcon({ className = "w-4 h-4" }) {
+function ClockIcon({ className = "w-4 h-4", style }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <svg className={className} style={style} fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
   );
 }
 
-function SparklesIcon({ className = "w-4 h-4" }) {
+function SparklesIcon({ className = "w-4 h-4", style }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <svg className={className} style={style} fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
     </svg>
   );
 }
 
-function ArrowRightIcon({ className = "w-4 h-4" }) {
+function ArrowRightIcon({ className = "w-4 h-4", style }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <svg className={className} style={style} fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
     </svg>
   );
 }
 
-function SearchIcon({ className = "w-4 h-4" }) {
+function SearchIcon({ className = "w-4 h-4", style }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <svg className={className} style={style} fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+    </svg>
+  );
+}
+
+function AlertIcon({ className = "w-4 h-4", style }) {
+  return (
+    <svg className={className} style={style} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+    </svg>
+  );
+}
+
+function LightbulbIcon({ className = "w-4 h-4", style }) {
+  return (
+    <svg className={className} style={style} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 01-2 2h-4a2 2 0 01-2-2v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
     </svg>
   );
 }
@@ -78,12 +95,6 @@ const PRESET_CAREERS = [
     field: "Technology",
     icon: "⌘",
     duration: "6 Months",
-    stages: [
-      { id: 1, title: "Phase 1: Programming Fundamentals & Data Structures", phase: "Foundations (0-25% Readiness)", status: "completed", duration: "4 Weeks", concepts: ["Algorithms & Big-O", "Data Structures", "Git & Version Control", "Object-Oriented Design"], description: "Master foundational problem solving, data structures, and fundamental programming concepts.", questions: 20 },
-      { id: 2, title: "Phase 2: Modern Frontend & State Management", phase: "Core Competency (25-50% Readiness)", status: "current", duration: "6 Weeks", concepts: ["React & Component Architecture", "State Management & Hooks", "Tailwind CSS & Responsive Layouts", "REST & Async Data Fetching"], description: "Build interactive, high-performance web applications using modern component-driven libraries.", questions: 25 },
-      { id: 3, title: "Phase 3: Backend Systems & API Architecture", phase: "Advanced Specialization (50-75% Readiness)", status: "upcoming", duration: "6 Weeks", concepts: ["Node.js & Express APIs", "Relational & NoSQL Databases", "Authentication & Security", "System Architecture & Caching"], description: "Design secure, scalable backend microservices, database schemas, and robust API endpoints.", questions: 30 },
-      { id: 4, title: "Phase 4: Full-Stack Capstone & Job Readiness Portfolio", phase: "Career Readiness (75-100% Job Ready)", status: "locked", duration: "8 Weeks", concepts: ["Production Cloud Deployment (Vite/Docker)", "CI/CD Pipeline Integration", "System Design Mock Interviews", "Portfolio & Resume Showcase"], description: "Complete real-world full-stack capstone applications, optimize performance, and verify job readiness.", questions: 25 },
-    ],
   },
   {
     id: "data",
@@ -91,12 +102,6 @@ const PRESET_CAREERS = [
     field: "Data & AI",
     icon: "⚛",
     duration: "6 Months",
-    stages: [
-      { id: 1, title: "Phase 1: Python, Math & Data Analysis Foundations", phase: "Foundations (0-25% Readiness)", status: "completed", duration: "4 Weeks", concepts: ["Python for Data Science", "Pandas & NumPy Dataframes", "Linear Algebra & Statistics", "Data Cleaning & Wrangling"], description: "Build deep quantitative skills, exploratory data analysis techniques, and statistical modeling basics.", questions: 18 },
-      { id: 2, title: "Phase 2: Supervised & Unsupervised Machine Learning", phase: "Core Competency (25-50% Readiness)", status: "current", duration: "6 Weeks", concepts: ["Scikit-Learn Modeling", "Regression & Classification", "Feature Engineering", "Model Evaluation Metrics"], description: "Train, tune, and evaluate machine learning models for predictive analytics.", questions: 22 },
-      { id: 3, title: "Phase 3: Deep Learning & Generative AI", phase: "Advanced Specialization (50-75% Readiness)", status: "upcoming", duration: "8 Weeks", concepts: ["PyTorch / TensorFlow Neural Nets", "NLP & Large Language Models", "Computer Vision Basics", "Fine-Tuning & Prompting"], description: "Implement neural network architectures and leverage GenAI models for complex real-world datasets.", questions: 28 },
-      { id: 4, title: "Phase 4: MLOps Deployment & AI Career Readiness", phase: "Career Readiness (75-100% Job Ready)", status: "locked", duration: "6 Weeks", concepts: ["Model Deployment APIs", "BigQuery / SQL Analytics", "Kaggle & Portfolio Projects", "Technical Case Interview Prep"], description: "Deploy machine learning pipelines to cloud infrastructure and build an industry-grade portfolio.", questions: 20 },
-    ],
   },
   {
     id: "finance",
@@ -104,18 +109,9 @@ const PRESET_CAREERS = [
     field: "Finance",
     icon: "₹",
     duration: "5 Months",
-    stages: [
-      { id: 1, title: "Phase 1: Financial Statements & Accounting Logic", phase: "Foundations (0-25% Readiness)", status: "completed", duration: "4 Weeks", concepts: ["Income Statement & Balance Sheet", "Cash Flow Modeling", "Financial Ratio Analysis", "Working Capital Management"], description: "Understand core accounting logic and evaluate business operational health.", questions: 15 },
-      { id: 2, title: "Phase 2: Valuation Frameworks & DCF Modeling", phase: "Core Competency (25-50% Readiness)", status: "current", duration: "5 Weeks", concepts: ["Discounted Cash Flow (DCF)", "Enterprise Value & Multiples", "Growth Assumptions & WACC", "Comparable Company Analysis"], description: "Learn to estimate intrinsic valuation of public and private companies.", questions: 20 },
-      { id: 3, title: "Phase 3: Risk Sensitivity & Financial Modeling", phase: "Advanced Specialization (50-75% Readiness)", status: "upcoming", duration: "5 Weeks", concepts: ["Excel / Python Financial Modeling", "Scenario & Sensitivity Analysis", "Macroeconomic Risk Assessment", "Capital Structure Optimization"], description: "Build quantitative financial models to evaluate investment trade-offs under uncertainty.", questions: 24 },
-      { id: 4, title: "Phase 4: Equity Research & Investment Committee Pitch", phase: "Career Readiness (75-100% Job Ready)", status: "locked", duration: "6 Weeks", concepts: ["Investment Teaser Creation", "Portfolio Risk Management", "Equity Research Report Writing", "Mock Investment Pitch"], description: "Draft professional investment memos and pitch equity recommendations to hiring managers.", questions: 18 },
-    ],
   },
 ];
 
-/* =========================================================
-   CUSTOM CAREER DROPDOWN OPTIONS (used to auto-generate a roadmap)
-========================================================= */
 const CUSTOM_CAREER_OPTIONS = [
   "Cybersecurity Engineer",
   "Product Manager",
@@ -128,7 +124,7 @@ const CUSTOM_CAREER_OPTIONS = [
 ];
 
 /* =========================================================
-   PROGRESS & STATUS SUB-COMPONENTS (theme tokens)
+   SUB-COMPONENTS
 ========================================================= */
 function StatusBadge({ status }) {
   const styleMap = {
@@ -159,9 +155,43 @@ function StatusBadge({ status }) {
   );
 }
 
+function PriorityBadge({ priority, isWeakConcept }) {
+  if (priority === "High" || isWeakConcept) {
+    return (
+      <span
+        className="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider"
+        style={{ borderColor: "rgba(220, 38, 38, 0.3)", background: "rgba(254, 226, 226, 0.7)", color: "#b91c1c" }}
+      >
+        <AlertIcon className="w-3 h-3" />
+        {isWeakConcept ? "High Priority (Weak Concept)" : "High Priority"}
+      </span>
+    );
+  }
+
+  if (priority === "Medium") {
+    return (
+      <span
+        className="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider"
+        style={{ borderColor: "var(--color-primary-200)", background: "var(--color-primary-50)", color: "var(--color-primary-700)" }}
+      >
+        Medium Priority
+      </span>
+    );
+  }
+
+  return (
+    <span
+      className="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider"
+      style={{ borderColor: "var(--color-border)", background: "var(--color-surface-secondary)", color: "var(--color-text-muted)" }}
+    >
+      Standard Priority
+    </span>
+  );
+}
+
 function ProgressBar({ value, className = "" }) {
   return (
-    <div className={`h-3 w-full overflow-hidden rounded-full ${className}`} style={{ background: "var(--color-surface-secondary)" }}>
+    <div className={`h-2.5 w-full overflow-hidden rounded-full ${className}`} style={{ background: "var(--color-surface-secondary)" }}>
       <div
         className="h-full rounded-full transition-all duration-700 ease-out"
         style={{ width: `${Math.min(Math.max(value, 0), 100)}%`, background: "var(--color-primary-600)" }}
@@ -227,6 +257,7 @@ function StageCard({ stage, expanded, onToggle, onStart, onToggleCompletion }) {
               <div>
                 <div className="mb-2 flex flex-wrap items-center gap-2">
                   <StatusBadge status={stage.status} />
+                  <PriorityBadge priority={stage.priority} isWeakConcept={stage.isWeakConcept} />
                   <span className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-primary-600)" }}>
                     {stage.phase}
                   </span>
@@ -245,8 +276,37 @@ function StageCard({ stage, expanded, onToggle, onStart, onToggleCompletion }) {
               {stage.description}
             </p>
 
+            {/* Why You Need to Learn This - Personalized AI Reason */}
+            {stage.why && (
+              <div className="mt-4 rounded-xl border p-3.5 text-xs leading-5 transition-all" style={{ borderColor: "var(--color-primary-100)", background: "var(--color-primary-50)", color: "var(--color-text-h)" }}>
+                <div className="flex items-start gap-2.5">
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md" style={{ background: "var(--color-surface)", color: "var(--color-primary-600)" }}>
+                    <LightbulbIcon className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="font-bold uppercase tracking-wider text-[11px]" style={{ color: "var(--color-primary-700)" }}>
+                      Why You Need to Learn This (Assessment Insights):
+                    </span>
+                    <p className="mt-0.5 text-xs font-medium leading-5" style={{ color: "var(--color-text-muted)" }}>
+                      {stage.why}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Stage Progress Bar */}
+            <div className="mt-4">
+              <div className="mb-1.5 flex justify-between text-xs font-medium" style={{ color: "var(--color-text-muted)" }}>
+                <span>Estimated Stage Progress</span>
+                <span className="font-bold" style={{ color: "var(--color-primary-600)" }}>{stage.progress || 0}%</span>
+              </div>
+              <ProgressBar value={stage.progress || 0} />
+            </div>
+
+            {/* Concepts Chips */}
             <div className="mt-4 flex flex-wrap gap-2">
-              {stage.concepts.map((concept) => (
+              {stage.concepts && stage.concepts.map((concept) => (
                 <span
                   key={concept}
                   className="rounded-lg border px-2.5 py-1 text-xs font-semibold transition-colors duration-200"
@@ -259,7 +319,7 @@ function StageCard({ stage, expanded, onToggle, onStart, onToggleCompletion }) {
 
             <div className="mt-5 flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between" style={{ borderColor: "var(--color-border)" }}>
               <div className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-                <span className="font-bold" style={{ color: "var(--color-text-h)" }}>{stage.questions}</span> career practice modules
+                <span className="font-bold" style={{ color: "var(--color-text-h)" }}>{stage.questions || 20}</span> career practice modules
               </div>
 
               <div className="flex items-center gap-2">
@@ -291,7 +351,7 @@ function StageCard({ stage, expanded, onToggle, onStart, onToggleCompletion }) {
                 </p>
 
                 <div className="mt-3 grid gap-2.5 sm:grid-cols-2">
-                  {stage.concepts.map((concept, index) => (
+                  {stage.concepts && stage.concepts.map((concept, index) => (
                     <div
                       key={concept}
                       className="flex items-center gap-3 rounded-lg border p-3 shadow-xs transition-all hover:shadow-md"
@@ -316,17 +376,97 @@ function StageCard({ stage, expanded, onToggle, onStart, onToggleCompletion }) {
 }
 
 /* =========================================================
+   NO ASSESSMENT EMPTY STATE COMPONENT
+========================================================= */
+function EmptyRoadmapState() {
+  const navigate = useNavigate();
+
+  return (
+    <Section className="pt-8">
+      <Card hoverable={false} className="mx-auto max-w-3xl p-8 text-center shadow-lg">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: "var(--color-primary-50)", color: "var(--color-primary-600)" }}>
+          <SparklesIcon className="w-8 h-8" />
+        </div>
+
+        <h3 className="mt-6 text-2xl font-bold tracking-tight sm:text-3xl" style={{ fontFamily: "var(--font-display)", color: "var(--color-text-h)" }}>
+          No Assessment Data Found
+        </h3>
+
+        <p className="mt-3 text-sm leading-6" style={{ color: "var(--color-text-muted)" }}>
+          Your learning roadmap is personalized using your actual assessment performance, weak concepts, mistake patterns, and skill gaps. Complete your first assessment to unlock your custom learning path.
+        </p>
+
+        <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <Button
+            size="lg"
+            onClick={() => navigate("/assessment")}
+            icon={<ArrowRightIcon />}
+          >
+            Take Your First Assessment
+          </Button>
+        </div>
+
+        <div className="mt-8 grid gap-4 border-t pt-6 text-left sm:grid-cols-3" style={{ borderColor: "var(--color-border)" }}>
+          <div className="rounded-xl border p-4" style={{ borderColor: "var(--color-border)", background: "var(--color-surface-secondary)" }}>
+            <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-primary-600)" }}>01. Measure</p>
+            <p className="mt-1 text-xs" style={{ color: "var(--color-text-muted)" }}>Complete an assessment to test domain knowledge.</p>
+          </div>
+          <div className="rounded-xl border p-4" style={{ borderColor: "var(--color-border)", background: "var(--color-surface-secondary)" }}>
+            <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-primary-600)" }}>02. Detect</p>
+            <p className="mt-1 text-xs" style={{ color: "var(--color-text-muted)" }}>Identify weak concepts, mistake patterns, and skill gaps.</p>
+          </div>
+          <div className="rounded-xl border p-4" style={{ borderColor: "var(--color-border)", background: "var(--color-surface-secondary)" }}>
+            <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-primary-600)" }}>03. Personalize</p>
+            <p className="mt-1 text-xs" style={{ color: "var(--color-text-muted)" }}>Automatically generate your custom 0-100% roadmap.</p>
+          </div>
+        </div>
+      </Card>
+    </Section>
+  );
+}
+
+/* =========================================================
    MAIN ROADMAP COMPONENT
 ========================================================= */
 export default function Roadmap() {
-  const [selectedCareer, setSelectedCareer] = useState(PRESET_CAREERS[0]);
-  const [customCareer, setCustomCareer] = useState("");
-  const [targetTimeline] = useState("6 Months");
-  const [stages, setStages] = useState(PRESET_CAREERS[0].stages);
-  const [expandedStage, setExpandedStage] = useState(2);
+  const [stages, setStages] = useState([]);
+  const [targetCareer, setTargetCareer] = useState("Full-Stack Software Engineer");
+  const [readinessScore, setReadinessScore] = useState(0);
+  const [hasHistory, setHasHistory] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const [expandedStage, setExpandedStage] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [customCareerInput, setCustomCareerInput] = useState("");
   const [notification, setNotification] = useState("");
+
+  const navigate = useNavigate();
+
+  // Load real personalized roadmap from backend database
+  const fetchRoadmap = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const res = await analyticsApi.getRoadmap();
+      if (res && res.success && res.data) {
+        setHasHistory(res.data.hasHistory);
+        setTargetCareer(res.data.targetCareer || "Full-Stack Software Engineer");
+        setReadinessScore(res.data.readinessScore || 0);
+        setStages(res.data.stages || []);
+      }
+    } catch (err) {
+      console.error("Failed to load personalized roadmap:", err);
+      setError("Failed to load your personalized roadmap. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRoadmap();
+  }, []);
 
   useEffect(() => {
     let timer;
@@ -338,44 +478,43 @@ export default function Roadmap() {
     };
   }, [notification]);
 
-  const readinessScore = useMemo(() => {
-    const completedCount = stages.filter((s) => s.status === "completed").length;
-    return Math.round((completedCount / stages.length) * 100);
-  }, [stages]);
-
-  const handleSelectPreset = (career) => {
-    setSelectedCareer(career);
-    setCustomCareer("");
-    setStages(career.stages);
-    setNotification(`Loaded end-to-end roadmap for ${career.title}.`);
-  };
-
-  const handleGenerateCustom = () => {
-    if (!customCareer.trim()) return;
+  const handleSelectPreset = async (careerTitle) => {
+    setTargetCareer(careerTitle);
+    setCustomCareerInput("");
     setIsGenerating(true);
 
-    setTimeout(() => {
+    try {
+      const res = await analyticsApi.updateRoadmap({ customCareer: careerTitle });
+      if (res && res.success && res.data) {
+        setStages(res.data.stages || []);
+        setReadinessScore(res.data.readinessScore || 0);
+        setNotification(`Loaded dynamic assessment-backed roadmap for ${careerTitle}.`);
+      }
+    } catch {
+      setNotification(`Updated target career to ${careerTitle}.`);
+    } finally {
       setIsGenerating(false);
-      const generatedTitle = customCareer.trim();
-      const generatedStages = [
-        { id: 1, title: `Phase 1: Foundations of ${generatedTitle}`, phase: "Foundations (0-25% Readiness)", status: "completed", duration: "4 Weeks", concepts: ["Core Principles & Theory", "Essential Tools & Environment", "Fundamental Terminology", "Basic Hands-on Practice"], description: `Build complete baseline knowledge and setup required tools for ${generatedTitle}.`, questions: 15 },
-        { id: 2, title: `Phase 2: Core Competencies & Real-World Projects`, phase: "Core Competency (25-50% Readiness)", status: "current", duration: "6 Weeks", concepts: ["Standard Workflows", "Intermediate Problem Solving", "Hands-on Project Building", "Quality Control"], description: `Implement hands-on projects and master intermediate skills expected in ${generatedTitle} roles.`, questions: 20 },
-        { id: 3, title: `Phase 3: Advanced Specialization & Architecture`, phase: "Advanced Specialization (50-75% Readiness)", status: "upcoming", duration: "6 Weeks", concepts: ["Advanced Design Patterns", "Performance & Optimization", "Complex Problem Decomposition", "Industry Best Practices"], description: `Master advanced frameworks and system architecture techniques for professional proficiency.`, questions: 25 },
-        { id: 4, title: `Phase 4: Industry Capstone & Job Readiness Portfolio`, phase: "Career Readiness (75-100% Job Ready)", status: "locked", duration: "6 Weeks", concepts: ["Production Portfolio Project", "Resume & LinkedIn Alignment", "Technical Mock Case Interviews", "Final Career Verification"], description: `Assemble your job readiness portfolio, pass mock assessments, and verify career readiness.`, questions: 20 },
-      ];
+    }
+  };
 
-      setSelectedCareer({
-        id: "custom",
-        title: generatedTitle,
-        field: "Custom Career",
-        icon: "✦",
-        duration: targetTimeline,
-        stages: generatedStages,
-      });
+  const handleGenerateCustom = async () => {
+    if (!customCareerInput.trim()) return;
+    const title = customCareerInput.trim();
+    setIsGenerating(true);
 
-      setStages(generatedStages);
-      setNotification(`End-to-End Career Roadmap generated for "${generatedTitle}".`);
-    }, 800);
+    try {
+      const res = await analyticsApi.updateRoadmap({ customCareer: title });
+      if (res && res.success && res.data) {
+        setTargetCareer(res.data.targetCareer || title);
+        setStages(res.data.stages || []);
+        setReadinessScore(res.data.readinessScore || 0);
+        setNotification(`Personalized end-to-end roadmap updated for "${title}".`);
+      }
+    } catch {
+      setNotification(`Roadmap generated for "${title}".`);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleToggle = (id) => {
@@ -386,17 +525,27 @@ export default function Roadmap() {
     setNotification(`${stage.title} session is ready. Proceed with practice modules.`);
   };
 
-  const handleToggleCompletion = (id) => {
+  const handleToggleCompletion = async (id) => {
+    // Optimistic UI update
     setStages((prevStages) =>
       prevStages.map((stage) => {
         if (stage.id === id) {
-          const nextStatus =
-            stage.status === "completed" ? "current" : stage.status === "current" ? "completed" : stage.status === "upcoming" ? "completed" : stage.status;
+          const nextStatus = stage.status === "completed" ? "current" : "completed";
           return { ...stage, status: nextStatus };
         }
         return stage;
       })
     );
+
+    try {
+      const res = await analyticsApi.updateRoadmap({ stageId: id });
+      if (res && res.success && res.data) {
+        setStages(res.data.stages || []);
+        setReadinessScore(res.data.readinessScore || 0);
+      }
+    } catch (err) {
+      console.error("Failed to persist stage completion:", err);
+    }
   };
 
   const filteredStages = useMemo(() => {
@@ -404,7 +553,8 @@ export default function Roadmap() {
     return stages.filter(
       (s) =>
         s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        s.concepts.some((c) => c.toLowerCase().includes(searchQuery.toLowerCase()))
+        s.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (s.concepts && s.concepts.some((c) => c.toLowerCase().includes(searchQuery.toLowerCase())))
     );
   }, [stages, searchQuery]);
 
@@ -422,7 +572,7 @@ export default function Roadmap() {
                 <SparklesIcon className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-sm font-bold" style={{ color: "var(--color-text-h)" }}>AIFinity AI Career Guidance</p>
+                <p className="text-sm font-bold" style={{ color: "var(--color-text-h)" }}>AIFinity AI Dynamic Guidance</p>
                 <p className="mt-0.5 text-xs" style={{ color: "var(--color-text-muted)" }}>{notification}</p>
               </div>
             </div>
@@ -442,211 +592,227 @@ export default function Roadmap() {
       {/* HERO SECTION */}
       <HeroSection
         variant="roadmap"
-        eyebrow="End-to-End AI Career Guidance & Readiness Engine"
+        eyebrow="End-to-End AI Assessment-Driven Guidance"
         title="Your complete path to"
         highlightWord="career readiness."
-        description="Tell AIFinity AI what career or skill you want to master. We generate a 0-to-100% sequential roadmap providing step-by-step guidance from zero prerequisites to job readiness."
-        primaryCta={{ label: "Build My Roadmap", href: "#career-select" }}
-        secondaryCta={{ label: "See How It Works", href: "#roadmap-stages" }}
+        description="AIFinity AI analyzes your real assessment scores, weak concepts, mistake patterns, and skill gaps to generate a personalized 0-to-100% sequential roadmap tailored to your performance."
+        primaryCta={{ label: "View My Roadmap", href: "#roadmap-stages" }}
+        secondaryCta={{ label: "Take Assessment", href: "/assessment" }}
       />
 
-      {/* PRESET SELECTOR + CUSTOM GENERATOR + ANALYTICS */}
-      <Section className="pt-0 sm:pt-0">
-        {/* Preset Career Dropdown */}
-        <div className="max-w-md">
-          <label htmlFor="career-select" className="mb-1.5 block text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-text-light)" }}>
-            Choose a career path
-          </label>
-
-          <select
-            id="career-select"
-            value={PRESET_CAREERS.some((c) => c.id === selectedCareer.id) ? selectedCareer.id : ""}
-            onChange={(e) => {
-              const chosen = PRESET_CAREERS.find((c) => c.id === e.target.value);
-              if (chosen) handleSelectPreset(chosen);
-            }}
-            className="w-full rounded-xl border px-4 py-3 text-sm font-semibold outline-none transition-all duration-200 focus:ring-4"
-            style={{ borderColor: "var(--color-primary-600)", background: "var(--color-primary-50)", color: "var(--color-primary-700)" }}
-          >
-            {!PRESET_CAREERS.some((c) => c.id === selectedCareer.id) && (
-              <option value="" disabled>
-                Custom roadmap active — pick a preset to switch
-              </option>
-            )}
-            {PRESET_CAREERS.map((career) => (
-              <option key={career.id} value={career.id}>
-                {career.icon} {career.title}
-              </option>
-            ))}
-          </select>
-
-          {selectedCareer.id === "custom" && (
-            <p className="mt-2 text-xs font-medium" style={{ color: "var(--color-primary-600)" }}>
-              Currently viewing custom roadmap: {selectedCareer.title}
-            </p>
-          )}
-        </div>
-
-        {/* Custom Career Dropdown + Generate */}
-        <div className="mt-6 rounded-2xl border p-5 shadow-sm" style={{ borderColor: "var(--color-border)", background: "var(--color-surface)" }}>
-          <label htmlFor="custom-career" className="mb-2 block text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-text-light)" }}>
-            Want a custom career roadmap? Choose a field or skill goal:
-          </label>
-
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <select
-              id="custom-career"
-              value={customCareer}
-              onChange={(e) => setCustomCareer(e.target.value)}
-              className="w-full flex-1 rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-4"
-              style={{ borderColor: "var(--color-border)", background: "var(--color-surface-secondary)", color: "var(--color-text-h)" }}
-            >
-              <option value="" disabled>
-                Select a career or skill goal
-              </option>
-              {CUSTOM_CAREER_OPTIONS.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-
-            <Button
-              size="md"
-              disabled={!customCareer.trim() || isGenerating}
-              onClick={handleGenerateCustom}
-              icon={isGenerating ? <SpinnerIcon /> : <SparklesIcon className="w-4 h-4" />}
-            >
-              {isGenerating ? "Generating Roadmap..." : "Generate Custom Roadmap"}
-            </Button>
-          </div>
-        </div>
-
-        {/* Career Readiness Analytics Bar */}
-        <div className="mt-6 grid gap-4 sm:grid-cols-3">
-          <Card hoverable={false} className="p-5">
-            <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-text-light)" }}>Target Career Role</p>
-            <p className="mt-2 text-lg font-bold truncate" style={{ color: "var(--color-text-h)" }}>{selectedCareer.title}</p>
-            <p className="mt-1 text-xs" style={{ color: "var(--color-text-muted)" }}>
-              Estimated Duration: <span className="font-semibold" style={{ color: "var(--color-primary-600)" }}>{selectedCareer.duration}</span>
-            </p>
-          </Card>
-
-          <Card hoverable={false} className="p-5">
-            <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-text-light)" }}>Career Readiness Score</p>
-            <div className="mt-2 flex items-end justify-between gap-3">
-              <p className="text-3xl font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--color-text-h)" }}>{readinessScore}%</p>
-              <span className="rounded-full px-2.5 py-1 text-[11px] font-bold" style={{ background: "var(--color-primary-50)", color: "var(--color-primary-700)" }}>
-                {readinessScore >= 75 ? "Job Ready" : readinessScore >= 50 ? "Advanced Specialization" : readinessScore >= 25 ? "Building Competency" : "Foundations"}
-              </span>
-            </div>
-            <div className="mt-3">
-              <ProgressBar value={readinessScore} />
-            </div>
-          </Card>
-
-          <Card hoverable={false} className="p-5">
-            <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-text-light)" }}>Guidance Objective</p>
-            <p className="mt-2 text-xs font-medium leading-5" style={{ color: "var(--color-text-muted)" }}>
-              From zero prerequisites to verified job readiness with practical portfolio milestones.
-            </p>
-          </Card>
-        </div>
-      </Section>
-
-      {/* END TO END ROADMAP STAGES */}
-      <Section id="roadmap-stages">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <span className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-primary-600)" }}>
-              End-to-End Career Progression
-            </span>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight" style={{ fontFamily: "var(--font-display)", color: "var(--color-text-h)" }}>
-              {selectedCareer.title} Guidance Path
-            </h2>
-            <p className="mt-1 max-w-2xl text-sm" style={{ color: "var(--color-text-muted)" }}>
-              Click stage numbers to mark phases completed and dynamically increase your Career Readiness Score.
+      {/* LOADING STATE */}
+      {isLoading && (
+        <Section className="pt-8">
+          <div className="flex flex-col items-center justify-center p-12 text-center">
+            <SpinnerIcon className="h-10 w-10 text-primary-600 animate-spin" />
+            <p className="mt-4 text-sm font-semibold" style={{ color: "var(--color-text-h)" }}>
+              Fetching your personalized assessment-driven roadmap...
             </p>
           </div>
+        </Section>
+      )}
 
-          <div className="flex items-center gap-3">
-            <div className="relative min-w-[220px]">
-              <SearchIcon className="absolute left-3.5 top-1/2 w-4 h-4 -translate-y-1/2" style={{ color: "var(--color-text-light)" }} />
-              <input
-                type="text"
-                placeholder="Filter milestones & tools..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-full border py-2 pl-9 pr-4 text-xs outline-none transition focus:ring-2"
-                style={{ borderColor: "var(--color-border)", background: "var(--color-surface-secondary)", color: "var(--color-text-h)" }}
-              />
+      {/* EMPTY STATE (User has no completed assessments) */}
+      {!isLoading && !hasHistory && (
+        <EmptyRoadmapState />
+      )}
+
+      {/* DYNAMIC PERSONALIZED ROADMAP (User has completed assessments) */}
+      {!isLoading && hasHistory && (
+        <>
+          {/* PRESET SELECTOR + CUSTOM GENERATOR + ANALYTICS */}
+          <Section className="pt-0 sm:pt-0">
+            {/* Preset Career Dropdown */}
+            <div className="max-w-md">
+              <label htmlFor="career-select" className="mb-1.5 block text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-text-light)" }}>
+                Choose a target career path
+              </label>
+
+              <select
+                id="career-select"
+                value={PRESET_CAREERS.some((c) => c.title === targetCareer) ? PRESET_CAREERS.find((c) => c.title === targetCareer).id : ""}
+                onChange={(e) => {
+                  const chosen = PRESET_CAREERS.find((c) => c.id === e.target.value);
+                  if (chosen) handleSelectPreset(chosen.title);
+                }}
+                className="w-full rounded-xl border px-4 py-3 text-sm font-semibold outline-none transition-all duration-200 focus:ring-4"
+                style={{ borderColor: "var(--color-primary-600)", background: "var(--color-primary-50)", color: "var(--color-primary-700)" }}
+              >
+                {!PRESET_CAREERS.some((c) => c.title === targetCareer) && (
+                  <option value="" disabled>
+                    Custom roadmap active: {targetCareer}
+                  </option>
+                )}
+                {PRESET_CAREERS.map((career) => (
+                  <option key={career.id} value={career.id}>
+                    {career.icon} {career.title}
+                  </option>
+                ))}
+              </select>
             </div>
-          </div>
-        </div>
 
-        {/* Timeline */}
-        <div className="relative mt-10">
-          <div className="absolute bottom-8 left-5 top-8 hidden w-0.5 sm:block" style={{ background: "var(--color-border)" }} />
+            {/* Custom Career Dropdown + Generate */}
+            <div className="mt-6 rounded-2xl border p-5 shadow-sm" style={{ borderColor: "var(--color-border)", background: "var(--color-surface)" }}>
+              <label htmlFor="custom-career" className="mb-2 block text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-text-light)" }}>
+                Want a custom career roadmap? Choose a field or skill goal:
+              </label>
 
-          <div className="space-y-5">
-            {filteredStages.map((stage) => (
-              <div key={stage.id} className="relative sm:pl-16">
-                <div
-                  onClick={() => stage.status !== "locked" && handleToggleCompletion(stage.id)}
-                  className="absolute left-0 top-6 hidden h-10 w-10 cursor-pointer items-center justify-center rounded-full border-4 text-xs font-bold shadow-sm transition-all sm:flex hover:scale-110 active:scale-95"
-                  style={{
-                    borderColor: "var(--color-surface)",
-                    background: stage.status === "completed" ? "var(--color-confirm)" : stage.status === "current" ? "var(--color-primary-600)" : "var(--color-surface-secondary)",
-                    color: stage.status === "completed" || stage.status === "current" ? "#fff" : "var(--color-text-light)",
-                  }}
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <select
+                  id="custom-career"
+                  value={customCareerInput}
+                  onChange={(e) => setCustomCareerInput(e.target.value)}
+                  className="w-full flex-1 rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-4"
+                  style={{ borderColor: "var(--color-border)", background: "var(--color-surface-secondary)", color: "var(--color-text-h)" }}
                 >
-                  {stage.status === "completed" ? <CheckIcon className="w-4 h-4" /> : stage.id}
+                  <option value="" disabled>
+                    Select a career or skill goal
+                  </option>
+                  {CUSTOM_CAREER_OPTIONS.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+
+                <Button
+                  size="md"
+                  disabled={!customCareerInput.trim() || isGenerating}
+                  onClick={handleGenerateCustom}
+                  icon={isGenerating ? <SpinnerIcon /> : <SparklesIcon className="w-4 h-4" />}
+                >
+                  {isGenerating ? "Updating Roadmap..." : "Generate Custom Roadmap"}
+                </Button>
+              </div>
+            </div>
+
+            {/* Career Readiness Analytics Bar */}
+            <div className="mt-6 grid gap-4 sm:grid-cols-3">
+              <Card hoverable={false} className="p-5">
+                <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-text-light)" }}>Target Career Role</p>
+                <p className="mt-2 text-lg font-bold truncate" style={{ color: "var(--color-text-h)" }}>{targetCareer}</p>
+                <p className="mt-1 text-xs" style={{ color: "var(--color-text-muted)" }}>
+                  Personalized to real assessment results
+                </p>
+              </Card>
+
+              <Card hoverable={false} className="p-5">
+                <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-text-light)" }}>Career Readiness Score</p>
+                <div className="mt-2 flex items-end justify-between gap-3">
+                  <p className="text-3xl font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--color-text-h)" }}>{readinessScore}%</p>
+                  <span className="rounded-full px-2.5 py-1 text-[11px] font-bold" style={{ background: "var(--color-primary-50)", color: "var(--color-primary-700)" }}>
+                    {readinessScore >= 75 ? "Job Ready" : readinessScore >= 50 ? "Advanced Specialization" : readinessScore >= 25 ? "Building Competency" : "Foundations"}
+                  </span>
                 </div>
+                <div className="mt-3">
+                  <ProgressBar value={readinessScore} />
+                </div>
+              </Card>
 
-                <StageCard
-                  stage={stage}
-                  expanded={expandedStage === stage.id}
-                  onToggle={handleToggle}
-                  onStart={handleStart}
-                  onToggleCompletion={handleToggleCompletion}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      </Section>
+              <Card hoverable={false} className="p-5">
+                <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-text-light)" }}>Guidance Objective</p>
+                <p className="mt-2 text-xs font-medium leading-5" style={{ color: "var(--color-text-muted)" }}>
+                  From identified weak concepts to verified job readiness with dynamic remediation milestones.
+                </p>
+              </Card>
+            </div>
+          </Section>
 
-      {/* JOB READINESS CHECKLIST SECTION */}
-      <Section>
-        <SectionHeading
-          eyebrow="JOB READINESS VERIFICATION"
-          title="What makes you job-ready?"
-          subtitle="AIFinity  verifies your readiness through four essential career criteria."
-        />
-
-        <div className="grid gap-6 md:grid-cols-4">
-          {[
-            { num: "01", title: "Foundational Theory", desc: "Master foundational concepts, terminology, and core principles of your domain.", done: readinessScore >= 25 },
-            { num: "02", title: "Applied Projects", desc: "Build real-world hands-on projects demonstrating practical problem solving.", done: readinessScore >= 50 },
-            { num: "03", title: "System Architecture", desc: "Understand enterprise design patterns, scaling trade-offs, and tool ecosystems.", done: readinessScore >= 75 },
-            { num: "04", title: "Portfolio & Interview", desc: "Complete technical case studies, portfolio showcase, and mock interviews.", done: readinessScore >= 100 },
-          ].map((item) => (
-            <Card key={item.num} hoverable className="p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold" style={{ color: "var(--color-primary-600)" }}>{item.num}</span>
-                <span
-                  className="rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase"
-                  style={item.done ? { background: "var(--color-primary-50)", color: "var(--color-confirm)" } : { background: "var(--color-surface-secondary)", color: "var(--color-text-light)" }}
-                >
-                  {item.done ? "Verified ✓" : "Pending"}
+          {/* END TO END ROADMAP STAGES */}
+          <Section id="roadmap-stages">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--color-primary-600)" }}>
+                  Dynamic Assessment-Driven Guidance
                 </span>
+                <h2 className="mt-2 text-3xl font-bold tracking-tight" style={{ fontFamily: "var(--font-display)", color: "var(--color-text-h)" }}>
+                  {targetCareer} Guidance Path
+                </h2>
+                <p className="mt-1 max-w-2xl text-sm" style={{ color: "var(--color-text-muted)" }}>
+                  Click stage numbers to mark phases completed and update your Career Readiness Score.
+                </p>
               </div>
-              <h4 className="mt-4 font-bold text-base" style={{ color: "var(--color-text-h)" }}>{item.title}</h4>
-              <p className="mt-1 text-xs leading-5" style={{ color: "var(--color-text-muted)" }}>{item.desc}</p>
-            </Card>
-          ))}
-        </div>
-      </Section>
+
+              <div className="flex items-center gap-3">
+                <div className="relative min-w-[220px]">
+                  <SearchIcon className="absolute left-3.5 top-1/2 w-4 h-4 -translate-y-1/2" style={{ color: "var(--color-text-light)" }} />
+                  <input
+                    type="text"
+                    placeholder="Filter milestones & tools..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full rounded-full border py-2 pl-9 pr-4 text-xs outline-none transition focus:ring-2"
+                    style={{ borderColor: "var(--color-border)", background: "var(--color-surface-secondary)", color: "var(--color-text-h)" }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Timeline */}
+            <div className="relative mt-10">
+              <div className="absolute bottom-8 left-5 top-8 hidden w-0.5 sm:block" style={{ background: "var(--color-border)" }} />
+
+              <div className="space-y-5">
+                {filteredStages.map((stage) => (
+                  <div key={stage.id} className="relative sm:pl-16">
+                    <div
+                      onClick={() => stage.status !== "locked" && handleToggleCompletion(stage.id)}
+                      className="absolute left-0 top-6 hidden h-10 w-10 cursor-pointer items-center justify-center rounded-full border-4 text-xs font-bold shadow-sm transition-all sm:flex hover:scale-110 active:scale-95"
+                      style={{
+                        borderColor: "var(--color-surface)",
+                        background: stage.status === "completed" ? "var(--color-confirm)" : stage.status === "current" ? "var(--color-primary-600)" : "var(--color-surface-secondary)",
+                        color: stage.status === "completed" || stage.status === "current" ? "#fff" : "var(--color-text-light)",
+                      }}
+                    >
+                      {stage.status === "completed" ? <CheckIcon className="w-4 h-4" /> : stage.id}
+                    </div>
+
+                    <StageCard
+                      stage={stage}
+                      expanded={expandedStage === stage.id}
+                      onToggle={handleToggle}
+                      onStart={handleStart}
+                      onToggleCompletion={handleToggleCompletion}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Section>
+
+          {/* JOB READINESS CHECKLIST SECTION */}
+          <Section>
+            <SectionHeading
+              eyebrow="JOB READINESS VERIFICATION"
+              title="What makes you job-ready?"
+              subtitle="AIFinity verifies your readiness through four essential career criteria derived from your assessment performance."
+            />
+
+            <div className="grid gap-6 md:grid-cols-4">
+              {[
+                { num: "01", title: "Foundational Theory", desc: "Master foundational concepts, terminology, and core principles of your domain.", done: readinessScore >= 25 },
+                { num: "02", title: "Applied Projects", desc: "Build real-world hands-on projects demonstrating practical problem solving.", done: readinessScore >= 50 },
+                { num: "03", title: "System Architecture", desc: "Understand enterprise design patterns, scaling trade-offs, and tool ecosystems.", done: readinessScore >= 75 },
+                { num: "04", title: "Portfolio & Interview", desc: "Complete technical case studies, portfolio showcase, and mock interviews.", done: readinessScore >= 100 },
+              ].map((item) => (
+                <Card key={item.num} hoverable className="p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold" style={{ color: "var(--color-primary-600)" }}>{item.num}</span>
+                    <span
+                      className="rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase"
+                      style={item.done ? { background: "var(--color-primary-50)", color: "var(--color-confirm)" } : { background: "var(--color-surface-secondary)", color: "var(--color-text-light)" }}
+                    >
+                      {item.done ? "Verified ✓" : "Pending"}
+                    </span>
+                  </div>
+                  <h4 className="mt-4 font-bold text-base" style={{ color: "var(--color-text-h)" }}>{item.title}</h4>
+                  <p className="mt-1 text-xs leading-5" style={{ color: "var(--color-text-muted)" }}>{item.desc}</p>
+                </Card>
+              ))}
+            </div>
+          </Section>
+        </>
+      )}
 
       {/* FINAL CTA */}
       <Section>

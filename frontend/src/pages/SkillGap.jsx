@@ -252,6 +252,8 @@ function GoalCard({ item, active, isRecommended, onClick }) {
   );
 }
 
+import { analyticsApi } from "../services/api";
+
 /* =========================================================
    MAIN SKILL GAP COMPONENT
 ========================================================= */
@@ -265,6 +267,30 @@ export default function SkillGap() {
   const [priorityFilter, setPriorityFilter] = useState("All");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [prefilledFromOnboarding, setPrefilledFromOnboarding] = useState(false);
+
+  useEffect(() => {
+    analyticsApi.getSkillGap().then((res) => {
+      if (res && res.success && res.data && res.data.hasHistory) {
+        setAnalysis({
+          score: res.data.demonstratedCapability,
+          averageGap: res.data.averageGap,
+          strengths: res.data.strengths,
+          goal: res.data.targetCareer,
+          recommendations: res.data.recommendations,
+          gaps: (res.data.weakSkills || []).map((w) => ({
+            id: w.name,
+            skill: w.name,
+            current: w.avgScore,
+            required: 100,
+            gap: w.gapPoints,
+            priority: w.gapPoints >= 40 ? "High" : "Medium",
+            why: `Accuracy is currently ${w.avgScore}%.`,
+            recommendation: `Complete additional assessments in ${w.name}.`,
+          })),
+        });
+      }
+    }).catch(() => {});
+  }, []);
 
   // On first load, silently pick up whatever the user already told us
   // during onboarding (field + career goal) so they don't have to

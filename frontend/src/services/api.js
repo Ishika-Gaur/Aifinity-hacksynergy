@@ -113,8 +113,45 @@ export const assessmentApi = {
       method: "POST",
       body: JSON.stringify(payload),
     }),
+  syncAttempt: (payload) =>
+    request("/assessments/sync-attempt", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
   getAllForAdmin: () => request("/assessments/admin/all"),
   create: (assessment) => request("/assessments/admin", { method: "POST", body: JSON.stringify(assessment) }),
   update: (id, assessment) => request(`/assessments/admin/${id}`, { method: "PUT", body: JSON.stringify(assessment) }),
   remove: (id) => request(`/assessments/admin/${id}`, { method: "DELETE" }),
 };
+
+export const analyticsApi = {
+  getSkillGap: () => request("/analytics/skill-gap"),
+  getMistakeMap: () => request("/analytics/mistake-map"),
+  getConceptRoot: () => request("/analytics/concept-root"),
+  getRoadmap: () => request("/analytics/roadmap"),
+  updateRoadmap: (payload) =>
+    request("/analytics/roadmap", {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }),
+};
+
+export const dashboardApi = {
+  /**
+   * GET /api/dashboard
+   * Returns fully aggregated dashboard data for the authenticated user.
+   * All metrics are computed from real attempt history — no mock data.
+   */
+  get: () => request("/dashboard"),
+
+  /**
+   * PUT /api/dashboard/career-goal
+   * Persists the user's updated career goal to their profile in the database.
+   */
+  updateCareerGoal: (goal) =>
+    request("/dashboard/career-goal", {
+      method: "PUT",
+      body: JSON.stringify(goal),
+    }),
+};
+

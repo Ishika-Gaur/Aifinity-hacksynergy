@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -217,7 +217,22 @@ function TopicRow({ topic }) {
   );
 }
 
+import { analyticsApi } from "../services/api";
+
 export default function MistakeMapPage() {
+  const [topicProgress, setTopicProgress] = useState(TOPIC_PROGRESS);
+  const [hasHistory, setHasHistory] = useState(false);
+
+  useEffect(() => {
+    analyticsApi.getMistakeMap().then((res) => {
+      if (res && res.success && res.data && res.data.hasHistory) {
+        setHasHistory(true);
+        if (Array.isArray(res.data.topicProgress) && res.data.topicProgress.length > 0) {
+          setTopicProgress(res.data.topicProgress);
+        }
+      }
+    }).catch(() => {});
+  }, []);
   return (
     <div className="flex min-h-screen flex-col ">
       {/* Hero */}
@@ -293,7 +308,7 @@ export default function MistakeMapPage() {
           <div className="rounded-2xl border border-[var(--color-border)] bg-white p-4 shadow-[var(--shadow-card)] sm:p-6">
             <ResponsiveContainer width="100%" height={340}>
               <BarChart
-                data={TOPIC_PROGRESS}
+                data={topicProgress}
                 margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
                 barGap={4}
               >
@@ -323,7 +338,7 @@ export default function MistakeMapPage() {
                 />
                 <Bar dataKey="before" name="Before" fill={CHART_COLOR_BEFORE} radius={[4, 4, 0, 0]} />
                 <Bar dataKey="after" name="Now" fill={CHART_COLOR_PRIMARY} radius={[4, 4, 0, 0]}>
-                  {TOPIC_PROGRESS.map((entry) => (
+                  {topicProgress.map((entry) => (
                     <Cell
                       key={entry.concept}
                       fill={entry.needsAttention ? CHART_COLOR_ATTENTION : CHART_COLOR_PRIMARY}
@@ -346,13 +361,13 @@ export default function MistakeMapPage() {
             </div>
           </div>
 
-          {/* Per-topic breakdown — collapsed by default, expandable per row so the column stays compact */}
+          {/* Per-topic breakdown */}
           <div className="flex flex-col gap-2 rounded-2xl border border-[var(--color-border)] bg-white p-4 shadow-[var(--shadow-card)] sm:p-6">
             <h3 className="mb-1 text-sm font-semibold text-[var(--color-text-h)]">
               Topic by topic — what's actually going on
             </h3>
             <div className="flex flex-col divide-y divide-[var(--color-border)]">
-              {TOPIC_PROGRESS.map((topic) => (
+              {topicProgress.map((topic) => (
                 <TopicRow key={topic.concept} topic={topic} />
               ))}
             </div>

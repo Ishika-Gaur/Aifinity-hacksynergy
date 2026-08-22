@@ -520,7 +520,10 @@ export default function AssessmentAttemptPage() {
               <Button onClick={initAttempt} variant="outline" size="md">
                 🔄 Start Fresh Attempt
               </Button>
-              <Button as={Link} to="/dashboard" size="md">
+              <Button as={Link} to="/roadmap" size="md">
+                View Personalized Roadmap →
+              </Button>
+              <Button as={Link} to="/dashboard" variant="subtle" size="md">
                 Go to Dashboard
               </Button>
             </div>

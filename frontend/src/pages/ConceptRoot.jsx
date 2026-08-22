@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import Section from "../components/Section";
 import SectionHeading from "../components/SectionHeading";
 import Card from "../components/Card";
@@ -60,9 +60,21 @@ const JOURNEY_STEPS = [
   "Improved Understanding",
 ];
 
+import { useState, useEffect, useRef } from "react";
+import { analyticsApi } from "../services/api";
+
 export default function ConceptRoot() {
   const demoRef = useRef(null);
   const howItWorksRef = useRef(null);
+  const [userAnalytics, setUserAnalytics] = useState(null);
+
+  useEffect(() => {
+    analyticsApi.getConceptRoot().then((res) => {
+      if (res && res.success && res.data) {
+        setUserAnalytics(res.data);
+      }
+    }).catch(() => {});
+  }, []);
 
   const handleScrollToDemo = (e) => {
     if (e) e.preventDefault();

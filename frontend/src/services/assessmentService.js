@@ -341,21 +341,6 @@ export async function createAttemptSession(assessmentId) {
  * Validates and submits assessment answers server-side (or via session validator).
  */
 export async function submitAttemptSession(assessmentId, attemptId, responses, elapsedSeconds, violations = []) {
-  // 1. Try backend API first if available
-  try {
-    const apiRes = await assessmentApi.submitAttempt(assessmentId, {
-      attemptId,
-      responses,
-      elapsedSeconds,
-      violations,
-    });
-    if (apiRes && apiRes.success) {
-      return apiRes;
-    }
-  } catch (_) {}
-
-  // 2. Fallback: Validate against private closure session cache
-  const session = attemptSessionCache.get(attemptId);
   const sId = String(assessmentId || "").toLowerCase().trim();
   let rawAssessment = ASSESSMENTS.find((a) => {
     const aId = String(a.id || a._id || "").toLowerCase().trim();
@@ -365,6 +350,28 @@ export async function submitAttemptSession(assessmentId, attemptId, responses, e
     rawAssessment = ASSESSMENTS[0];
   }
 
+  const title = rawAssessment?.title || "Assessment Attempt";
+  const category = rawAssessment?.category || rawAssessment?.field || "General";
+  const field = rawAssessment?.field || "";
+
+  // 1. Try backend API first if available
+  try {
+    const apiRes = await assessmentApi.submitAttempt(assessmentId, {
+      attemptId,
+      responses,
+      elapsedSeconds,
+      violations,
+      assessmentTitle: title,
+      assessmentCategory: category,
+      assessmentField: field,
+    });
+    if (apiRes && apiRes.success) {
+      return apiRes;
+    }
+  } catch (_) {}
+
+  // 2. Fallback: Validate against private closure session cache
+  const session = attemptSessionCache.get(attemptId);
   const questions = session ? session.questions : (rawAssessment ? rawAssessment.questions : []);
   const answersMap = session ? session.answersMap : null;
 
@@ -402,7 +409,7 @@ export async function submitAttemptSession(assessmentId, attemptId, responses, e
     attemptSessionCache.delete(attemptId);
   }
 
-  return {
+  const result = {
     success: true,
     scorePercent: percentage,
     totalScore,
@@ -419,4 +426,24 @@ export async function submitAttemptSession(assessmentId, attemptId, responses, e
     violations,
     autoSubmitted: violations.length >= 3,
   };
+
+  // Sync attempt to backend so MongoDB always receives AttemptResult and updates Roadmap
+  try {
+    await assessmentApi.syncAttempt({
+      assessmentTitle: title,
+      assessmentCategory: category,
+      assessmentField: field,
+      scorePercent: percentage,
+      totalScore,
+      maxScore,
+      correctCount,
+      incorrectCount,
+      unansweredCount,
+      totalQuestions: questions.length,
+      elapsedSeconds,
+      questionResults,
+    });
+  } catch (_) {}
+
+  return result;
 }
