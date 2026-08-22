@@ -11,13 +11,7 @@ import {
 } from "../data/assessments";
 import { assessmentApi } from "../services/api";
 
-const DIFFICULTY_STYLES = {
-  Easy: "text-green-600 bg-green-50 border-green-200",
-  Medium: "text-amber-600 bg-amber-50 border-amber-200",
-  Hard: "text-red-600 bg-red-50 border-red-200",
-  Mixed:
-    "text-[var(--color-primary-600)] bg-[var(--color-primary-50)] border-[var(--color-primary-100)]",
-};
+const ITEMS_PER_PAGE = 6;
 
 /* ---------------- Category palette (gradient tiles + Quest-style cards) ---------------- */
 
@@ -58,9 +52,7 @@ const CATEGORY_ICON_PATHS = [
 ];
 
 function getCategoryIndex(cat) {
-  const list = CATEGORIES.filter((c) => c !== "All");
-  const i = list.indexOf(cat);
-  return i === -1 ? 0 : i % CATEGORY_GRADIENTS.length;
+  return Array.from(cat).reduce((hash, character) => hash + character.charCodeAt(0), 0) % CATEGORY_GRADIENTS.length;
 }
 
 /* ---------------- Left sidebar nav (LeetCode-style rail) ---------------- */
@@ -375,11 +367,7 @@ function FlameIcon({ className }) {
 function StreakSidebar({ profile, dailyAssessments, completedDays }) {
   const now = new Date();
   const monthLabel = `${MONTH_LABELS[now.getMonth()]} ${now.getFullYear()}`;
-
-  const firstWeekdayOffset = useMemo(
-    () => new Date(now.getFullYear(), now.getMonth(), 1).getDay(),
-    [now]
-  );
+  const firstWeekdayOffset = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
 
   const currentStreak = useMemo(() => {
     let streak = 0;
@@ -489,14 +477,20 @@ export default function AssessmentPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [assessments, setAssessments] = useState([]);
   const [loadError, setLoadError] = useState("");
-  const ITEMS_PER_PAGE = 6;
 
   const profile = useMemo(() => getUserProfile(), []);
   useEffect(() => {
+    let isMounted = true;
+
     assessmentApi.getPublished().then((result) => {
+      if (!isMounted) return;
       if (result.success) setAssessments(result.assessments);
       else setLoadError(result.error || "Assessments could not be loaded.");
     });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
   const categories = useMemo(() => ["All", ...new Set(assessments.map((assessment) => assessment.category))], [assessments]);
   const recommended = useMemo(() => {
@@ -528,14 +522,6 @@ export default function AssessmentPage() {
     return dailyAssessments.slice(weekStart, weekStart + 7);
   }, [dailyAssessments]);
 
-  // Which weekday (0=Sun..6=Sat) the 1st of the current month falls on,
-  // so "Day 1" lines up under the correct column instead of always
-  // starting at Sunday.
-  const firstWeekdayOffset = useMemo(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1).getDay();
-  }, []);
-
   const exploreList = useMemo(() => {
     return assessments.filter((a) => {
       if (category !== "All" && a.category !== category) return false;
@@ -551,7 +537,7 @@ export default function AssessmentPage() {
   }, [assessments, category, difficulty, type]);
 
   // Reset to page 1 when filters change
-  React.useEffect(() => {
+  useEffect(() => {
     setCurrentPage(1);
   }, [category, difficulty, type]);
 
