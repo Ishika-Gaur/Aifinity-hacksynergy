@@ -216,6 +216,7 @@ export default function Dashboard() {
           {/* 2. LEARNING OVERVIEW (4 STAT CARDS) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <StatCard
+              href="/dashboard/progress"
               label={stats.overallProgress.label}
               value={stats.overallProgress.value}
               unit={stats.overallProgress.unit}
@@ -228,6 +229,7 @@ export default function Dashboard() {
               }
             />
             <StatCard
+              href="/dashboard/assessments"
               label={stats.assessments.label}
               value={stats.assessments.value}
               unit={stats.assessments.unit}
@@ -240,6 +242,7 @@ export default function Dashboard() {
               }
             />
             <StatCard
+              href="/dashboard/streak"
               label={stats.learningStreak.label}
               value={stats.learningStreak.value}
               unit={stats.learningStreak.unit}
@@ -251,6 +254,7 @@ export default function Dashboard() {
               }
             />
             <StatCard
+              href="/dashboard/skills"
               label={stats.skillsImproved.label}
               value={stats.skillsImproved.value}
               unit={stats.skillsImproved.unit}

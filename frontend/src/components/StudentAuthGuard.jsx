@@ -18,9 +18,14 @@ export default function StudentAuthGuard({
         localUser = JSON.parse(localStorage.getItem("user") || "null");
       } catch (_) {}
 
-      // Fetch authoritative user record from backend if reachable
+      // Do not trust cached identity when the backend explicitly rejects the session.
       const res = await authApi.getMe();
-      const currentUser = res && res.success && res.user ? res.user : localUser;
+      const networkUnavailable = res?.error && (
+        res.error.includes("Network") ||
+        res.error.includes("Failed to fetch") ||
+        res.error.includes("Failed to reach server")
+      );
+      const currentUser = res?.success && res.user ? res.user : networkUnavailable ? localUser : null;
 
       if (currentUser) {
         setUser(currentUser);

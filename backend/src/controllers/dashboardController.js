@@ -190,6 +190,117 @@ function getCategoryStats(attempts) {
   }));
 }
 
+function getDateKey(value) {
+  const date = new Date(value);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function computeLongestStreak(attempts) {
+  const dates = [...new Set(attempts.map((attempt) => getDateKey(attempt.completedAt)))].sort();
+  let longest = 0;
+  let current = 0;
+
+  dates.forEach((date, index) => {
+    if (index === 0) {
+      current = 1;
+    } else {
+      const previous = new Date(dates[index - 1]);
+      const next = new Date(date);
+      current = Math.round((next - previous) / (1000 * 60 * 60 * 24)) === 1 ? current + 1 : 1;
+    }
+    longest = Math.max(longest, current);
+  });
+
+  return longest;
+}
+
+function buildAnalyticsDetails(attempts, avgScore, currentStreak, categoryStats, progressSeries) {
+  const chronological = [...attempts].reverse();
+  const categoryHistory = {};
+  chronological.forEach((attempt) => {
+    const category = attempt.assessmentCategory || "General";
+    if (!categoryHistory[category]) categoryHistory[category] = [];
+    categoryHistory[category].push(attempt.scorePercent);
+  });
+
+  const skillImprovements = Object.entries(categoryHistory)
+    .filter(([, scores]) => scores.length >= 2)
+    .map(([category, scores]) => ({
+      category,
+      previousScore: scores[0],
+      currentScore: scores[scores.length - 1],
+      improvement: scores[scores.length - 1] - scores[0],
+      attempts: scores.length,
+    }))
+    .filter((skill) => skill.improvement > 0)
+    .sort((a, b) => b.improvement - a.improvement);
+
+  const recentScores = attempts.slice(0, 3);
+  const previousScores = attempts.slice(3, 6);
+  const recentAverage = recentScores.length
+    ? Math.round(recentScores.reduce((sum, attempt) => sum + attempt.scorePercent, 0) / recentScores.length)
+    : 0;
+  const previousAverage = previousScores.length
+    ? Math.round(previousScores.reduce((sum, attempt) => sum + attempt.scorePercent, 0) / previousScores.length)
+    : null;
+
+  const activityDates = new Set(attempts.map((attempt) => getDateKey(attempt.completedAt)));
+  const activityCalendar = Array.from({ length: 42 }, (_, index) => {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    date.setDate(date.getDate() - (41 - index));
+    const key = getDateKey(date);
+    return { date: key, active: activityDates.has(key) };
+  });
+
+  const assessmentHistory = attempts.map((attempt) => ({
+    id: String(attempt._id),
+    title: attempt.assessmentTitle,
+    category: attempt.assessmentCategory || "General",
+    field: attempt.assessmentField || "",
+    scorePercent: attempt.scorePercent,
+    correctCount: attempt.correctCount,
+    gradableCount: attempt.gradableCount,
+    totalQuestions: attempt.totalQuestions,
+    completedAt: attempt.completedAt,
+    status: attempt.scorePercent >= 60 ? "Completed" : "Needs Review",
+  }));
+
+  return {
+    progress: {
+      overallProgress: avgScore,
+      trend: previousAverage === null ? null : recentAverage - previousAverage,
+      recentAverage,
+      completedActivities: attempts.length,
+      strongAreas: categoryStats.filter((item) => item.avgScore >= 75).sort((a, b) => b.avgScore - a.avgScore),
+      weakAreas: categoryStats.filter((item) => item.avgScore < 60).sort((a, b) => a.avgScore - b.avgScore),
+      categoryPerformance: categoryStats,
+      progressSeries,
+      recentActivities: assessmentHistory.slice(0, 5),
+    },
+    assessments: {
+      totalCompleted: attempts.length,
+      averageScore: avgScore,
+      highestScore: attempts.length ? Math.max(...attempts.map((attempt) => attempt.scorePercent)) : null,
+      mostRecent: assessmentHistory[0] || null,
+      history: assessmentHistory,
+    },
+    streak: {
+      current: currentStreak,
+      longest: computeLongestStreak(attempts),
+      activeDays: activityDates.size,
+      calendar: activityCalendar,
+      recentActivity: assessmentHistory.slice(0, 5),
+    },
+    skills: {
+      improved: skillImprovements,
+      strongAreas: categoryStats.filter((item) => item.avgScore >= 75).sort((a, b) => b.avgScore - a.avgScore),
+      needsAttention: categoryStats.filter((item) => item.avgScore < 60).sort((a, b) => a.avgScore - b.avgScore),
+      categoryPerformance: categoryStats,
+    },
+  };
+}
+
 /**
  * Maps an average score to a ConceptRoot/SkillGap status label.
  */
@@ -406,18 +517,10 @@ export async function getDashboard(req, res) {
     const catStats = getCategoryStats(attempts);
     const streak = computeStreak(attempts);
 
-    // Skills improved: categories where the most recent score > earliest score
-    let skillsImproved = 0;
-    const catMap = {};
-    for (const a of [...attempts].reverse()) {
-      if (!catMap[a.assessmentCategory]) catMap[a.assessmentCategory] = [];
-      catMap[a.assessmentCategory].push(a.scorePercent);
-    }
-    for (const scores of Object.values(catMap)) {
-      if (scores.length >= 2 && scores[scores.length - 1] > scores[0]) {
-        skillsImproved++;
-      }
-    }
+    // ── Progress chart series
+    const progressSeries = buildProgressSeries(attempts);
+    const analytics = buildAnalyticsDetails(attempts, avgScore, streak, catStats, progressSeries);
+    const skillsImproved = analytics.skills.improved.length;
 
     // ── Stats cards
     const stats = {
@@ -447,9 +550,6 @@ export async function getDashboard(req, res) {
       },
     };
 
-    // ── Progress chart series
-    const progressSeries = buildProgressSeries(attempts);
-
     // ── Recent assessments (last 5)
     const recentAssessments = attempts.slice(0, 5).map((a) => ({
       id: String(a._id),
@@ -460,33 +560,31 @@ export async function getDashboard(req, res) {
       type: a.scorePercent >= 60 ? "success" : "warning",
     }));
 
-    // ── ConceptRoot: per-category analysis
+    // ── ConceptRoot
     const conceptRoot = {
       title: "ConceptRoot AI",
       description: "Understand why you're getting questions wrong.",
       metrics: {
-        analyzed: catStats.reduce((s, c) => s + c.count, 0),
+        analyzed: attempts.length, // Assessments analyzed
         strong: catStats.filter((c) => c.avgScore >= 75).length,
-        needsAttention: catStats.filter((c) => c.avgScore < 55).length,
+        needsAttention: catStats.filter((c) => c.avgScore < 60).length,
       },
       concepts: catStats
-        .sort((a, b) => b.count - a.count)
+        .sort((a, b) => a.avgScore - b.avgScore)
         .slice(0, 4)
         .map((c) => ({ name: c.category, status: scoreToStatus(c.avgScore) })),
       cta: "Explore ConceptRoot",
       href: "/concept-root",
     };
 
-    // ── MistakeMap: weakest category
+    // ── MistakeMap
     const weakestCat = catStats.sort((a, b) => a.avgScore - b.avgScore)[0];
     const mistakeMap = {
       title: "MistakeMap AI",
       description: "Discover the patterns behind your mistakes.",
-      mostCommonMistake: weakestCat ? `Low accuracy in ${weakestCat.category}` : "No patterns yet",
+      mostCommonMistake: weakestCat ? `Weakness in ${weakestCat.category}` : "No patterns yet",
       occurrences: weakestCat ? weakestCat.count : 0,
-      improvement: weakestCat && catStats.length > 1
-        ? Math.max(0, catStats.sort((a, b) => b.avgScore - a.avgScore)[0].avgScore - weakestCat.avgScore)
-        : 0,
+      improvement: 0, // placeholder, requires historical tracking per concept
       cta: "View MistakeMap",
       href: "/mistake-map",
     };
@@ -541,6 +639,7 @@ export async function getDashboard(req, res) {
       data: {
         user: userInfo,
         stats,
+        analytics,
         progressSeries,
         aiInsight,
         conceptRoot,

@@ -54,6 +54,17 @@ app.get("/api/health", (req, res) => {
   res.status(200).json({ status: "OK", timestamp: new Date().toISOString() });
 });
 
+// Return a useful API response when a client sends malformed JSON.
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid JSON request body.",
+    });
+  }
+  return next(err);
+});
+
 // MongoDB Connection & Server Launch
 export async function startServer() {
   try {

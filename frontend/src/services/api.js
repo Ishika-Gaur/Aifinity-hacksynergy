@@ -155,3 +155,12 @@ export const dashboardApi = {
     }),
 };
 
+export const conceptRootApi = {
+  /**
+   * GET /api/concept-root
+   * Returns fully personalized ConceptRoot analysis data.
+   */
+  get: () => request("/concept-root"),
+};
+
+
