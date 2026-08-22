@@ -59,7 +59,7 @@ export default function SignupPage() {
           localStorage.setItem("user", JSON.stringify(res.user));
         } catch (_) {}
       }
-      navigate("/dashboard");
+      navigate("/onboardingpage");
     } else {
       // If network fails (e.g. backend server offline), gracefully create local session
       if (res?.error && (res.error.includes("Network") || res.error.includes("Failed to fetch") || res.error.includes("Failed to reach server"))) {
@@ -67,11 +67,13 @@ export default function SignupPage() {
           name: trimmedName,
           email: trimmedEmail,
           role: "student",
+          onboardingCompleted: false,
+          selectedField: "",
         };
         try {
           localStorage.setItem("user", JSON.stringify(fallbackUser));
         } catch (_) {}
-        navigate("/dashboard");
+        navigate("/onboardingpage");
         return;
       }
       setError(res?.error || "Registration failed. Please try again.");

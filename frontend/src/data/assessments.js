@@ -52,6 +52,21 @@ function matchField(text) {
 export function getUserProfile() {
   if (typeof window === "undefined" || !window.localStorage) return DEFAULT_PROFILE;
   try {
+    let sessionUser = null;
+    try {
+      sessionUser = JSON.parse(window.localStorage.getItem("user") || "null");
+    } catch (_) {}
+
+    if (sessionUser && sessionUser.selectedField) {
+      const profile = sessionUser.onboardingProfile || {};
+      return {
+        careerGoal: profile.careerGoal || sessionUser.selectedField,
+        field: sessionUser.selectedField,
+        skills: DEFAULT_PROFILE.skills,
+        currentLevel: profile.level || DEFAULT_PROFILE.currentLevel,
+      };
+    }
+
     const raw = window.localStorage.getItem(ONBOARDING_STORAGE_KEY);
     if (!raw) return DEFAULT_PROFILE;
     const saved = JSON.parse(raw);

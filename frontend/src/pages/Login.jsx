@@ -54,21 +54,35 @@ export default function LoginPage() {
       }
       if (res.user?.role === "admin") {
         navigate("/admin/dashboard");
+      } else if (!res.user?.onboardingCompleted) {
+        navigate("/onboardingpage");
       } else {
         navigate("/dashboard");
       }
     } else {
       // If network fails (e.g. backend server offline), gracefully create local session
       if (res?.error && (res.error.includes("Network") || res.error.includes("Failed to fetch") || res.error.includes("Failed to reach server"))) {
-        const fallbackUser = {
+        let savedUser = null;
+        try {
+          savedUser = JSON.parse(localStorage.getItem("user") || "null");
+        } catch (_) {}
+
+        const fallbackUser = savedUser || {
           name: trimmedEmail.split("@")[0] || "Student",
           email: trimmedEmail,
           role: "student",
+          onboardingCompleted: false,
+          selectedField: "",
         };
         try {
           localStorage.setItem("user", JSON.stringify(fallbackUser));
         } catch (_) {}
-        navigate("/dashboard");
+
+        if (!fallbackUser.onboardingCompleted) {
+          navigate("/onboardingpage");
+        } else {
+          navigate("/dashboard");
+        }
         return;
       }
       setError(res?.error || "Login failed. Please check your credentials.");

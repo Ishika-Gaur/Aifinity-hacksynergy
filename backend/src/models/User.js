@@ -34,6 +34,20 @@ const userSchema = new mongoose.Schema(
       enum: ["active", "suspended"],
       default: "active",
     },
+    onboardingCompleted: {
+      type: Boolean,
+      default: false,
+    },
+    selectedField: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    onboardingProfile: {
+      field: String,
+      careerGoal: String,
+      level: String,
+    },
     lastLoginAt: Date,
     resetPasswordToken: {
       type: String,

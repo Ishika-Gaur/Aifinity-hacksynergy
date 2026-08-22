@@ -22,6 +22,9 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Faq from './pages/Faq';
 
+// Student Auth Guard
+import StudentAuthGuard from './components/StudentAuthGuard';
+
 // Admin Auth & Protection
 import { AdminAuthProvider } from './context/AdminAuthContext';
 import ProtectedRoute from './components/admin/ProtectedRoute';
@@ -55,10 +58,10 @@ function PublicLayout() {
 
 function AssessmentLoading() {
   return (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex items-center justify-center min-h-screen bg-[#FBF8F0]">
       <div className="text-center">
-        <div className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-[var(--color-primary-100)] mb-4">
-          <div className="h-6 w-6 border-2 border-[var(--color-primary-600)] border-t-transparent rounded-full animate-spin"></div>
+        <div className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-[#1B332C]/10 mb-4">
+          <div className="h-6 w-6 border-2 border-[#1B332C] border-t-transparent rounded-full animate-spin"></div>
         </div>
         <p className="text-[var(--color-text-muted)] font-medium">Loading assessments...</p>
       </div>
@@ -75,95 +78,125 @@ function App() {
           {/* =====================================================
               ADMIN AUTH ROUTES
               ===================================================== */}
-
           <Route path="/admin/login" element={<AdminLogin />} />
-
 
           {/* =====================================================
               PROTECTED ADMIN DASHBOARD
               ===================================================== */}
-
           <Route element={<ProtectedRoute />}>
             <Route path="/admin" element={<AdminLayout />}>
-
               <Route index element={<AdminOverview />} />
-
               <Route path="dashboard" element={<AdminOverview />} />
-
               <Route path="users" element={<UserManagement />} />
-
               <Route path="assessments" element={<AssessmentManagement />} />
-
               <Route path="analytics" element={<AiAnalytics />} />
-
               <Route path="content" element={<ContentManagement />} />
-
               <Route path="reports" element={<ReportsPage />} />
-
               <Route path="settings" element={<AdminSettings />} />
-
             </Route>
           </Route>
 
-
           {/* =====================================================
-              PUBLIC WEBSITE
+              PUBLIC & STUDENT ROUTES
               ===================================================== */}
-
           <Route element={<PublicLayout />}>
-
             <Route path="/" element={<Home />} />
-
             <Route path="/about" element={<About />} />
-
-            <Route path="/assessment" element={
-              <Suspense fallback={<AssessmentLoading />}>
-                <AssessmentPage />
-              </Suspense>
-            } />
-
-            <Route path="/assessment/:id" element={
-              <Suspense fallback={<AssessmentLoading />}>
-                <AssessmentAttemptPage />
-              </Suspense>
-            } />
-
-            <Route path="/dashboard" element={<Dashboard />} />
-
-            <Route path="/concept-root" element={<ConceptRoot />} />
-
-            <Route path="/conceptroot" element={<ConceptRoot />} />
-
-            <Route path="/mistake-map" element={<MistakeMap />} />
-
-            <Route path="/skill-gap" element={<SkillGap />} />
-
-            <Route path="/roadmap" element={<Roadmap />} />
-
             <Route path="/contact" element={<Contact />} />
-
             <Route path="/login" element={<Login />} />
-
             <Route path="/signup" element={<Signup />} />
-
             <Route path="/faq" element={<Faq />} />
-
-            <Route
-              path="/onboardingpage"
-              element={<OnboardingPage />}
-            />
-
-            <Route
-              path="/forgot-password"
-              element={<ForgotPassword />}
-            />
-
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
 
+            {/* Onboarding Guard: Unauthenticated -> Login; Already Completed -> Dashboard */}
+            <Route
+              path="/onboardingpage"
+              element={
+                <StudentAuthGuard allowOnlyIncomplete>
+                  <OnboardingPage />
+                </StudentAuthGuard>
+              }
+            />
+
+            {/* Protected Student Routes (Require Completed Onboarding) */}
+            <Route
+              path="/dashboard"
+              element={
+                <StudentAuthGuard requireOnboardingCompleted>
+                  <Dashboard />
+                </StudentAuthGuard>
+              }
+            />
+
+            <Route
+              path="/assessment"
+              element={
+                <StudentAuthGuard requireOnboardingCompleted>
+                  <Suspense fallback={<AssessmentLoading />}>
+                    <AssessmentPage />
+                  </Suspense>
+                </StudentAuthGuard>
+              }
+            />
+
+            <Route
+              path="/assessment/:id"
+              element={
+                <StudentAuthGuard requireOnboardingCompleted>
+                  <Suspense fallback={<AssessmentLoading />}>
+                    <AssessmentAttemptPage />
+                  </Suspense>
+                </StudentAuthGuard>
+              }
+            />
+
+            <Route
+              path="/concept-root"
+              element={
+                <StudentAuthGuard requireOnboardingCompleted>
+                  <ConceptRoot />
+                </StudentAuthGuard>
+              }
+            />
+            <Route
+              path="/conceptroot"
+              element={
+                <StudentAuthGuard requireOnboardingCompleted>
+                  <ConceptRoot />
+                </StudentAuthGuard>
+              }
+            />
+
+            <Route
+              path="/mistake-map"
+              element={
+                <StudentAuthGuard requireOnboardingCompleted>
+                  <MistakeMap />
+                </StudentAuthGuard>
+              }
+            />
+
+            <Route
+              path="/skill-gap"
+              element={
+                <StudentAuthGuard requireOnboardingCompleted>
+                  <SkillGap />
+                </StudentAuthGuard>
+              }
+            />
+
+            <Route
+              path="/roadmap"
+              element={
+                <StudentAuthGuard requireOnboardingCompleted>
+                  <Roadmap />
+                </StudentAuthGuard>
+              }
+            />
+
             <Route path="*" element={<NotFound />} />
-
           </Route>
-
         </Routes>
       </Router>
     </AdminAuthProvider>

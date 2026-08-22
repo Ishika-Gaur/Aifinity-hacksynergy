@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Section from "../components/Section";
 import Container from "../components/Container";
 import SectionHeading from "../components/SectionHeading";
@@ -6,8 +7,8 @@ import Card from "../components/Card";
 import Button from "../components/Button";
 import ImageCard from "../components/ImageCard";
 import { FIELDS, FIELD_ICONS, CAREER_GOALS_BY_FIELD } from "../data/assessments";
+import { authApi } from "../services/api";
 
-/* Original, simple AI/learning illustration — no external image dependency. */
 const WELCOME_ILLUSTRATION =
   "data:image/svg+xml;utf8," +
   encodeURIComponent(`
@@ -44,256 +45,369 @@ const LEVEL_OPTIONS = [
 ];
 
 const TOTAL_STEPS = 4;
-
-/* Read by data/assessments.js (getUserProfile) to personalize the
-   Assessment page. Keep this key in sync if it's ever renamed. */
 const ONBOARDING_STORAGE_KEY = "aifinity_onboarding_profile";
 
 export default function OnboardingPage() {
-  const [step, setStep] = useState(1); // 1-4 = flow, 5 = final screen
+  const navigate = useNavigate();
+  const [step, setStep] = useState(1);
   const [field, setField] = useState(null);
   const [level, setLevel] = useState(null);
   const [careerGoal, setCareerGoal] = useState(null);
+  const [isFieldLocked, setIsFieldLocked] = useState(false);
 
-  // Career-goal options depend on the chosen field. If the field
-  // changes after a goal was already picked, drop the stale goal so
-  // we never save a goal that doesn't belong to the selected field.
+  const [loadingCheck, setLoadingCheck] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  // 1. Authenticated Routing & One-Time Onboarding Check
+  useEffect(() => {
+    async function checkAuthAndOnboarding() {
+      let localUser = null;
+      try {
+        localUser = JSON.parse(localStorage.getItem("user") || "null");
+      } catch (_) {}
+
+      // Fetch fresh authenticated user state from backend if available
+      const res = await authApi.getMe();
+      const currentUser = res && res.success && res.user ? res.user : localUser;
+
+      // Requirement 3: Redirect unauthenticated users to login
+      if (!currentUser) {
+        navigate("/login", { replace: true });
+        return;
+      }
+
+      // Sync backend user state to local storage
+      try {
+        localStorage.setItem("user", JSON.stringify(currentUser));
+      } catch (_) {}
+
+      // Requirement 1: If onboarding is already completed, redirect to Dashboard
+      if (currentUser.onboardingCompleted) {
+        navigate("/dashboard", { replace: true });
+        return;
+      }
+
+      // Requirement 2: Choose career field only once. If field is already set, lock field choice.
+      const savedField = currentUser.selectedField || currentUser.onboardingProfile?.field;
+      if (savedField) {
+        setField(savedField);
+        setIsFieldLocked(true);
+        // Requirement 7: Resume at step 3 if interrupted after field selection
+        setStep(3);
+      }
+
+      setLoadingCheck(false);
+    }
+
+    checkAuthAndOnboarding();
+  }, [navigate]);
+
+  // Keep career goals synced with selected field
   useEffect(() => {
     if (careerGoal && field && !CAREER_GOALS_BY_FIELD[field]?.includes(careerGoal)) {
       setCareerGoal(null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [field]);
+  }, [field, careerGoal]);
 
-  // Scroll to the top of the page every time the step changes, so each
-  // step always opens from the top instead of wherever the user last
-  // scrolled to on the previous step.
+  // Scroll to top on step changes
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
   }, [step]);
 
   const goNext = () => setStep((s) => Math.min(s + 1, 5));
-  const goBack = () => setStep((s) => Math.max(s - 1, 1));
+  const goBack = () => {
+    // If field is locked, user cannot go back past step 3 to change field
+    if (isFieldLocked && step === 3) {
+      return;
+    }
+    setStep((s) => Math.max(s - 1, 1));
+  };
 
-  // Persist the onboarding answers once the person reaches the final
-  // screen, so pages like Assessment can personalize using them.
-  // No UI change — this is a silent side effect only.
-  useEffect(() => {
-    if (step !== 5) return;
+  // Requirement 5: Final button action "Start Learning"
+  const handleStartLearning = async () => {
+    if (saving) return;
+    setSaving(true);
+    setError("");
+
+    const payload = {
+      field,
+      careerGoal: careerGoal || field || "",
+      level: level || "Intermediate",
+    };
+
+    // 1. Save onboarding completion & selected field to persistent backend DB
+    const res = await authApi.completeOnboarding(payload);
+
+    let updatedUser = null;
+    if (res && res.success && res.user) {
+      updatedUser = res.user;
+    } else {
+      let localUser = null;
+      try {
+        localUser = JSON.parse(localStorage.getItem("user") || "{}");
+      } catch (_) {}
+
+      updatedUser = {
+        ...localUser,
+        onboardingCompleted: true,
+        selectedField: field,
+        onboardingProfile: payload,
+      };
+    }
+
+    // 2. Persist updated user & onboarding profile locally
     try {
+      localStorage.setItem("user", JSON.stringify(updatedUser));
       window.localStorage.setItem(
         ONBOARDING_STORAGE_KEY,
-        JSON.stringify({ field, careerGoal, level })
+        JSON.stringify(payload)
       );
-    } catch {
-      // localStorage unavailable (e.g. private browsing) — safe to ignore,
-      // Assessment page just falls back to its default profile.
-    }
-  }, [step, field, careerGoal, level]);
+    } catch (_) {}
+
+    setSaving(false);
+
+    // Requirement 5: Redirect directly to Assessment page
+    navigate("/assessment", { replace: true });
+  };
+
+  if (loadingCheck) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center bg-[#FBF8F0]">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#1B332C] border-t-transparent"></div>
+          <p className="text-sm font-semibold text-[var(--color-text-muted)]">
+            Checking onboarding status...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const careerGoalOptions = field ? CAREER_GOALS_BY_FIELD[field] || [] : [];
 
   return (
-    <>
-      <Section className="py-16 flex-1">
-        <Container>
-          {/* Progress indicator — shown during the 4-step flow only */}
-          {step >= 1 && step <= TOTAL_STEPS && (
-            <div className="mx-auto mb-12 max-w-xl">
-              <div className="mb-2 flex items-center justify-between text-sm font-medium text-[var(--color-text-muted)]">
-                <span>
-                  Step {step} of {TOTAL_STEPS}
-                </span>
-              </div>
-              <div className="flex gap-1.5">
-                {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
-                  <div
-                    key={i}
-                    className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${i < step
-                        ? "bg-[var(--color-primary-600)]"
-                        : "bg-[var(--color-primary-100)]"
-                      }`}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* ---------------- STEP 1: WELCOME ---------------- */}
-          {step === 1 && (
-            <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-14">
-              <div className="flex flex-col items-start gap-5 text-left">
-                <span className="inline-flex items-center gap-2 rounded-full border border-[var(--color-primary-100)] bg-white px-3 py-1 text-sm font-semibold text-[var(--color-primary-600)]">
-                  AI-Powered Onboarding
-                </span>
-                <h1 className="max-w-lg text-4xl font-bold tracking-tight text-[var(--color-text-h)] sm:text-5xl">
-                  Welcome to your AI Learning Observatory
-                </h1>
-                <p className="max-w-md text-lg leading-relaxed text-[var(--color-text-muted)]">
-                  Let's personalize your learning experience and help you
-                  understand your progress better.
-                </p>
-                <Button size="lg" onClick={goNext} className="mt-2">
-                  Get Started →
-                </Button>
-              </div>
-
-              <div className="mx-auto w-full max-w-sm">
-                <ImageCard
-                  image={WELCOME_ILLUSTRATION}
-                  alt="Abstract illustration of connected learning concepts"
-                  title="Built around how you actually learn"
-                  description="Every answer helps shape a path that's specific to you."
-                  hoverable={false}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* ---------------- STEP 2: FIELD ---------------- */}
-          {step === 2 && (
-            <div className="mx-auto max-w-2xl">
-              <SectionHeading
-                title="What field are you focused on?"
-                subtitle="This decides which assessments and recommendations you'll see — you can change it later."
-              />
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {FIELDS.map((f) => (
-                  <SelectableCard
-                    key={f}
-                    icon={FIELD_ICONS[f]}
-                    title={f}
-                    selected={field === f}
-                    onSelect={() => setField(f)}
-                  />
-                ))}
-              </div>
-
-              <StepNav onBack={goBack} onNext={goNext} showBack nextDisabled={!field} />
-            </div>
-          )}
-
-          {/* ---------------- STEP 3: CURRENT LEVEL ---------------- */}
-          {step === 3 && (
-            <div className="mx-auto max-w-2xl">
-              <SectionHeading
-                title="Where are you right now?"
-                subtitle="Be honest — this just helps us pace things correctly."
-              />
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                {LEVEL_OPTIONS.map((option) => (
-                  <SelectableCard
-                    key={option.title}
-                    title={option.title}
-                    description={option.description}
-                    selected={level === option.title}
-                    onSelect={() => setLevel(option.title)}
-                  />
-                ))}
-              </div>
-
-              <StepNav onBack={goBack} onNext={goNext} showBack nextDisabled={!level} />
-            </div>
-          )}
-
-          {/* ---------------- STEP 4: CAREER GOAL ---------------- */}
-          {step === 4 && (
-            <div className="mx-auto max-w-2xl">
-              <SectionHeading
-                title={`What's your career goal in ${field}?`}
-                subtitle="This shapes the roadmap and recommendations we build for you."
-              />
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {careerGoalOptions.map((option) => (
-                  <SelectableCard
-                    key={option}
-                    title={option}
-                    selected={careerGoal === option}
-                    onSelect={() => setCareerGoal(option)}
-                  />
-                ))}
-                {careerGoalOptions.length === 0 && (
-                  <p className="col-span-full text-sm text-[var(--color-text-muted)]">
-                    Go back and pick a field first to see relevant goals here.
-                  </p>
-                )}
-              </div>
-
-              <StepNav
-                onBack={goBack}
-                onNext={goNext}
-                showBack
-                nextLabel="Finish →"
-                nextDisabled={!careerGoal}
-              />
-            </div>
-          )}
-
-          {/* ---------------- FINAL SCREEN ---------------- */}
-          {step === 5 && (
-            <div className="mx-auto flex max-w-lg flex-col items-center gap-6 text-center">
-              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-primary-50)] text-3xl">
-                ✓
+    <Section className="py-16 flex-1 bg-[#FBF8F0]">
+      <Container>
+        {/* Progress indicator */}
+        {step >= 1 && step <= TOTAL_STEPS && (
+          <div className="mx-auto mb-12 max-w-xl">
+            <div className="mb-2 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]" style={{ fontFamily: "var(--font-mono)" }}>
+              <span>
+                Step {step} of {TOTAL_STEPS}
               </span>
-              <h1 className="text-4xl font-bold tracking-tight text-[var(--color-text-h)] sm:text-5xl">
-                You're all set!
+              <span>{Math.round((step / TOTAL_STEPS) * 100)}% Completed</span>
+            </div>
+            <div className="flex gap-1.5">
+              {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`h-2 flex-1 rounded-full transition-all duration-300 ${
+                    i < step ? "bg-[#1B332C]" : "bg-[#2E4F42]/15"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ---------------- STEP 1: WELCOME ---------------- */}
+        {step === 1 && (
+          <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-14">
+            <div className="flex flex-col items-start gap-5 text-left">
+              <span className="inline-flex items-center gap-2 rounded-full border border-[#2E4F42]/20 bg-white px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-[#C4952A]" style={{ fontFamily: "var(--font-mono)" }}>
+                ✨ AI-POWERED ONBOARDING
+              </span>
+              <h1 className="max-w-lg text-4xl font-bold tracking-tight text-[#1B332C] sm:text-5xl" style={{ fontFamily: "var(--font-display)" }}>
+                Welcome to your AI Learning Observatory
               </h1>
               <p className="max-w-md text-lg leading-relaxed text-[var(--color-text-muted)]">
-                Your personalized learning journey is ready. Let's see
-                where you can go.
+                Let's personalize your learning path and target skills to help you track your progress accurately.
               </p>
-              <Button as="a" href="/assessment" size="lg" className="mt-2">
-                Start Learning →
+              <Button size="lg" onClick={goNext} className="mt-2 shadow-md">
+                Get Started →
               </Button>
             </div>
-          )}
-        </Container>
-      </Section>
-    </>
+
+            <div className="mx-auto w-full max-w-sm">
+              <ImageCard
+                image={WELCOME_ILLUSTRATION}
+                alt="AI Learning illustration"
+                title="Personalized Skill Pathways"
+                description="Your selected target field shapes mock assessments and gap analysis."
+                hoverable={false}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* ---------------- STEP 2: FIELD SELECTION ---------------- */}
+        {step === 2 && (
+          <div className="mx-auto max-w-2xl">
+            <SectionHeading
+              title="What field are you focused on?"
+              subtitle="Choose your primary career domain. Note: Your selected field is saved permanently to your profile."
+            />
+
+            {isFieldLocked && (
+              <div className="mb-6 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 shadow-sm flex items-center gap-3">
+                <span className="text-xl">🔒</span>
+                <div>
+                  <p className="font-bold">Target Field Locked</p>
+                  <p className="text-xs text-amber-800">
+                    Your target domain is permanently set to <strong>{field}</strong>.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {FIELDS.map((f) => (
+                <SelectableCard
+                  key={f}
+                  icon={FIELD_ICONS[f]}
+                  title={f}
+                  selected={field === f}
+                  disabled={isFieldLocked && field !== f}
+                  onSelect={() => {
+                    if (!isFieldLocked) {
+                      setField(f);
+                    }
+                  }}
+                />
+              ))}
+            </div>
+
+            <StepNav onBack={goBack} onNext={goNext} showBack={!isFieldLocked} nextDisabled={!field} />
+          </div>
+        )}
+
+        {/* ---------------- STEP 3: CURRENT LEVEL ---------------- */}
+        {step === 3 && (
+          <div className="mx-auto max-w-2xl">
+            <SectionHeading
+              title="Where are you right now?"
+              subtitle={`Assess your current skill level in ${field || "your target field"}.`}
+            />
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              {LEVEL_OPTIONS.map((option) => (
+                <SelectableCard
+                  key={option.title}
+                  title={option.title}
+                  description={option.description}
+                  selected={level === option.title}
+                  onSelect={() => setLevel(option.title)}
+                />
+              ))}
+            </div>
+
+            <StepNav onBack={goBack} onNext={goNext} showBack={!isFieldLocked} nextDisabled={!level} />
+          </div>
+        )}
+
+        {/* ---------------- STEP 4: CAREER GOAL ---------------- */}
+        {step === 4 && (
+          <div className="mx-auto max-w-2xl">
+            <SectionHeading
+              title={`What's your career goal in ${field}?`}
+              subtitle="Select the target role you want to prepare for."
+            />
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {careerGoalOptions.map((option) => (
+                <SelectableCard
+                  key={option}
+                  title={option}
+                  selected={careerGoal === option}
+                  onSelect={() => setCareerGoal(option)}
+                />
+              ))}
+              {careerGoalOptions.length === 0 && (
+                <p className="col-span-full text-sm text-[var(--color-text-muted)]">
+                  Please go back and select a field first.
+                </p>
+              )}
+            </div>
+
+            <StepNav
+              onBack={goBack}
+              onNext={goNext}
+              showBack
+              nextLabel="Continue →"
+              nextDisabled={!careerGoal}
+            />
+          </div>
+        )}
+
+        {/* ---------------- STEP 5: FINAL MOTIVATIONAL SCREEN ---------------- */}
+        {step === 5 && (
+          <div className="mx-auto flex max-w-lg flex-col items-center gap-6 text-center">
+            <span className="flex h-20 w-20 items-center justify-center rounded-full bg-[#1B332C] text-4xl text-[#E8C547] shadow-lg">
+              ✓
+            </span>
+            <h1 className="text-4xl font-bold tracking-tight text-[#1B332C] sm:text-5xl" style={{ fontFamily: "var(--font-display)" }}>
+              You're all set!
+            </h1>
+            <p className="max-w-md text-lg leading-relaxed text-[var(--color-text-muted)]">
+              Your personalized AI learning path for <strong className="text-[#1B332C]">{field}</strong> is ready. Time to evaluate your skills.
+            </p>
+
+            {error && (
+              <div className="w-full rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-700">
+                {error}
+              </div>
+            )}
+
+            <Button
+              size="lg"
+              onClick={handleStartLearning}
+              disabled={saving}
+              className="mt-2 w-full max-w-xs shadow-lg text-base py-3.5"
+            >
+              {saving ? "Saving Onboarding..." : "Start Learning →"}
+            </Button>
+          </div>
+        )}
+      </Container>
+    </Section>
   );
 }
 
-/* ---------------- Local helpers (kept in this file, not new component files) ---------------- */
+/* ---------------- Local helpers ---------------- */
 
-function SelectableCard({ icon, title, description, selected, onSelect }) {
+function SelectableCard({ icon, title, description, selected, disabled, onSelect }) {
   return (
     <button
       type="button"
       onClick={onSelect}
+      disabled={disabled}
       aria-pressed={selected}
-      className="text-left transition-transform duration-150 focus:outline-none"
+      className={`text-left transition-all duration-150 focus:outline-none ${
+        disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"
+      }`}
     >
-      {/*
-        Selection styling lives on this wrapper div instead of being
-        passed into <Card> via className. Card renders its own default
-        border/background classes internally, and depending on how
-        Tailwind orders utilities in the final stylesheet, those
-        defaults can visually win over classes passed in from outside —
-        which is why the highlight wasn't showing. Applying the ring +
-        background here guarantees it always renders on top.
-      */}
       <div
-        className={`relative rounded-2xl transition-all duration-150 ${selected
-            ? "ring-2 ring-[var(--color-primary-600)] ring-offset-2 ring-offset-[var(--color-bg,transparent)] bg-[var(--color-primary-50)] shadow-[var(--shadow-card-hover)] scale-[1.01]"
-            : ""
-          }`}
+        className={`relative rounded-2xl transition-all duration-150 ${
+          selected
+            ? "ring-2 ring-[#1B332C] ring-offset-2 bg-white shadow-md scale-[1.01]"
+            : "border border-[#2E4F42]/15 bg-white hover:border-[#1B332C]/40"
+        }`}
       >
         {selected && (
-          <span className="absolute -top-2 -right-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-primary-600)] text-xs font-bold text-white shadow-sm">
+          <span className="absolute -top-2 -right-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-[#1B332C] text-xs font-bold text-[#E8C547] shadow-sm">
             ✓
           </span>
         )}
         <Card
           icon={
             icon ? (
-              <span className="text-lg font-bold text-[var(--color-primary-600)]">
+              <span className="text-lg font-bold text-[#1B332C]">
                 {icon}
               </span>
             ) : undefined
           }
           title={title}
-          hoverable={!selected}
-          className={selected ? "border-transparent bg-transparent" : "border-[var(--color-border)]"}
+          hoverable={!selected && !disabled}
+          className="border-transparent bg-transparent"
         >
           {description}
         </Card>

@@ -25,6 +25,9 @@ const formatUserResponse = (user) => ({
   name: user.name,
   email: user.email,
   role: user.role,
+  onboardingCompleted: !!user.onboardingCompleted,
+  selectedField: user.selectedField || "",
+  onboardingProfile: user.onboardingProfile || null,
 });
 
 const RESET_LINK_LIFETIME_MS = 15 * 60 * 1000;
@@ -77,12 +80,14 @@ export async function register(req, res) {
 
     const passwordHash = await User.hashPassword(password);
 
-    // CRITICAL: Force role to 'student'. Never trust client-supplied role.
+    // CRITICAL: Force role to 'student'. Onboarding is incomplete for new registrants.
     const newUser = await User.create({
       name: name.trim(),
       email: email.toLowerCase().trim(),
       passwordHash,
       role: "student",
+      onboardingCompleted: false,
+      selectedField: "",
     });
 
     const token = generateToken(newUser._id, newUser.role);
@@ -111,7 +116,6 @@ export async function register(req, res) {
 /**
  * Shared Login Endpoint:
  * POST /api/auth/login
- * Used by both students and administrators.
  */
 export async function login(req, res) {
   try {
@@ -166,7 +170,6 @@ export async function login(req, res) {
 /**
  * Logout Endpoint:
  * POST /api/auth/logout
- * Clears HTTP-only authentication cookie.
  */
 export async function logout(req, res) {
   res.clearCookie("token", getCookieOptions());
@@ -177,8 +180,52 @@ export async function logout(req, res) {
 }
 
 /**
+ * Complete Onboarding Endpoint:
+ * PUT /api/auth/onboarding
+ * Saves field selection (only once) and marks onboardingCompleted = true permanently.
+ */
+export async function completeOnboarding(req, res) {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: "Not authenticated." });
+    }
+
+    const { field, careerGoal, level } = req.body;
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found." });
+    }
+
+    // Rule 2: Choose career field ONLY ONCE. If field is already set in DB, prevent overwriting.
+    if (!user.selectedField && field) {
+      user.selectedField = String(field).trim();
+    }
+
+    user.onboardingCompleted = true;
+    user.onboardingProfile = {
+      field: user.selectedField || field || "",
+      careerGoal: careerGoal || user.selectedField || "",
+      level: level || "Intermediate",
+    };
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Onboarding completed successfully.",
+      user: formatUserResponse(user),
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to save onboarding completion.",
+    });
+  }
+}
+
+/**
  * POST /api/auth/forgot-password
- * Sends a short-lived, single-use password-reset link when the account exists.
  */
 export async function forgotPassword(req, res) {
   try {
@@ -221,7 +268,7 @@ export async function forgotPassword(req, res) {
         to: user.email,
         subject: "Reset your AIFINITY password",
         text: `You requested a password reset. Open this link within 15 minutes: ${resetUrl}`,
-        html: `<p>You requested a password reset for your AIFINITY account.</p><p><a href="${resetUrl}">Click here to reset your password</a></p><p>This link expires in 15 minutes. If you did not request this, you can ignore this email.</p>`,
+        html: `<p>You requested a password reset for your AIFINITY account.</p><p><a href="${resetUrl}">Click here to reset your password</a></p><p>This link expires in 15 minutes.</p>`,
       });
     } catch (mailError) {
       console.error("Mail send error:", mailError.message);
@@ -239,7 +286,6 @@ export async function forgotPassword(req, res) {
 
 /**
  * POST /api/auth/reset-password/:token
- * Replaces the password only when a valid, unexpired reset token is supplied.
  */
 export async function resetPassword(req, res) {
   try {
@@ -272,7 +318,6 @@ export async function resetPassword(req, res) {
 /**
  * Current User Endpoint:
  * GET /api/auth/me
- * Returns currently authenticated user details.
  */
 export async function getMe(req, res) {
   if (!req.user) {
