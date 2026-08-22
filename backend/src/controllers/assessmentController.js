@@ -99,11 +99,14 @@ export async function submitAttempt(req, res) {
   const gradableQuestions = rawQuestions.filter((q) => GRADABLE_TYPES.includes(q.type));
 
   let correctCount = 0;
+  let attemptedGradableCount = 0;
 
   gradableQuestions.forEach((q) => {
     const qId = String(q._id);
     const userResp = responses ? responses[qId] : undefined;
     if (userResp === undefined || userResp === null || userResp === "") return;
+
+    attemptedGradableCount++;
 
     if (session && session.answersMap.has(qId)) {
       const sessionQ = session.answersMap.get(qId);
@@ -142,6 +145,13 @@ export async function submitAttempt(req, res) {
     }
   });
 
+  const incorrectCount = attemptedGradableCount - correctCount;
+  const unansweredCount = gradableQuestions.length - attemptedGradableCount;
+  const totalQuestions = rawQuestions.length;
+  const attemptedCount = Object.keys(responses || {}).length;
+  const unansweredTotalCount = totalQuestions - attemptedCount;
+
+  // Score based on gradable questions only (consistent with existing logic)
   const scorePercent = gradableQuestions.length
     ? Math.round((correctCount / gradableQuestions.length) * 100)
     : 0;
@@ -174,9 +184,14 @@ export async function submitAttempt(req, res) {
   res.json({
     success: true,
     scorePercent,
+    totalQuestions,
+    attemptedCount,
     correctCount,
+    incorrectCount,
+    unansweredCount,
+    unansweredTotalCount,
     gradableCount: gradableQuestions.length,
-    answeredCount: Object.keys(responses || {}).length,
+    attemptedGradableCount,
     elapsedSeconds,
     violationsCount: violations.length,
     violations,
