@@ -22,6 +22,7 @@ import OnboardingPage from './pages/OnboardingPage';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Faq from './pages/Faq';
+import PersonalIntelligence from './pages/PersonalIntelligence';
 
 // Student Auth Guard
 import StudentAuthGuard from './components/StudentAuthGuard';
@@ -135,6 +136,15 @@ function App() {
               element={
                 <StudentAuthGuard requireOnboardingCompleted>
                   <DashboardMetricPage />
+                </StudentAuthGuard>
+              }
+            />
+
+            <Route
+              path="/personal-intelligence"
+              element={
+                <StudentAuthGuard requireOnboardingCompleted>
+                  <PersonalIntelligence />
                 </StudentAuthGuard>
               }
             />

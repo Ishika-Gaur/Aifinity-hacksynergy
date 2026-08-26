@@ -8,6 +8,7 @@ import adminRoutes from "./routes/adminRoutes.js";
 import assessmentRoutes from "./routes/assessmentRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
+import personalIntelligenceRoutes from "./routes/personalIntelligenceRoutes.js";
 import { authenticate, isAdmin } from "./middleware/authMiddleware.js";
 
 dotenv.config();
@@ -34,6 +35,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/assessments", assessmentRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/personal-intelligence", personalIntelligenceRoutes);
 
 // Protected Admin Test Route
 app.get("/api/admin/test", authenticate, isAdmin, (req, res) => {
