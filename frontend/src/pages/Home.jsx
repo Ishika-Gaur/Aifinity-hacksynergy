@@ -28,10 +28,12 @@ function ArrowRightIcon({ className = "w-4 h-4" }) {
 /* =========================================================
    PAGE DATA
 ========================================================= */
-const FEATURES = [
-  { eyebrow: "01", title: "Concept Root", description: "Break every topic down to its fundamental building blocks. Instantly pinpoint missing prerequisites before moving ahead.", href: "/concept-root", tag: "Prerequisite Intelligence" },
-  { eyebrow: "02", title: "Mistake Map", description: "Every wrong answer is automatically mapped to the underlying concept error, transforming mistakes into actionable fixes.", href: "/mistake-map", tag: "Error Pattern Tracking" },
-  { eyebrow: "03", title: "Skill Gap", description: "Measure the exact distance between your current capability and target career standards — ranked by priority.", href: "/skill-gap", tag: "Job Readiness Scoring" },
+const AIFINITY_MODULES = [
+  { eyebrow: "01", title: "ConceptRoot AI", description: "Identifies weak concepts and provides personalized concept explanations.", href: "/concept-root", tag: "Prerequisite Intelligence" },
+  { eyebrow: "02", title: "MistakeMap AI", description: "Analyzes assessment mistakes and identifies recurring error patterns.", href: "/mistake-map", tag: "Error Pattern Tracking" },
+  { eyebrow: "03", title: "SkillGap AI", description: "Compares assessment performance with required skills and identifies skill gaps.", href: "/skill-gap", tag: "Job Readiness Scoring" },
+  { eyebrow: "04", title: "Personalized Roadmap", description: "Dynamically generates a learning path based on your assessment, weaknesses, skills, and goals.", href: "/roadmap", tag: "Dynamic Pathing" },
+  { eyebrow: "05", title: "AI Learning Dashboard", description: "Brings progress, assessment insights, skill gaps, mistakes, and roadmap progress together.", href: "/dashboard", tag: "Unified View" },
 ];
 
 const STEPS = [
@@ -71,37 +73,152 @@ export default function Home() {
       />
 
       {/* =========================================================
-         THREE CORE TOOLS (FEATURES) SECTION
+         PLATFORM ARCHITECTURE / OVERVIEW
       ========================================================= */}
       <Section>
         <SectionHeading
-          eyebrow="THREE ESSENTIAL TOOLS"
-          title="One clear picture of your progress"
-          subtitle="Everything is connected to your actual empirical test results — not arbitrary assumptions."
+          eyebrow="PLATFORM ARCHITECTURE"
+          title="One Unified Intelligent Learning Platform"
+          subtitle="Watch how your initial assessment is transformed into a highly personalized learning experience through our 5 core AI modules."
         />
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURES.map((feature) => (
-            <Card
-              key={feature.title}
-              icon={<span style={{ fontFamily: "var(--font-mono)" }} className="text-lg font-bold">{feature.eyebrow}</span>}
-              eyebrow={feature.tag}
-              title={feature.title}
-              footer={
-                <Button
-                  as="a"
-                  href={feature.href}
-                  variant="ghost"
-                  size="sm"
-                  icon={<ArrowRightIcon className="w-4 h-4 transition-transform group-hover:translate-x-1" />}
-                >
-                  Explore {feature.title}
-                </Button>
-              }
+        <div className="mx-auto mt-12 max-w-7xl">
+          {/* TOP PIPELINE: Assessment -> AI Analysis -> Personalized Intelligence */}
+          <div className="flex flex-col items-center justify-center gap-4 lg:flex-row lg:gap-8">
+            {/* 1. Assessment */}
+            <div className="flex w-64 flex-col items-center text-center">
+              <div
+                className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border shadow-sm"
+                style={{ borderColor: "var(--color-border)", background: "var(--color-surface)" }}
+              >
+                <svg className="h-8 w-8" style={{ color: "var(--color-text-muted)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
+              </div>
+              <h4 className="text-base font-bold" style={{ color: "var(--color-text-h)" }}>Assessment</h4>
+              <p className="mt-1 text-xs" style={{ color: "var(--color-text-muted)" }}>Raw knowledge capture</p>
+            </div>
+
+            <ArrowRightIcon className="hidden h-6 w-6 lg:block" style={{ color: "var(--color-border-strong)" }} />
+            <div className="block lg:hidden my-2">
+              <svg className="h-6 w-6 rotate-90" style={{ color: "var(--color-border-strong)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </div>
+
+            {/* 2. AI Analysis */}
+            <div className="flex w-64 flex-col items-center text-center">
+              <div
+                className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border shadow-sm"
+                style={{ borderColor: "var(--color-border)", background: "var(--color-surface)" }}
+              >
+                <svg className="h-8 w-8" style={{ color: "var(--color-primary-600)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m14-6h2m-2 6h2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                </svg>
+              </div>
+              <h4 className="text-base font-bold" style={{ color: "var(--color-text-h)" }}>AI Analysis</h4>
+              <p className="mt-1 text-xs" style={{ color: "var(--color-text-muted)" }}>Cognitive profiling & mapping</p>
+            </div>
+
+            <ArrowRightIcon className="hidden h-6 w-6 lg:block" style={{ color: "var(--color-border-strong)" }} />
+            <div className="block lg:hidden my-2">
+              <svg className="h-6 w-6 rotate-90" style={{ color: "var(--color-border-strong)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </div>
+
+            {/* 3. Personalized Intelligence */}
+            <div className="flex w-64 flex-col items-center text-center">
+              <div
+                className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border shadow-sm"
+                style={{ borderColor: "var(--color-primary-600)", background: "var(--color-primary-50)" }}
+              >
+                <SparklesIcon className="h-8 w-8" style={{ color: "var(--color-primary-700)" }} />
+              </div>
+              <h4 className="text-base font-bold" style={{ color: "var(--color-primary-700)" }}>Personalized Intelligence</h4>
+              <p className="mt-1 text-xs" style={{ color: "var(--color-primary-600)" }}>The engine for our modules</p>
+            </div>
+          </div>
+
+          {/* BRANCHING CONNECTOR */}
+          <div className="my-8 hidden flex-col items-center lg:flex">
+            <div className="h-8 w-px" style={{ background: "var(--color-border-strong)" }}></div>
+            <div className="h-px w-full max-w-[80%]" style={{ background: "var(--color-border-strong)" }}></div>
+            <div className="flex w-full max-w-[80%] justify-between">
+              <div className="h-8 w-px" style={{ background: "var(--color-border-strong)" }}></div>
+              <div className="h-8 w-px" style={{ background: "var(--color-border-strong)" }}></div>
+              <div className="h-8 w-px" style={{ background: "var(--color-border-strong)" }}></div>
+              <div className="h-8 w-px" style={{ background: "var(--color-border-strong)" }}></div>
+              <div className="h-8 w-px" style={{ background: "var(--color-border-strong)" }}></div>
+            </div>
+          </div>
+          
+          <div className="my-8 flex justify-center lg:hidden">
+            <div className="h-12 w-px" style={{ background: "var(--color-border-strong)" }}></div>
+          </div>
+
+          {/* 4. THE 5 AIFINITY MODULES */}
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
+            {AIFINITY_MODULES.map((mod) => (
+              <Card
+                key={mod.title}
+                icon={<span style={{ fontFamily: "var(--font-mono)" }} className="text-lg font-bold">{mod.eyebrow}</span>}
+                eyebrow={mod.tag}
+                title={mod.title}
+                footer={
+                  <Button
+                    as="a"
+                    href={mod.href}
+                    variant="ghost"
+                    size="sm"
+                    icon={<ArrowRightIcon className="w-4 h-4 transition-transform group-hover:translate-x-1" />}
+                  >
+                    Explore
+                  </Button>
+                }
+              >
+                {mod.description}
+              </Card>
+            ))}
+          </div>
+
+          {/* CONVERGING CONNECTOR */}
+          <div className="my-8 hidden flex-col items-center lg:flex">
+            <div className="flex w-full max-w-[80%] justify-between">
+              <div className="h-8 w-px" style={{ background: "var(--color-border-strong)" }}></div>
+              <div className="h-8 w-px" style={{ background: "var(--color-border-strong)" }}></div>
+              <div className="h-8 w-px" style={{ background: "var(--color-border-strong)" }}></div>
+              <div className="h-8 w-px" style={{ background: "var(--color-border-strong)" }}></div>
+              <div className="h-8 w-px" style={{ background: "var(--color-border-strong)" }}></div>
+            </div>
+            <div className="h-px w-full max-w-[80%]" style={{ background: "var(--color-border-strong)" }}></div>
+            <div className="h-8 w-px" style={{ background: "var(--color-border-strong)" }}></div>
+          </div>
+
+          <div className="my-8 flex justify-center lg:hidden">
+            <div className="h-12 w-px" style={{ background: "var(--color-border-strong)" }}></div>
+          </div>
+
+          {/* 5. PERSONALIZED LEARNING JOURNEY */}
+          <div className="flex justify-center">
+            <div
+              className="flex w-full max-w-md flex-col items-center justify-center rounded-3xl border px-8 py-6 text-center shadow-sm transition-transform hover:scale-105"
+              style={{ borderColor: "var(--color-primary-600)", background: "var(--color-surface)", boxShadow: "0 10px 30px -10px rgba(0,0,0,0.1)" }}
             >
-              {feature.description}
-            </Card>
-          ))}
+              <span
+                className="mb-3 inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide"
+                style={{ background: "var(--color-primary-50)", color: "var(--color-primary-700)", fontFamily: "var(--font-mono)" }}
+              >
+                The Outcome
+              </span>
+              <h3 className="text-2xl font-bold" style={{ color: "var(--color-text-h)", fontFamily: "var(--font-display)" }}>
+                Personalized Learning Journey
+              </h3>
+              <p className="mt-2 text-sm" style={{ color: "var(--color-text-muted)" }}>
+                A dynamically generated path leading directly to your career goals.
+              </p>
+            </div>
+          </div>
         </div>
       </Section>
 

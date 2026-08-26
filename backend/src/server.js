@@ -7,6 +7,8 @@ import authRoutes from "./routes/authRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import assessmentRoutes from "./routes/assessmentRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
+import analyticsRoutes from "./routes/analyticsRoutes.js";
+import personalIntelligenceRoutes from "./routes/personalIntelligenceRoutes.js";
 import conceptRootRoutes from "./routes/conceptRootRoutes.js";
 import mistakeMapRoutes from "./routes/mistakeMapRoutes.js";
 import skillGapRoutes from "./routes/skillGapRoutes.js";
@@ -36,6 +38,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/assessments", assessmentRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/analytics", analyticsRoutes);
+app.use("/api/personal-intelligence", personalIntelligenceRoutes);
 app.use("/api/concept-root", conceptRootRoutes);
 app.use("/api/mistake-map", mistakeMapRoutes);
 app.use("/api/skill-gap", skillGapRoutes);
@@ -91,7 +95,7 @@ export async function startServer() {
   }
 }
 
-if (process.env.NODE_ENV !== "test" && import.meta.url === `file:///${process.argv[1].replace(/\\/g, "/")}`) {
+if (process.env.NODE_ENV !== "test") {
   startServer();
 }
 

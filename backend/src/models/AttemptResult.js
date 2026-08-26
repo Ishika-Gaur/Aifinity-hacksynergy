@@ -3,9 +3,23 @@ import mongoose from "mongoose";
 /**
  * AttemptResult
  * Persists every completed assessment submission for a user.
- * This is the source of truth for all dashboard analytics
- * (progress charts, assessment count, mistakeMap, skillGap, etc.).
+ * This is the single source of truth for all dynamic AI modules & analytics
+ * (SkillGap, MistakeMap, ConceptRoot, Roadmap, Dashboard).
  */
+const questionResultSchema = new mongoose.Schema({
+  questionId: { type: String, required: true },
+  questionText: { type: String, required: true },
+  type: { type: String, default: "mcq" },
+  userAnswer: { type: String, default: null },
+  correctAnswer: { type: String, default: "" },
+  status: { type: String, enum: ["correct", "partial", "incorrect", "unanswered"], default: "incorrect" },
+  isCorrect: { type: Boolean, default: false },
+  marksAwarded: { type: Number, default: 0 },
+  maxMarks: { type: Number, default: 10 },
+  explanation: { type: String, default: "" },
+  concept: { type: String, default: "" },
+});
+
 const attemptResultSchema = new mongoose.Schema(
   {
     userId: {
@@ -17,7 +31,7 @@ const attemptResultSchema = new mongoose.Schema(
     assessmentId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Assessment",
-      required: true,
+      required: false,
     },
     assessmentTitle: {
       type: String,
@@ -40,15 +54,32 @@ const attemptResultSchema = new mongoose.Schema(
       min: 0,
       max: 100,
     },
+    totalScore: {
+      type: Number,
+      default: 0,
+    },
+    maxScore: {
+      type: Number,
+      default: 0,
+    },
     correctCount: {
       type: Number,
-      required: true,
+      default: 0,
+      min: 0,
+    },
+    incorrectCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    unansweredCount: {
+      type: Number,
+      default: 0,
       min: 0,
     },
     gradableCount: {
       type: Number,
-      required: true,
-      min: 0,
+      default: 0,
     },
     totalQuestions: {
       type: Number,
@@ -59,6 +90,7 @@ const attemptResultSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    questionResults: [questionResultSchema],
     completedAt: {
       type: Date,
       default: Date.now,
