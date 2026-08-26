@@ -230,6 +230,9 @@ export default function AssessmentAttemptPage() {
     if (res.success) {
       setAssessment(res.assessment);
       setAttemptId(res.attemptId);
+      if (typeof window !== "undefined" && window.sessionStorage) {
+        window.sessionStorage.setItem(`aifinity_active_attempt_${id}`, "true");
+      }
     } else {
       setAssessment(null);
     }
@@ -266,6 +269,10 @@ export default function AssessmentAttemptPage() {
 
       if (document.fullscreenElement) {
         document.exitFullscreen().catch(() => {});
+      }
+
+      if (typeof window !== "undefined" && window.sessionStorage) {
+        window.sessionStorage.removeItem(`aifinity_active_attempt_${id}`);
       }
 
       setResultData(result);
@@ -458,7 +465,18 @@ export default function AssessmentAttemptPage() {
 
   /* ---------------- RESULTS VIEW ---------------- */
   if (completed && resultData) {
-    const { scorePercent, correctCount, gradableCount, autoSubmitted } = resultData;
+    const {
+      scorePercent,
+      totalQuestions,
+      attemptedCount,
+      correctCount,
+      incorrectCount,
+      unansweredCount,
+      unansweredTotalCount,
+      gradableCount,
+      attemptedGradableCount,
+      autoSubmitted,
+    } = resultData;
 
     return (
       <Section className="py-16 bg-[#FBF8F0] min-h-screen">
@@ -487,9 +505,42 @@ export default function AssessmentAttemptPage() {
 
             <div className="mt-2 grid w-full grid-cols-2 gap-4 sm:grid-cols-4">
               <StatBlock label="Score" value={`${scorePercent}%`} />
-              <StatBlock label="Attempted" value={`${answeredCount}/${questions.length}`} />
-              <StatBlock label="Correct" value={`${correctCount}/${gradableCount}`} />
+              <StatBlock label="Attempted" value={`${attemptedCount}/${totalQuestions}`} />
+              <StatBlock label="Correct" value={`${correctCount}/${attemptedCount}`} />
               <StatBlock label="Time Taken" value={formatTime(elapsedSeconds)} />
+            </div>
+
+            {/* Result Breakdown */}
+            <div className="w-full text-left rounded-xl border border-[var(--color-border)] bg-white p-4">
+              <p className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-3">
+                Result Breakdown
+              </p>
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-[var(--color-text-muted)]">Total Questions</span>
+                  <span className="font-semibold text-[var(--color-text-h)]">{totalQuestions}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[var(--color-text-muted)]">Attempted</span>
+                  <span className="font-semibold text-[var(--color-text-h)]">{attemptedCount}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[var(--color-text-muted)]">Correct</span>
+                  <span className="font-semibold text-green-600">{correctCount}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[var(--color-text-muted)]">Incorrect</span>
+                  <span className="font-semibold text-red-600">{incorrectCount}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[var(--color-text-muted)]">Unanswered (Gradable)</span>
+                  <span className="font-semibold text-amber-600">{unansweredCount}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[var(--color-text-muted)]">Unanswered (Total)</span>
+                  <span className="font-semibold text-[var(--color-text-muted)]">{unansweredTotalCount}</span>
+                </div>
+              </div>
             </div>
 
             {/* Violation History Summary */}

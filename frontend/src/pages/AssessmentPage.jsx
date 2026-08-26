@@ -3,14 +3,14 @@ import { Link } from "react-router-dom";
 import Section from "../components/Section";
 import SectionHeading from "../components/SectionHeading";
 import Button from "../components/Button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   TYPE_FILTERS,
   DIFFICULTY_FILTERS,
   getUserProfile,
   formatType,
 } from "../data/assessments";
-import { assessmentApi } from "../services/api";
+import { assessmentApi, dashboardApi } from "../services/api";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -155,45 +155,52 @@ function SidebarNav({ active, open, onToggle }) {
   );
 }
 
-/* ---------------- Hero signature visual: one clean skill-score ring ----------------
-   Deliberately minimal — a single ring is the "characteristic thing" for an
-   assessment tool (a score), so it carries the whole visual instead of
-   stacking a card, a question, options, a meter, and a floating pill. */
-function AssessmentHeroVisual({ className = "" }) {
-  const pct = 88;
-  const circumference = 2 * Math.PI * 54;
-  const dash = (pct / 100) * circumference;
+/* ---------------- Assessment Progress Card ----------------
+   Replaces the hardcoded 88% Mastery Skill Snapshot visual with real,
+   data-driven user metrics from the backend. */
+function AssessmentProgressCard({ completedCount, availableCount, inProgressCount, loading, className = "" }) {
+  const hasCompleted = completedCount > 0;
 
   return (
     <div
-      className={`relative flex flex-col items-center gap-4 rounded-2xl border border-[#2E4F42]/15 bg-[#FBF8F0] px-8 py-9 text-center shadow-[var(--shadow-card)] ${className}`}
+      className={`relative flex flex-col items-center gap-5 rounded-2xl border border-[#2E4F42]/15 bg-[#FBF8F0] px-6 py-7 text-center shadow-[var(--shadow-card)] ${className}`}
     >
       <span className="font-['Space_Mono'] text-[10px] font-bold uppercase tracking-[0.15em] text-[#C4952A]">
-        Skill Snapshot
+        Assessment Progress
       </span>
 
-      <div className="relative flex h-32 w-32 items-center justify-center">
-        <svg viewBox="0 0 120 120" className="h-32 w-32 -rotate-90">
-          <circle cx="60" cy="60" r="54" fill="none" stroke="#1B332C1A" strokeWidth="8" />
-          <circle
-            cx="60"
-            cy="60"
-            r="54"
-            fill="none"
-            stroke="#D9A62B"
-            strokeWidth="8"
-            strokeLinecap="round"
-            strokeDasharray={`${dash} ${circumference}`}
-          />
-        </svg>
-        <div className="absolute flex flex-col items-center">
-          <span className="text-3xl font-bold text-[#1B332C]">{pct}%</span>
-          <span className="text-[10px] text-[#5B6B5F]">Mastery</span>
+      <div className="flex flex-col items-center gap-1">
+        <span className="font-['Kalam'] text-4xl sm:text-5xl font-bold text-[#1B332C]">
+          {loading ? "..." : completedCount}
+        </span>
+        <span className="text-xs font-semibold uppercase tracking-wider text-[#5B6B5F]">
+          Assessments Completed
+        </span>
+      </div>
+
+      <div className="grid w-full grid-cols-3 gap-2 border-y border-[#2E4F42]/10 py-4">
+        <div className="flex flex-col items-center rounded-xl bg-[#F1EDE1]/60 p-2.5">
+          <span className="text-xl font-bold text-[#1B332C]">{loading ? "-" : completedCount}</span>
+          <span className="text-[10px] font-medium text-[#5B6B5F]">Completed</span>
+        </div>
+
+        <div className="flex flex-col items-center rounded-xl bg-[#F1EDE1]/60 p-2.5">
+          <span className="text-xl font-bold text-[#1B332C]">{loading ? "-" : availableCount}</span>
+          <span className="text-[10px] font-medium text-[#5B6B5F]">Available</span>
+        </div>
+
+        <div className="flex flex-col items-center rounded-xl bg-[#F1EDE1]/60 p-2.5">
+          <span className={`text-xl font-bold ${inProgressCount > 0 ? "text-[#C4952A]" : "text-[#1B332C]"}`}>
+            {loading ? "-" : inProgressCount}
+          </span>
+          <span className="text-[10px] font-medium text-[#5B6B5F]">In Progress</span>
         </div>
       </div>
 
-      <p className="max-w-[220px] text-sm text-[#24413A]">
-        Your average score across completed assessments this month.
+      <p className="max-w-[260px] text-xs leading-relaxed text-[#24413A]">
+        {!hasCompleted
+          ? "Complete an assessment to see your skill insights."
+          : `Great progress! You have completed ${completedCount} unique assessment${completedCount === 1 ? "" : "s"}.`}
       </p>
     </div>
   );
@@ -365,102 +372,223 @@ function FlameIcon({ className }) {
 
 /* ---------------- Right sidebar: streak calendar + stats ---------------- */
 
-function StreakSidebar({ profile, dailyAssessments, completedDays }) {
-  const now = new Date();
-  const monthLabel = `${MONTH_LABELS[now.getMonth()]} ${now.getFullYear()}`;
-  const firstWeekdayOffset = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
+/* ---------------- Right sidebar: dynamic streak calendar + stats ---------------- */
 
+function StreakSidebar({ profile, attempts = [] }) {
+  const [viewDate, setViewDate] = useState(() => new Date());
+  const now = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, []);
+
+  const viewYear = viewDate.getFullYear();
+  const viewMonth = viewDate.getMonth();
+  const monthLabel = `${MONTH_LABELS[viewMonth]} ${viewYear}`;
+
+  const daysInViewMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const firstWeekdayOffset = new Date(viewYear, viewMonth, 1).getDay();
+
+  // Extract set of unique YYYY-MM-DD date strings when user made an attempt
+  const attemptDatesSet = useMemo(() => {
+    const set = new Set();
+    if (!Array.isArray(attempts)) return set;
+    attempts.forEach((a) => {
+      if (!a.completedAt) return;
+      const d = new Date(a.completedAt);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      set.add(key);
+    });
+    return set;
+  }, [attempts]);
+
+  // Compute current active streak (consecutive days with attempts ending today or yesterday)
   const currentStreak = useMemo(() => {
+    if (!attemptDatesSet.size) return 0;
     let streak = 0;
-    for (let i = dailyAssessments.length - 1; i >= 0; i--) {
-      const d = dailyAssessments[i];
-      if (d.status === "Completed") streak++;
-      else if (d.isToday) continue;
-      else break;
+    const checkDate = new Date();
+    checkDate.setHours(0, 0, 0, 0);
+
+    const todayKey = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, "0")}-${String(checkDate.getDate()).padStart(2, "0")}`;
+
+    if (!attemptDatesSet.has(todayKey)) {
+      checkDate.setDate(checkDate.getDate() - 1);
+    }
+
+    while (true) {
+      const key = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, "0")}-${String(checkDate.getDate()).padStart(2, "0")}`;
+      if (attemptDatesSet.has(key)) {
+        streak++;
+        checkDate.setDate(checkDate.getDate() - 1);
+      } else {
+        break;
+      }
     }
     return streak;
-  }, [dailyAssessments]);
+  }, [attemptDatesSet]);
 
-  const completionPct = dailyAssessments.length
-    ? Math.round((completedDays / dailyAssessments.length) * 100)
-    : 0;
+  // Count days in current view month that have at least one attempt
+  const monthAttemptedCount = useMemo(() => {
+    let count = 0;
+    for (let day = 1; day <= daysInViewMonth; day++) {
+      const dateKey = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+      if (attemptDatesSet.has(dateKey)) count++;
+    }
+    return count;
+  }, [viewYear, viewMonth, daysInViewMonth, attemptDatesSet]);
+
+  const handlePrevMonth = () => {
+    setViewDate((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setViewDate((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+  };
+
+  const handleToday = () => {
+    setViewDate(new Date());
+  };
+
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* Streak calendar card */}
-      <div className="p-0">
+    <div className="flex flex-col gap-5">
+      {/* 1. Dynamic Streak & Month Calendar Card */}
+      <div className="rounded-2xl border border-[#2E4F42]/15 bg-[#FBF8F0] p-5 shadow-[var(--shadow-card)]">
+        {/* Header: Flame Icon & Current Streak */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <FlameIcon className="h-5 w-5 text-amber-500" />
-            <span className="text-lg font-bold text-[var(--color-text-h)]">
-              {currentStreak} day{currentStreak === 1 ? "" : "s"}
+            <FlameIcon className="h-5 w-5 text-[#D9A62B]" />
+            <span className="text-lg font-bold text-[#1B332C]">
+              {currentStreak} day{currentStreak === 1 ? "" : "s"} streak
             </span>
           </div>
-          <span className="rounded-full border border-[var(--color-primary-100)] bg-[var(--color-primary-50)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-primary-600)]">
+          <span className="rounded-full border border-[#2E4F42]/15 bg-[#F1EDE1] px-2.5 py-1 text-[11px] font-semibold text-[#1B332C]">
             {profile.field || "Not set"}
           </span>
         </div>
-        <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
-          {monthLabel} · {completedDays}/{dailyAssessments.length} days completed
+
+        {/* Subtitle: Monthly Progress */}
+        <p className="mt-1.5 text-xs font-medium text-[#5B6B5F]">
+          {monthAttemptedCount}/{daysInViewMonth} days attempted this month
         </p>
 
-        {/* Weekday header */}
-        <div className="mt-4 grid grid-cols-7 text-center text-[11px] font-medium text-[var(--color-text-light)]">
+        {/* Month Navigation Bar */}
+        <div className="mt-4 flex items-center justify-between border-t border-[#2E4F42]/10 pt-3">
+          <span className="text-xs font-bold text-[#1B332C]">{monthLabel}</span>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={handlePrevMonth}
+              className="rounded-lg p-1 text-[#5B6B5F] hover:bg-[#EDE6D3] hover:text-[#1B332C] transition-colors"
+              title="Previous Month"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={handleToday}
+              className="rounded-md border border-[#2E4F42]/15 bg-[#F1EDE1] px-2 py-0.5 text-[10px] font-semibold text-[#1B332C] hover:bg-[#EDE6D3] transition-colors"
+            >
+              Today
+            </button>
+            <button
+              type="button"
+              onClick={handleNextMonth}
+              className="rounded-lg p-1 text-[#5B6B5F] hover:bg-[#EDE6D3] hover:text-[#1B332C] transition-colors"
+              title="Next Month"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Weekday Header */}
+        <div className="mt-3 grid grid-cols-7 text-center text-[11px] font-medium text-[#5B6B5F]">
           {WEEKDAY_LABELS.map((d, i) => (
             <span key={i}>{d}</span>
           ))}
         </div>
 
-        {/* Day grid — leading blanks align "Day 1" to its real weekday */}
-        <div className="mt-2 grid grid-cols-7 gap-y-2 text-center">
+        {/* Day Grid */}
+        <div className="mt-2 grid grid-cols-7 gap-1 text-center">
           {Array.from({ length: firstWeekdayOffset }).map((_, i) => (
-            <div key={`pad-${i}`} />
+            <div key={`pad-${i}`} className="h-8 w-8" />
           ))}
-          {dailyAssessments.map((daily) => (
-            <DayCell key={daily.id} daily={daily} />
-          ))}
+
+          {Array.from({ length: daysInViewMonth }).map((_, idx) => {
+            const dayNum = idx + 1;
+            const dateKey = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(dayNum).padStart(2, "0")}`;
+            const cellDate = new Date(viewYear, viewMonth, dayNum);
+            const isTodayCell = dateKey === todayStr;
+            const isPastCell = cellDate < now;
+            const hasAttempt = attemptDatesSet.has(dateKey);
+
+            let cellStyle = "bg-[#1B332C]/10 text-[#1B332C] font-semibold"; // Default Dark Green = Available/Upcoming
+
+            if (hasAttempt) {
+              cellStyle = "bg-emerald-600 text-white font-bold shadow-xs"; // Green = Attempted/Completed
+            } else if (isPastCell) {
+              cellStyle = "bg-rose-100 text-rose-700 font-medium"; // Red = Missed past day
+            }
+
+            return (
+              <div
+                key={dayNum}
+                className={`relative flex h-8 w-8 items-center justify-center rounded-full text-xs transition-colors ${cellStyle} ${
+                  isTodayCell ? "ring-2 ring-[#D9A62B] ring-offset-1 font-bold" : ""
+                }`}
+                title={`${monthLabel} ${dayNum}${hasAttempt ? " - Assessment Attempted" : isPastCell ? " - Missed Day" : ""}`}
+              >
+                {dayNum}
+              </div>
+            );
+          })}
         </div>
 
-        {/* Legend */}
-        <div className="mt-4 flex flex-wrap gap-4 border-t border-[var(--color-border)] pt-3 text-[11px] text-[var(--color-text-muted)]">
-          <span className="flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-primary-600)]" /> Available
+        {/* Color Legend */}
+        <div className="mt-4 flex flex-wrap gap-x-3 gap-y-1.5 border-t border-[#2E4F42]/10 pt-3 text-[10px] text-[#5B6B5F]">
+          <span className="flex items-center gap-1">
+            <span className="h-2 w-2 rounded-full bg-emerald-600" /> Completed
           </span>
-          <span className="flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-green-500" /> Completed
+          <span className="flex items-center gap-1">
+            <span className="h-2 w-2 rounded-full bg-rose-500" /> Missed
           </span>
-          <span className="flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-text-light)]" /> Locked
+          <span className="flex items-center gap-1">
+            <span className="h-2 w-2 rounded-full bg-[#1B332C]" /> Available
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="h-2 w-2 rounded-full border-2 border-[#D9A62B]" /> Today
           </span>
         </div>
       </div>
 
-      {/* Progress card */}
-      <div className="border-t border-[var(--color-border)] pt-5">
-        <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-light)]">
+      {/* 2. This Month / Career Progress Card */}
+      <div className="rounded-2xl border border-[#2E4F42]/15 bg-[#FBF8F0] p-5 shadow-[var(--shadow-card)]">
+        <span className="text-xs font-semibold uppercase tracking-wide text-[#5B6B5F]">
           This month
         </span>
         <div className="mt-3 flex items-center gap-4">
           <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-full">
             <svg viewBox="0 0 36 36" className="h-16 w-16 -rotate-90">
-              <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--color-border)" strokeWidth="3" />
+              <circle cx="18" cy="18" r="15.5" fill="none" stroke="#2E4F42" strokeOpacity="0.15" strokeWidth="3" />
               <circle
                 cx="18"
                 cy="18"
                 r="15.5"
                 fill="none"
-                stroke="var(--color-primary-600)"
+                stroke="#C4952A"
                 strokeWidth="3"
                 strokeLinecap="round"
-                strokeDasharray={`${(completionPct / 100) * 97.4} 97.4`}
+                strokeDasharray={`${(monthAttemptedCount / daysInViewMonth) * 97.4} 97.4`}
               />
             </svg>
-            <span className="absolute text-sm font-bold text-[var(--color-text-h)]">
-              {completionPct}%
+            <span className="absolute text-xs font-bold text-[#1B332C]">
+              {Math.round((monthAttemptedCount / daysInViewMonth) * 100)}%
             </span>
           </div>
-          <div className="text-sm text-[var(--color-text-muted)]">
-            <p className="font-semibold text-[var(--color-text-h)]">{profile.careerGoal || "Not set"}</p>
+          <div className="text-sm text-[#5B6B5F]">
+            <p className="font-semibold text-[#1B332C]">{profile.careerGoal || "Not set"}</p>
             <p className="mt-0.5">{profile.skills.length} tracked skills</p>
           </div>
         </div>
@@ -479,7 +607,15 @@ export default function AssessmentPage() {
   const [assessments, setAssessments] = useState([]);
   const [loadError, setLoadError] = useState("");
 
+  const [userStats, setUserStats] = useState({
+    completedCount: 0,
+    inProgressCount: 0,
+    history: [],
+    loading: true,
+  });
+
   const profile = useMemo(() => getUserProfile(), []);
+
   useEffect(() => {
     let isMounted = true;
 
@@ -493,6 +629,65 @@ export default function AssessmentPage() {
       isMounted = false;
     };
   }, []);
+
+  // Fetch real user assessment metrics from backend
+  useEffect(() => {
+    let isMounted = true;
+
+    const getInProgressCount = () => {
+      if (typeof window === "undefined" || !window.sessionStorage) return 0;
+      let count = 0;
+      for (let i = 0; i < window.sessionStorage.length; i++) {
+        const key = window.sessionStorage.key(i);
+        if (key && key.startsWith("aifinity_active_attempt_")) {
+          count++;
+        }
+      }
+      return count;
+    };
+
+    const inProgress = getInProgressCount();
+
+    dashboardApi
+      .get()
+      .then((res) => {
+        if (!isMounted) return;
+        if (res && res.success && res.data) {
+          const history = res.data.analytics?.assessments?.history || res.data.assessments || [];
+          const uniqueCompleted = new Set(
+            history.map((a) => String(a.assessmentId || a.id || a.name || a.title))
+          );
+          setUserStats({
+            completedCount: uniqueCompleted.size,
+            inProgressCount: inProgress,
+            history,
+            loading: false,
+          });
+        } else {
+          setUserStats({
+            completedCount: 0,
+            inProgressCount: inProgress,
+            history: [],
+            loading: false,
+          });
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setUserStats({
+            completedCount: 0,
+            inProgressCount: inProgress,
+            history: [],
+            loading: false,
+          });
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const categories = useMemo(() => ["All", ...new Set(assessments.map((assessment) => assessment.category))], [assessments]);
   const recommended = useMemo(() => {
     const fieldMatches = assessments.filter((assessment) => assessment.field === profile.field);
@@ -508,9 +703,6 @@ export default function AssessmentPage() {
   const completedDays = dailyAssessments.filter((d) => d.status === "Completed").length;
   const todayDay = new Date().getDate();
 
-  // Today's featured challenge + a Mon–Sun strip for the week it falls in,
-  // so the Daily Assessment section has real content of its own instead of
-  // just pointing at the calendar in the sidebar.
   const todayAssessment = useMemo(
     () => dailyAssessments.find((d) => d.isToday),
     [dailyAssessments]
@@ -527,8 +719,6 @@ export default function AssessmentPage() {
     return assessments.filter((a) => {
       if (category !== "All" && a.category !== category) return false;
       if (difficulty !== "All") {
-        // Exact match for single-difficulty assessments, or "contains a
-        // question of this difficulty" for Mixed ones.
         const matches = a.difficulty === difficulty || a.questions.some((q) => q.difficulty === difficulty);
         if (!matches) return false;
       }
@@ -537,12 +727,10 @@ export default function AssessmentPage() {
     });
   }, [assessments, category, difficulty, type]);
 
-  // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [category, difficulty, type]);
 
-  // Paginated explore list
   const paginatedList = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     const end = start + ITEMS_PER_PAGE;
@@ -551,7 +739,6 @@ export default function AssessmentPage() {
 
   const totalPages = Math.ceil(exploreList.length / ITEMS_PER_PAGE);
 
-  // Scroll-spy: highlight the sidebar nav item for the section in view.
   useEffect(() => {
     const sectionEls = NAV_ITEMS.map((item) => document.getElementById(item.id)).filter(Boolean);
     if (!sectionEls.length) return;
@@ -581,10 +768,10 @@ export default function AssessmentPage() {
         backgroundSize: "24px 24px",
       }}
     >
-      <div className="mx-auto flex max-w-[1400px] gap-6 px-4 pb-16 lg:px-8">
+      <div className="mx-auto flex items-start max-w-[1400px] gap-6 px-4 pb-16 lg:px-8">
         {/* ---------------- LEFT SIDEBAR ---------------- */}
         <aside
-          className={`sticky top-20 hidden h-fit shrink-0 self-start pt-14 transition-all duration-200 md:block ${sidebarOpen ? "w-44" : "w-12"
+          className={`sticky top-[100px] hidden h-fit shrink-0 self-start pt-8 transition-all duration-200 md:block ${sidebarOpen ? "w-44" : "w-12"
             }`}
         >
           <SidebarNav active={activeSection} open={sidebarOpen} onToggle={() => setSidebarOpen((v) => !v)} />
@@ -643,7 +830,12 @@ export default function AssessmentPage() {
 
                 {/* Right Column: Assessment Diagnostic Preview Visual */}
                 <div className="lg:col-span-5 w-full">
-                  <AssessmentHeroVisual />
+                  <AssessmentProgressCard
+                    completedCount={userStats.completedCount}
+                    availableCount={assessments.length}
+                    inProgressCount={userStats.inProgressCount}
+                    loading={userStats.loading}
+                  />
                 </div>
               </div>
             </div>
@@ -675,8 +867,7 @@ export default function AssessmentPage() {
           <div className="mb-10 xl:hidden">
             <StreakSidebar
               profile={profile}
-              dailyAssessments={dailyAssessments}
-              completedDays={completedDays}
+              attempts={userStats.history}
             />
           </div>
 
@@ -883,11 +1074,10 @@ export default function AssessmentPage() {
         </div>
 
         {/* ---------------- RIGHT SIDEBAR (streak calendar) ---------------- */}
-        <aside className="sticky top-20 hidden h-fit w-64 shrink-0 self-start pt-14 xl:block">
+        <aside className="sticky top-[100px] hidden h-fit w-80 shrink-0 self-start pt-8 xl:block">
           <StreakSidebar
             profile={profile}
-            dailyAssessments={dailyAssessments}
-            completedDays={completedDays}
+            attempts={userStats.history}
           />
         </aside>
       </div>

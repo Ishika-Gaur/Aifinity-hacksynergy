@@ -163,4 +163,26 @@ export const conceptRootApi = {
   get: () => request("/concept-root"),
 };
 
+export const mistakeMapApi = {
+  /**
+   * GET /api/mistake-map
+   * Returns fully personalized Mistake Map analysis data.
+   */
+  get: () => request("/mistake-map"),
+};
 
+export const skillGapApi = {
+  /**
+   * GET /api/skill-gap
+   * Returns fully personalized Skill Gap analysis data.
+   */
+  get: () => request("/skill-gap"),
+};
+
+export const roadmapApi = {
+  /**
+   * GET /api/roadmap
+   * Returns fully personalized learning roadmap data.
+   */
+  get: () => request("/roadmap"),
+};
