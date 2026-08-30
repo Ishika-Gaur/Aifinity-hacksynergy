@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Section from "../components/Section";
 import SectionHeading from "../components/SectionHeading";
 import Button from "../components/Button";
+import Calendar from "../components/Calendar";
 import { ArrowRight } from "lucide-react";
 import {
   TYPE_FILTERS,
@@ -303,171 +304,6 @@ function CategoryTile({ category, count, index, onSelect }) {
   );
 }
 
-/* ---------------- Daily calendar (LeetCode-style) ---------------- */
-
-/* Single day cell — number in a circle, tiny activity dot below.
-   Today gets a filled circle; locked days are dimmed and inert. */
-function DayCell({ daily }) {
-  const isLocked = daily.status === "Locked";
-  const hasActivity = !isLocked;
-
-  const content = (
-    <div className="flex flex-col items-center justify-center gap-0.5 py-0.5">
-      <span
-        className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium transition-colors ${daily.isToday
-          ? "bg-[var(--color-primary-600)] text-white"
-          : isLocked
-            ? "text-[var(--color-text-light)]"
-            : "text-[var(--color-text-h)] hover:bg-[var(--color-surface-secondary)]"
-          }`}
-      >
-        {daily.day}
-      </span>
-      <span
-        className={`h-1 w-1 rounded-full ${!hasActivity
-          ? "bg-transparent"
-          : daily.status === "Completed"
-            ? "bg-green-500"
-            : "bg-[var(--color-primary-600)]"
-          }`}
-      />
-    </div>
-  );
-
-  if (isLocked) {
-    return content;
-  }
-
-  return (
-    <Link to={`/assessment/${daily.id}`} className="block" title={daily.title}>
-      {content}
-    </Link>
-  );
-}
-
-const WEEKDAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
-const MONTH_LABELS = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
-
-/* Streak flame icon — used in the sidebar streak card. */
-function FlameIcon({ className }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className}>
-      <path
-        d="M12 2c1 3-2.5 4.2-2.5 7.2 0 1.4 1 2.3 2 2.3.4-1.6-.4-2-.1-3.2C12.9 10 15 11.6 15 14.3c0 2.9-2.2 5.2-5 5.7-3.4-.4-6-3-6-6.3C4 9.9 7.3 7 9.2 5c-.4 1.3-.2 2 .5 2.5C9.4 5.6 10.3 3.6 12 2z"
-        fill="currentColor"
-      />
-    </svg>
-  );
-}
-
-/* ---------------- Right sidebar: streak calendar + stats ---------------- */
-
-function StreakSidebar({ profile, dailyAssessments, completedDays }) {
-  const now = new Date();
-  const monthLabel = `${MONTH_LABELS[now.getMonth()]} ${now.getFullYear()}`;
-  const firstWeekdayOffset = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
-
-  const currentStreak = useMemo(() => {
-    let streak = 0;
-    for (let i = dailyAssessments.length - 1; i >= 0; i--) {
-      const d = dailyAssessments[i];
-      if (d.status === "Completed") streak++;
-      else if (d.isToday) continue;
-      else break;
-    }
-    return streak;
-  }, [dailyAssessments]);
-
-  const completionPct = dailyAssessments.length
-    ? Math.round((completedDays / dailyAssessments.length) * 100)
-    : 0;
-
-  return (
-    <div className="flex flex-col gap-4">
-      {/* Streak calendar card */}
-      <div className="p-0">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <FlameIcon className="h-5 w-5 text-amber-500" />
-            <span className="text-lg font-bold text-[var(--color-text-h)]">
-              {currentStreak} day{currentStreak === 1 ? "" : "s"}
-            </span>
-          </div>
-          <span className="rounded-full border border-[var(--color-primary-100)] bg-[var(--color-primary-50)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-primary-600)]">
-            {profile.field || "Not set"}
-          </span>
-        </div>
-        <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
-          {monthLabel} · {completedDays}/{dailyAssessments.length} days completed
-        </p>
-
-        {/* Weekday header */}
-        <div className="mt-4 grid grid-cols-7 text-center text-[11px] font-medium text-[var(--color-text-light)]">
-          {WEEKDAY_LABELS.map((d, i) => (
-            <span key={i}>{d}</span>
-          ))}
-        </div>
-
-        {/* Day grid — leading blanks align "Day 1" to its real weekday */}
-        <div className="mt-2 grid grid-cols-7 gap-y-2 text-center">
-          {Array.from({ length: firstWeekdayOffset }).map((_, i) => (
-            <div key={`pad-${i}`} />
-          ))}
-          {dailyAssessments.map((daily) => (
-            <DayCell key={daily.id} daily={daily} />
-          ))}
-        </div>
-
-        {/* Legend */}
-        <div className="mt-4 flex flex-wrap gap-4 border-t border-[var(--color-border)] pt-3 text-[11px] text-[var(--color-text-muted)]">
-          <span className="flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-primary-600)]" /> Available
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-green-500" /> Completed
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-text-light)]" /> Locked
-          </span>
-        </div>
-      </div>
-
-      {/* Progress card */}
-      <div className="border-t border-[var(--color-border)] pt-5">
-        <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-light)]">
-          This month
-        </span>
-        <div className="mt-3 flex items-center gap-4">
-          <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-full">
-            <svg viewBox="0 0 36 36" className="h-16 w-16 -rotate-90">
-              <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--color-border)" strokeWidth="3" />
-              <circle
-                cx="18"
-                cy="18"
-                r="15.5"
-                fill="none"
-                stroke="var(--color-primary-600)"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeDasharray={`${(completionPct / 100) * 97.4} 97.4`}
-              />
-            </svg>
-            <span className="absolute text-sm font-bold text-[var(--color-text-h)]">
-              {completionPct}%
-            </span>
-          </div>
-          <div className="text-sm text-[var(--color-text-muted)]">
-            <p className="font-semibold text-[var(--color-text-h)]">{profile.careerGoal || "Not set"}</p>
-            <p className="mt-0.5">{profile.skills.length} tracked skills</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default function AssessmentPage() {
   const [category, setCategory] = useState("All");
@@ -515,13 +351,42 @@ export default function AssessmentPage() {
     () => dailyAssessments.find((d) => d.isToday),
     [dailyAssessments]
   );
-  const weekDays = useMemo(() => {
+
+  // Generate actual calendar for current month
+  const monthlyCalendar = useMemo(() => {
     const now = new Date();
-    const todayIndex = dailyAssessments.findIndex((d) => d.isToday);
-    if (todayIndex === -1) return dailyAssessments.slice(0, 7);
-    const weekStart = Math.max(0, todayIndex - now.getDay());
-    return dailyAssessments.slice(weekStart, weekStart + 7);
-  }, [dailyAssessments]);
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+    const today = now.getDate();
+
+    const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
+    const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
+    const daysInMonth = lastDayOfMonth.getDate();
+    const startDayOfWeek = firstDayOfMonth.getDay(); // 0 = Sunday, 1 = Monday, etc.
+
+    const calendar = [];
+
+    // Add empty cells for days before the first day of the month
+    for (let i = 0; i < startDayOfWeek; i++) {
+      calendar.push({ day: null, isPadding: true, isToday: false, status: "Locked" });
+    }
+
+    // Add all days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const isToday = day === today;
+      // For now, mark days as Available (this could be enhanced with real assessment data)
+      calendar.push({
+        day,
+        isPadding: false,
+        isToday,
+        status: isToday ? "Available" : day < today ? "Locked" : "Available"
+      });
+    }
+
+    return calendar;
+  }, []);
+
+  const weekDays = monthlyCalendar;
 
   const exploreList = useMemo(() => {
     return assessments.filter((a) => {
@@ -673,7 +538,7 @@ export default function AssessmentPage() {
 
           {/* MOBILE-ONLY: streak card sits inline since the right rail is hidden below xl */}
           <div className="mb-10 xl:hidden">
-            <StreakSidebar
+            <Calendar
               profile={profile}
               dailyAssessments={dailyAssessments}
               completedDays={completedDays}
@@ -737,39 +602,44 @@ export default function AssessmentPage() {
                 </div>
               )}
 
-              {/* This week */}
+              {/* This month */}
               <div className="rounded-2xl border border-[var(--color-border)] p-6">
                 <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-light)]">
-                  This week
+                  {new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}
                 </span>
-                <div className="mt-4 grid grid-cols-7 gap-1.5 text-center">
-                  {weekDays.map((d) => (
-                    <div key={d.id} className="flex flex-col items-center gap-1">
-                      <span
-                        className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold ${d.isToday
-                          ? "bg-[var(--color-primary-600)] text-white"
-                          : d.status === "Completed"
-                            ? "bg-green-50 text-green-700"
-                            : d.status === "Locked"
-                              ? "text-[var(--color-text-light)]"
-                              : "text-[var(--color-text-h)]"
-                          }`}
-                      >
-                        {d.day}
-                      </span>
-                      <span
-                        className={`h-1 w-1 rounded-full ${d.status === "Completed" ? "bg-green-500" : d.status === "Locked" ? "bg-transparent" : "bg-[var(--color-primary-600)]"
-                          }`}
-                      />
-                    </div>
-                  ))}
+                <div className="mt-4">
+                  <div className="grid grid-cols-7 gap-1.5 mb-2 text-center">
+                    {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+                      <span key={day} className="text-xs font-semibold text-[var(--color-text-light)]">{day}</span>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-7 gap-1.5 text-center">
+                    {weekDays.map((d, index) => (
+                      <div key={index} className="flex flex-col items-center gap-1">
+                        <span
+                          className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold ${d.isPadding
+                            ? "invisible"
+                            : d.isToday
+                              ? "bg-[var(--color-primary-600)] text-white"
+                              : d.status === "Completed"
+                                ? "bg-green-50 text-green-700"
+                                : d.status === "Locked"
+                                  ? "text-[var(--color-text-light)]"
+                                  : "text-[var(--color-text-h)]"
+                            }`}
+                        >
+                          {d.day}
+                        </span>
+                        {!d.isPadding && (
+                          <span
+                            className={`h-1 w-1 rounded-full ${d.status === "Completed" ? "bg-green-500" : d.status === "Locked" ? "bg-transparent" : "bg-[var(--color-primary-600)]"
+                              }`}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <p className="mt-4 text-xs text-[var(--color-text-muted)] xl:hidden">
-                  Full calendar is above.
-                </p>
-                <p className="mt-4 hidden text-xs text-[var(--color-text-muted)] xl:block">
-                  Full calendar is pinned to the right.
-                </p>
               </div>
             </div>
           </Section>
@@ -884,7 +754,7 @@ export default function AssessmentPage() {
 
         {/* ---------------- RIGHT SIDEBAR (streak calendar) ---------------- */}
         <aside className="sticky top-20 hidden h-fit w-64 shrink-0 self-start pt-14 xl:block">
-          <StreakSidebar
+          <Calendar
             profile={profile}
             dailyAssessments={dailyAssessments}
             completedDays={completedDays}

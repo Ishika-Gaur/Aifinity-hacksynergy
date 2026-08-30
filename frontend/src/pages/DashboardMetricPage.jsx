@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import Container from "../components/Container";
 import LearningProgressChart from "../components/dashboard/LearningProgressChart";
+import Calendar from "../components/Calendar";
 import { dashboardApi } from "../services/api";
 
 const PAGE_CONFIG = {
@@ -85,7 +86,61 @@ function AssessmentDetails({ data }) {
 
 function StreakDetails({ data }) {
   const { streak } = data;
-  return <div className="space-y-8"><div className="grid grid-cols-1 gap-5 sm:grid-cols-3"><Metric label="Current streak" value={`${streak.current} days`} /><Metric label="Longest streak" value={`${streak.longest} days`} /><Metric label="Active days" value={streak.activeDays} /></div>{!streak.activeDays ? <EmptyState>Start learning today to build your streak.</EmptyState> : <section className="rounded-md border border-[#2E4F42]/12 bg-[#FBF8F0] p-6"><h2 className="text-xl font-bold text-[#1B332C]">Last 42 days</h2><p className="mt-1 text-sm text-[#5B6B5F]">Gold squares mark days with a completed assessment.</p><div className="mt-5 grid grid-cols-7 gap-2 sm:grid-cols-14">{streak.calendar.map((day) => <div key={day.date} title={day.date} className={`aspect-square rounded-sm border ${day.active ? "border-[#C4952A] bg-[#D9A62B]" : "border-[#2E4F42]/10 bg-[#F1EDE1]"}`} />)}</div></section>}</div>;
+  
+  // Transform backend streak data to the format expected by Calendar component
+  const now = new Date();
+  const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startDayOfWeek = firstDayOfMonth.getDay();
+  
+  // Build dailyAssessments array from calendar data
+  const dailyAssessments = streak.calendar.map((day) => ({
+    id: day.date || `day-${day.day}`,
+    day: day.day,
+    isToday: day.isToday || false,
+    status: day.active ? "Completed" : day.isPadding ? "Locked" : "Available",
+    title: day.active ? "Assessment completed" : "Available"
+  }));
+  
+  // Add padding cells for days before the first day of the month
+  const paddingCells = Array.from({ length: startDayOfWeek }).map((_, i) => ({
+    id: `pad-${i}`,
+    day: null,
+    isToday: false,
+    status: "Locked",
+    title: ""
+  }));
+  
+  const allDays = [...paddingCells, ...dailyAssessments];
+  
+  // Build profile object from available data
+  const profile = {
+    field: "Learning",
+    careerGoal: "Skill Development",
+    skills: []
+  };
+  
+  return (
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+        <Metric label="Current streak" value={`${streak.current} days`} />
+        <Metric label="Longest streak" value={`${streak.longest} days`} />
+        <Metric label="Active days" value={streak.activeDays} />
+      </div>
+      {!streak.activeDays ? (
+        <EmptyState>Start learning today to build your streak.</EmptyState>
+      ) : (
+        <section className="rounded-md border border-[#2E4F42]/12 bg-[#FBF8F0] p-6">
+          <Calendar
+            streak={streak.current}
+            profile={profile}
+            dailyAssessments={allDays}
+            completedDays={streak.activeDays}
+            showProgress={false}
+          />
+        </section>
+      )}
+    </div>
+  );
 }
 
 function SkillsDetails({ data }) {
