@@ -6,7 +6,7 @@ import SectionHeading from "../components/SectionHeading";
 import Card from "../components/Card";
 import Button from "../components/Button";
 import ImageCard from "../components/ImageCard";
-import { FIELDS, FIELD_ICONS, CAREER_GOALS_BY_FIELD } from "../data/assessments";
+import { FIELDS, FIELD_ICONS, CAREER_GOALS_BY_FIELD } from "../utils/constants";
 import { authApi } from "../services/api";
 
 const WELCOME_ILLUSTRATION =
@@ -54,6 +54,9 @@ export default function OnboardingPage() {
   const [level, setLevel] = useState(null);
   const [careerGoal, setCareerGoal] = useState(null);
   const [isFieldLocked, setIsFieldLocked] = useState(false);
+  const [fieldSearch, setFieldSearch] = useState("");
+  const [customField, setCustomField] = useState("");
+  const [customCareerGoal, setCustomCareerGoal] = useState("");
 
   const [loadingCheck, setLoadingCheck] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -105,10 +108,19 @@ export default function OnboardingPage() {
 
   // Keep career goals synced with selected field
   useEffect(() => {
-    if (careerGoal && field && !CAREER_GOALS_BY_FIELD[field]?.includes(careerGoal)) {
-      setCareerGoal(null);
+    if (careerGoal && field && CAREER_GOALS_BY_FIELD[field] && !CAREER_GOALS_BY_FIELD[field]?.includes(careerGoal)) {
+      // Only reset if there ARE predefined goals for this field and current goal isn't in them
+      // For custom fields, don't reset
+      if (!customCareerGoal) {
+        setCareerGoal(null);
+      }
     }
-  }, [field, careerGoal]);
+  }, [field, careerGoal, customCareerGoal]);
+
+  // Filtered fields based on search
+  const filteredFields = fieldSearch
+    ? FIELDS.filter(f => f.toLowerCase().includes(fieldSearch.toLowerCase()))
+    : FIELDS;
 
   // Scroll to top on step changes
   useEffect(() => {
@@ -243,10 +255,10 @@ export default function OnboardingPage() {
 
         {/* ---------------- STEP 2: FIELD SELECTION ---------------- */}
         {step === 2 && (
-          <div className="mx-auto max-w-2xl">
+          <div className="mx-auto max-w-3xl">
             <SectionHeading
               title="What field are you focused on?"
-              subtitle="Choose your primary career domain. Note: Your selected field is saved permanently to your profile."
+              subtitle="Choose your primary career domain. Can't find yours? Type it below."
             />
 
             {isFieldLocked && (
@@ -261,8 +273,30 @@ export default function OnboardingPage() {
               </div>
             )}
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {FIELDS.map((f) => (
+            {/* Search bar */}
+            {!isFieldLocked && (
+              <div className="mb-6 relative">
+                <input
+                  type="text"
+                  placeholder="🔍  Search fields... (e.g. Medicine, AI, Law, Fashion)"
+                  value={fieldSearch}
+                  onChange={(e) => setFieldSearch(e.target.value)}
+                  className="w-full rounded-xl border border-[#2E4F42]/20 bg-white px-4 py-3 text-sm text-[#1B332C] shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1B332C]/30 focus:border-[#1B332C]/50 transition-all"
+                  style={{ fontFamily: "var(--font-body)" }}
+                />
+                {fieldSearch && (
+                  <button
+                    onClick={() => setFieldSearch("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#2E4F42]/40 hover:text-[#1B332C] text-lg cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3" style={{ maxHeight: "420px", overflowY: "auto", paddingRight: "4px" }}>
+              {filteredFields.map((f) => (
                 <SelectableCard
                   key={f}
                   icon={FIELD_ICONS[f]}
@@ -272,11 +306,52 @@ export default function OnboardingPage() {
                   onSelect={() => {
                     if (!isFieldLocked) {
                       setField(f);
+                      setCustomField("");
                     }
                   }}
                 />
               ))}
+              {filteredFields.length === 0 && !fieldSearch && (
+                <p className="col-span-full text-center text-sm text-[var(--color-text-muted)] py-6">
+                  Loading fields...
+                </p>
+              )}
+              {filteredFields.length === 0 && fieldSearch && (
+                <div className="col-span-full text-center py-6">
+                  <p className="text-sm text-[var(--color-text-muted)] mb-3">
+                    No matching field found for "<strong>{fieldSearch}</strong>"
+                  </p>
+                  <p className="text-xs text-[var(--color-text-muted)]">Use the custom field input below 👇</p>
+                </div>
+              )}
             </div>
+
+            {/* Custom field input */}
+            {!isFieldLocked && (
+              <div className="mt-6 rounded-xl border border-dashed border-[#2E4F42]/25 bg-[#f5f0e6] p-4">
+                <p className="text-xs font-bold uppercase tracking-wider text-[#C4952A] mb-2" style={{ fontFamily: "var(--font-mono)" }}>
+                  ✨ Don't see your field?
+                </p>
+                <input
+                  type="text"
+                  placeholder="Type your field (e.g. Veterinary Science, Astronomy, Journalism)"
+                  value={customField}
+                  onChange={(e) => {
+                    setCustomField(e.target.value);
+                    if (e.target.value.trim()) {
+                      setField(e.target.value.trim());
+                    }
+                  }}
+                  onFocus={() => {
+                    // Clear selection from predefined list when typing custom
+                    if (FIELDS.includes(field)) {
+                      setField("");
+                    }
+                  }}
+                  className="w-full rounded-lg border border-[#2E4F42]/15 bg-white px-4 py-2.5 text-sm text-[#1B332C] focus:outline-none focus:ring-2 focus:ring-[#1B332C]/30 transition-all"
+                />
+              </div>
+            )}
 
             <StepNav onBack={goBack} onNext={goNext} showBack={!isFieldLocked} nextDisabled={!field} />
           </div>
@@ -310,22 +385,41 @@ export default function OnboardingPage() {
           <div className="mx-auto max-w-2xl">
             <SectionHeading
               title={`What's your career goal in ${field}?`}
-              subtitle="Select the target role you want to prepare for."
+              subtitle="Select a target role or type your own."
             />
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {careerGoalOptions.map((option) => (
-                <SelectableCard
-                  key={option}
-                  title={option}
-                  selected={careerGoal === option}
-                  onSelect={() => setCareerGoal(option)}
-                />
-              ))}
-              {careerGoalOptions.length === 0 && (
-                <p className="col-span-full text-sm text-[var(--color-text-muted)]">
-                  Please go back and select a field first.
-                </p>
-              )}
+            {careerGoalOptions.length > 0 && (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {careerGoalOptions.map((option) => (
+                  <SelectableCard
+                    key={option}
+                    title={option}
+                    selected={careerGoal === option && !customCareerGoal}
+                    onSelect={() => {
+                      setCareerGoal(option);
+                      setCustomCareerGoal("");
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Custom career goal input — always visible */}
+            <div className="mt-6 rounded-xl border border-dashed border-[#2E4F42]/25 bg-[#f5f0e6] p-4">
+              <p className="text-xs font-bold uppercase tracking-wider text-[#C4952A] mb-2" style={{ fontFamily: "var(--font-mono)" }}>
+                {careerGoalOptions.length > 0 ? "✨ Or type your own career goal" : "✨ Type your career goal"}
+              </p>
+              <input
+                type="text"
+                placeholder={`e.g. Senior ${field} Specialist, ${field} Consultant...`}
+                value={customCareerGoal}
+                onChange={(e) => {
+                  setCustomCareerGoal(e.target.value);
+                  if (e.target.value.trim()) {
+                    setCareerGoal(e.target.value.trim());
+                  }
+                }}
+                className="w-full rounded-lg border border-[#2E4F42]/15 bg-white px-4 py-2.5 text-sm text-[#1B332C] focus:outline-none focus:ring-2 focus:ring-[#1B332C]/30 transition-all"
+              />
             </div>
 
             <StepNav

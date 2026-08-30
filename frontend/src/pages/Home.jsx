@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import HeroSection from "../components/HeroSection";
 import Section from "../components/Section";
 import SectionHeading from "../components/SectionHeading";
 import Card from "../components/Card";
 import Button from "../components/Button";
 import CtaBanner from "../components/CtaBanner";
+import { dashboardApi } from "../services/api";
 
 /* =========================================================
    REUSABLE SVG ICONS
@@ -56,6 +58,34 @@ const CHALLENGE_SOLUTIONS = [
 
 export default function Home() {
   const [activeObsTab, setActiveObsTab] = useState(OBSERVATORY_TABS[0]);
+  const [userData, setUserData] = useState(() => {
+    try {
+      const stored = localStorage.getItem("user");
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [dashboardData, setDashboardData] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    dashboardApi
+      .get()
+      .then((res) => {
+        if (isMounted && res.success && res.data) {
+          setDashboardData(res.data);
+          if (res.data.user) {
+            setUserData(res.data.user);
+          }
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -68,8 +98,14 @@ export default function Home() {
         title="Know exactly what to"
         highlightWord="learn next"
         description="Find your weak concepts, see your skill gap, and follow an end-to-end roadmap built around your own mistakes — not a generic syllabus."
-        primaryCta={{ label: "Start Assessment", href: "/onboardingpage" }}
-        secondaryCta={{ label: "Explore Roadmap", href: "/roadmap" }}
+        primaryCta={{
+          label: userData ? "⚡ Take Assessment" : "Start Free Assessment",
+          href: "/assessment",
+        }}
+        secondaryCta={{
+          label: userData ? "View Dashboard" : "Explore Roadmap",
+          href: userData ? "/dashboard" : "/roadmap",
+        }}
       />
 
       {/* =========================================================
@@ -83,148 +119,216 @@ export default function Home() {
         />
 
         <div className="mx-auto mt-12 max-w-7xl">
-          {/* TOP PIPELINE: Assessment -> AI Analysis -> Personalized Intelligence */}
-          <div className="flex flex-col items-center justify-center gap-4 lg:flex-row lg:gap-8">
-            {/* 1. Assessment */}
-            <div className="flex w-64 flex-col items-center text-center">
-              <div
-                className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border shadow-sm"
-                style={{ borderColor: "var(--color-border)", background: "var(--color-surface)" }}
-              >
-                <svg className="h-8 w-8" style={{ color: "var(--color-text-muted)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          {/* HOW IT WORKS — 3-step horizontal flow */}
+          <div className="relative mb-14 flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:gap-0">
+            {/* Step 1 */}
+            <Link
+              to="/assessment"
+              className="group flex flex-1 flex-col items-center gap-3 rounded-2xl border border-[#2E4F42]/10 bg-white/70 px-6 py-6 text-center shadow-sm hover:border-[#C4952A]/40 hover:shadow-md transition-all duration-200"
+            >
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#1B332C] shadow-md group-hover:bg-[#2E4F42] transition-colors">
+                <svg className="h-7 w-7 text-[#E8C547]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                 </svg>
               </div>
-              <h4 className="text-base font-bold" style={{ color: "var(--color-text-h)" }}>Assessment</h4>
-              <p className="mt-1 text-xs" style={{ color: "var(--color-text-muted)" }}>Raw knowledge capture</p>
-            </div>
+              <div>
+                <span className="mb-1 block text-[10px] font-mono font-bold uppercase tracking-widest text-[#C4952A]">Step 01</span>
+                <h4 className="text-sm font-bold text-[#1B332C] group-hover:text-[#C4952A] transition-colors">Take Assessment</h4>
+                <p className="mt-1 text-xs text-[#6B7B72]">Click to start your diagnostic →</p>
+              </div>
+            </Link>
 
-            <ArrowRightIcon className="hidden h-6 w-6 lg:block" style={{ color: "var(--color-border-strong)" }} />
-            <div className="block lg:hidden my-2">
-              <svg className="h-6 w-6 rotate-90" style={{ color: "var(--color-border-strong)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            {/* Arrow */}
+            <div className="flex items-center justify-center px-3 text-[#C4952A] opacity-60 sm:flex-shrink-0">
+              <svg className="h-5 w-5 rotate-90 sm:rotate-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
             </div>
 
-            {/* 2. AI Analysis */}
-            <div className="flex w-64 flex-col items-center text-center">
-              <div
-                className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border shadow-sm"
-                style={{ borderColor: "var(--color-border)", background: "var(--color-surface)" }}
-              >
-                <svg className="h-8 w-8" style={{ color: "var(--color-primary-600)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            {/* Step 2 */}
+            <div className="flex flex-1 flex-col items-center gap-3 rounded-2xl border border-[#2E4F42]/10 bg-white/70 px-6 py-6 text-center shadow-sm">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#2E4F42]/10 shadow-sm">
+                <svg className="h-7 w-7 text-[#2E4F42]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m14-6h2m-2 6h2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
                 </svg>
               </div>
-              <h4 className="text-base font-bold" style={{ color: "var(--color-text-h)" }}>AI Analysis</h4>
-              <p className="mt-1 text-xs" style={{ color: "var(--color-text-muted)" }}>Cognitive profiling & mapping</p>
+              <div>
+                <span className="mb-1 block text-[10px] font-mono font-bold uppercase tracking-widest text-[#2E4F42]">Step 02</span>
+                <h4 className="text-sm font-bold text-[#1B332C]">AI Analysis</h4>
+                <p className="mt-1 text-xs text-[#6B7B72]">Cognitive profiling & gap mapping</p>
+              </div>
             </div>
 
-            <ArrowRightIcon className="hidden h-6 w-6 lg:block" style={{ color: "var(--color-border-strong)" }} />
-            <div className="block lg:hidden my-2">
-              <svg className="h-6 w-6 rotate-90" style={{ color: "var(--color-border-strong)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            {/* Arrow */}
+            <div className="flex items-center justify-center px-3 text-[#C4952A] opacity-60 sm:flex-shrink-0">
+              <svg className="h-5 w-5 rotate-90 sm:rotate-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
             </div>
 
-            {/* 3. Personalized Intelligence */}
-            <div className="flex w-64 flex-col items-center text-center">
-              <div
-                className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border shadow-sm"
-                style={{ borderColor: "var(--color-primary-600)", background: "var(--color-primary-50)" }}
-              >
-                <SparklesIcon className="h-8 w-8" style={{ color: "var(--color-primary-700)" }} />
+            {/* Step 3 */}
+            <div className="flex flex-1 flex-col items-center gap-3 rounded-2xl border border-[#C4952A]/30 bg-gradient-to-br from-[#FBF3DC] to-[#EDE6D3] px-6 py-6 text-center shadow-sm">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#C4952A]/15 shadow-sm">
+                <SparklesIcon className="h-7 w-7 text-[#C4952A]" />
               </div>
-              <h4 className="text-base font-bold" style={{ color: "var(--color-primary-700)" }}>Personalized Intelligence</h4>
-              <p className="mt-1 text-xs" style={{ color: "var(--color-primary-600)" }}>The engine for our modules</p>
+              <div>
+                <span className="mb-1 block text-[10px] font-mono font-bold uppercase tracking-widest text-[#C4952A]">Step 03</span>
+                <h4 className="text-sm font-bold text-[#1B332C]">Personalized Intelligence</h4>
+                <p className="mt-1 text-xs text-[#6B7B72]">Your unique learning engine</p>
+              </div>
             </div>
           </div>
 
-          {/* BRANCHING CONNECTOR */}
-          <div className="my-8 hidden flex-col items-center lg:flex">
-            <div className="h-8 w-px" style={{ background: "var(--color-border-strong)" }}></div>
-            <div className="h-px w-full max-w-[80%]" style={{ background: "var(--color-border-strong)" }}></div>
-            <div className="flex w-full max-w-[80%] justify-between">
-              <div className="h-8 w-px" style={{ background: "var(--color-border-strong)" }}></div>
-              <div className="h-8 w-px" style={{ background: "var(--color-border-strong)" }}></div>
-              <div className="h-8 w-px" style={{ background: "var(--color-border-strong)" }}></div>
-              <div className="h-8 w-px" style={{ background: "var(--color-border-strong)" }}></div>
-              <div className="h-8 w-px" style={{ background: "var(--color-border-strong)" }}></div>
-            </div>
-          </div>
-          
-          <div className="my-8 flex justify-center lg:hidden">
-            <div className="h-12 w-px" style={{ background: "var(--color-border-strong)" }}></div>
-          </div>
+          {/* 5 AI MODULES GRID */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            {AIFINITY_MODULES.map((mod, i) => {
+              const accentColors = [
+                { border: "#1B332C", bg: "#E8F4F0", text: "#1B332C", num: "#E8C547" },
+                { border: "#C4952A", bg: "#FDF4E3", text: "#C4952A", num: "#C4952A" },
+                { border: "#2E4F42", bg: "#EAF2EE", text: "#2E4F42", num: "#2E4F42" },
+                { border: "#8B5CF6", bg: "#F3EEFF", text: "#7C3AED", num: "#8B5CF6" },
+                { border: "#0EA5E9", bg: "#E0F2FE", text: "#0369A1", num: "#0EA5E9" },
+              ][i];
+              return (
+                <a
+                  key={mod.title}
+                  href={mod.href}
+                  className="group flex flex-col gap-3 rounded-2xl border bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
+                  style={{ borderColor: `${accentColors.border}20` }}
+                >
+                  {/* Number badge */}
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold"
+                      style={{ background: accentColors.bg, color: accentColors.num }}
+                    >
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span
+                      className="rounded-md px-2 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider"
+                      style={{ background: accentColors.bg, color: accentColors.text }}
+                    >
+                      {mod.tag}
+                    </span>
+                  </div>
 
-          {/* 4. THE 5 AIFINITY MODULES */}
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
-            {AIFINITY_MODULES.map((mod) => (
-              <Card
-                key={mod.title}
-                icon={<span style={{ fontFamily: "var(--font-mono)" }} className="text-lg font-bold">{mod.eyebrow}</span>}
-                eyebrow={mod.tag}
-                title={mod.title}
-                footer={
-                  <Button
-                    as="a"
-                    href={mod.href}
-                    variant="ghost"
-                    size="sm"
-                    icon={<ArrowRightIcon className="w-4 h-4 transition-transform group-hover:translate-x-1" />}
+                  <h4 className="text-sm font-bold leading-snug text-[#1B332C] group-hover:text-[#2E4F42] transition-colors">
+                    {mod.title}
+                  </h4>
+                  <p className="flex-1 text-xs leading-relaxed text-[#6B7B72]">{mod.description}</p>
+
+                  <span
+                    className="mt-1 inline-flex items-center gap-1 text-xs font-semibold transition-colors"
+                    style={{ color: accentColors.text }}
                   >
                     Explore
-                  </Button>
-                }
+                    <svg className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </span>
+                </a>
+              );
+            })}
+          </div>
+
+          {/* OUTCOME CARD */}
+          <div className="mt-10 flex justify-center">
+            {userData ? (
+              <div
+                className="relative flex w-full max-w-xl flex-col items-center justify-center rounded-3xl border p-7 sm:p-8 text-center shadow-lg transition-all duration-300 hover:shadow-xl group"
+                style={{
+                  borderColor: "var(--color-primary-500)",
+                  background: "linear-gradient(180deg, var(--color-surface) 0%, rgba(251, 243, 220, 0.4) 100%)",
+                  boxShadow: "0 14px 36px -12px rgba(27, 51, 44, 0.15)",
+                }}
               >
-                {mod.description}
-              </Card>
-            ))}
-          </div>
-
-          {/* CONVERGING CONNECTOR */}
-          <div className="my-8 hidden flex-col items-center lg:flex">
-            <div className="flex w-full max-w-[80%] justify-between">
-              <div className="h-8 w-px" style={{ background: "var(--color-border-strong)" }}></div>
-              <div className="h-8 w-px" style={{ background: "var(--color-border-strong)" }}></div>
-              <div className="h-8 w-px" style={{ background: "var(--color-border-strong)" }}></div>
-              <div className="h-8 w-px" style={{ background: "var(--color-border-strong)" }}></div>
-              <div className="h-8 w-px" style={{ background: "var(--color-border-strong)" }}></div>
-            </div>
-            <div className="h-px w-full max-w-[80%]" style={{ background: "var(--color-border-strong)" }}></div>
-            <div className="h-8 w-px" style={{ background: "var(--color-border-strong)" }}></div>
-          </div>
-
-          <div className="my-8 flex justify-center lg:hidden">
-            <div className="h-12 w-px" style={{ background: "var(--color-border-strong)" }}></div>
-          </div>
-
-          {/* 5. PERSONALIZED LEARNING JOURNEY */}
-          <div className="flex justify-center">
-            <div
-              className="flex w-full max-w-md flex-col items-center justify-center rounded-3xl border px-8 py-6 text-center shadow-sm transition-transform hover:scale-105"
-              style={{ borderColor: "var(--color-primary-600)", background: "var(--color-surface)", boxShadow: "0 10px 30px -10px rgba(0,0,0,0.1)" }}
-            >
-              <span
-                className="mb-3 inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide"
-                style={{ background: "var(--color-primary-50)", color: "var(--color-primary-700)", fontFamily: "var(--font-mono)" }}
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-xs font-mono font-bold uppercase tracking-wider shadow-2xs border border-[#C4952A]/30 bg-[#EDE6D3] text-[#1B332C]">
+                  <span className="h-2 w-2 rounded-full bg-[#2E4F42] animate-ping" />
+                  <span>{userData.name ? `${userData.name.split(" ")[0]}'s Customized Outcome` : "Your Personalized Outcome"}</span>
+                </div>
+                <h3 className="font-sans text-2xl sm:text-3xl font-extrabold tracking-tight text-[#1B332C]">
+                  {userData.name ? `${userData.name}'s Learning Journey` : "Personalized Learning Journey"}
+                </h3>
+                <p className="mt-2 text-sm text-[#5B6B5F] max-w-md leading-relaxed">
+                  Tailored specifically for{" "}
+                  <strong className="text-[#1B332C] font-semibold">
+                    {dashboardData?.careerGoal?.role || userData?.profile?.careerGoal || "Machine Learning & AI"}
+                  </strong>{" "}
+                  with a dynamic milestone path addressing your exact concept gaps.
+                </p>
+                <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 gap-2.5 w-full max-w-md">
+                  <div className="rounded-xl bg-white/80 p-2.5 border border-[#2E4F42]/10 shadow-2xs">
+                    <span className="block text-[10px] font-mono uppercase text-[#8B9690] font-semibold">Target Role</span>
+                    <span className="text-xs font-bold text-[#1B332C] truncate block mt-0.5">
+                      {dashboardData?.careerGoal?.role || userData?.profile?.careerGoal || "ML Engineer"}
+                    </span>
+                  </div>
+                  <div className="rounded-xl bg-white/80 p-2.5 border border-[#2E4F42]/10 shadow-2xs">
+                    <span className="block text-[10px] font-mono uppercase text-[#2E4F42] font-semibold">Readiness</span>
+                    <span className="text-xs font-bold text-[#2E4F42] block mt-0.5">
+                      {dashboardData?.skillGap?.matchPercentage || 78}% Match
+                    </span>
+                  </div>
+                  <div className="rounded-xl bg-white/80 p-2.5 border border-[#2E4F42]/10 shadow-2xs col-span-2 sm:col-span-1">
+                    <span className="block text-[10px] font-mono uppercase text-[#C4952A] font-semibold">Streak</span>
+                    <span className="text-xs font-bold text-[#1B332C] block mt-0.5">
+                      🔥 {dashboardData?.user?.streak ?? 7} Days
+                    </span>
+                  </div>
+                </div>
+                <div className="mt-6 flex flex-wrap items-center justify-center gap-3 w-full">
+                  <Link
+                    to="/roadmap"
+                    className="inline-flex items-center gap-2 rounded-xl bg-[#1B332C] px-5 py-2.5 text-xs font-bold text-[#E8C547] shadow-sm hover:bg-[#2E4F42] hover:text-white transition-all duration-200 hover:scale-105"
+                  >
+                    <span>View Your Roadmap</span>
+                    <span>→</span>
+                  </Link>
+                  <Link
+                    to="/dashboard"
+                    className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-xs font-semibold text-[#1B332C] border border-[#2E4F42]/20 hover:bg-[#EDE6D3] transition-all duration-200"
+                  >
+                    <span>Open Dashboard</span>
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div
+                className="relative flex w-full max-w-md flex-col items-center justify-center rounded-3xl border px-8 py-7 text-center shadow-lg transition-transform hover:scale-105"
+                style={{ borderColor: "var(--color-primary-600)", background: "var(--color-surface)", boxShadow: "0 10px 30px -10px rgba(0,0,0,0.1)" }}
               >
-                The Outcome
-              </span>
-              <h3 className="text-2xl font-bold" style={{ color: "var(--color-text-h)", fontFamily: "var(--font-display)" }}>
-                Personalized Learning Journey
-              </h3>
-              <p className="mt-2 text-sm" style={{ color: "var(--color-text-muted)" }}>
-                A dynamically generated path leading directly to your career goals.
-              </p>
-            </div>
+                <span
+                  className="mb-3 inline-flex items-center justify-center rounded-full px-3.5 py-1 text-xs font-mono font-bold uppercase tracking-wider shadow-2xs"
+                  style={{ background: "var(--color-primary-50)", color: "var(--color-primary-700)" }}
+                >
+                  ✦ The Outcome
+                </span>
+                <h3 className="font-sans text-2xl sm:text-3xl font-extrabold text-[#1B332C] tracking-tight">
+                  Personalized Learning Journey
+                </h3>
+                <p className="mt-2 text-sm text-[#5B6B5F] leading-relaxed">
+                  A dynamically generated path leading directly to your career goals, tailored to your exact mistake patterns.
+                </p>
+                <div className="mt-5 flex flex-wrap justify-center gap-2">
+                  <span className="rounded-md bg-[#EDE6D3] px-2.5 py-1 text-[11px] font-mono text-[#1B332C] font-semibold">
+                    🎯 Dynamic Gap Detection
+                  </span>
+                  <span className="rounded-md bg-[#EDE6D3] px-2.5 py-1 text-[11px] font-mono text-[#1B332C] font-semibold">
+                    🛣️ Milestone Pathing
+                  </span>
+                </div>
+                <Link
+                  to="/assessment"
+                  className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#1B332C] px-5 py-2.5 text-xs font-bold text-[#E8C547] shadow-sm hover:bg-[#2E4F42] hover:text-white transition-all duration-200"
+                >
+                  <span>Start Your Personalized Journey →</span>
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </Section>
 
-      {/* =========================================================
-         CHALLENGES & DIRECT SOLUTIONS MATRIX
-      ========================================================= */}
       <Section>
         <SectionHeading
           eyebrow="WHY IT WORKS"

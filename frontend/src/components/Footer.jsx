@@ -72,17 +72,17 @@ export default function Footer() {
               </div>
 
               <div className="flex flex-col">
-                <span className="font-['Kalam'] text-xl font-bold tracking-tight text-[#FBF8F0] leading-none group-hover:text-[#E8C547] transition-colors">
-                  AIFINITY<span className="ml-1 font-['Space_Mono'] text-xs font-bold uppercase tracking-widest text-[#E8C547]"></span>
+                <span className="font-sans text-xl font-bold tracking-tight text-[#FBF8F0] leading-none group-hover:text-[#E8C547] transition-colors">
+                  AIFINITY<span className="ml-1 font-mono text-xs font-bold uppercase tracking-widest text-[#E8C547]"></span>
                 </span>
-                <span className="text-[9px] font-['Space_Mono'] font-bold uppercase tracking-widest text-[#8B9690] leading-tight mt-0.5">
+                <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-[#8B9690] leading-tight mt-0.5">
                   Learning Intelligence
                 </span>
               </div>
             </a>
 
             <div className="flex flex-col gap-1">
-              <p className="font-['Kalam'] text-base text-[#E8C547] font-semibold">
+              <p className="font-sans text-sm text-[#E8C547] font-semibold italic">
                 "Learn smarter. Learn deeper."
               </p>
               <p className="max-w-sm text-xs leading-5 text-[#EDE6D3]/80 font-sans">

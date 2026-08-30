@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { authApi } from "../../services/api";
 
 import { LogOut } from 'lucide-react';
@@ -88,7 +88,7 @@ export default function DashboardHeader({ user, quotes = [] }) {
   }, [activeQuotes.length]);
 
   return (
-    <div className="relative overflow-hidden rounded-md bg-[#FBF8F0] border border-[#2E4F42]/15 p-6 sm:p-8 shadow-[var(--shadow-card)] transition-all duration-300">
+    <div className="relative overflow-hidden rounded-2xl bg-[#FBF8F0] border border-[#2E4F42]/12 p-6 sm:p-8 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300">
       {/* Decorative top chalk gold accent bar */}
       <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#D9A62B] via-[#E8C547] to-[#1B332C]" />
 
@@ -97,7 +97,7 @@ export default function DashboardHeader({ user, quotes = [] }) {
         onClick={handleLogout}
         type="button"
         title="Sign out of your account"
-        className="absolute top-4 right-4 sm:top-6 sm:right-8 z-10 inline-flex items-center gap-2 rounded-md border border-[#2E4F42]/20 bg-[#FBF8F0]/90 px-3 py-1.5 text-xs font-semibold text-[#1B332C] shadow-2xs hover:border-[#C4952A]/60 hover:bg-[#EDE6D3] hover:text-[#1B332C] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#C4952A]/50 transition-all duration-200 cursor-pointer"
+        className="absolute top-4 right-4 sm:top-6 sm:right-8 z-10 inline-flex items-center gap-2 rounded-xl border border-[#2E4F42]/15 bg-white/80 backdrop-blur-xs px-3.5 py-1.5 text-xs font-semibold text-[#1B332C] shadow-xs hover:border-[#C4952A]/60 hover:bg-[#EDE6D3] hover:text-[#1B332C] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#C4952A]/40 transition-all duration-200 cursor-pointer"
       >
         <LogOut className="h-3.5 w-3.5 text-[#2E4F42]" />
         <span>Logout</span>
@@ -109,41 +109,50 @@ export default function DashboardHeader({ user, quotes = [] }) {
           <DashboardLogo />
 
           <div className="mt-1">
-            <h1 className="font-['Kalam'] text-3xl sm:text-4xl lg:text-5xl font-bold text-[#1B332C] leading-tight">
+            <h1 className="font-sans text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#1B332C] tracking-tight leading-tight">
               {dynamicName ? `${greeting}, ${dynamicName} 👋` : `${greeting} 👋`}
             </h1>
-            <p className="mt-1 text-sm sm:text-base text-[#24413A] font-normal leading-relaxed">
+            <p className="mt-1 text-sm sm:text-base text-[#5B6B5F] font-normal leading-relaxed">
               {subtitle}
             </p>
           </div>
 
-          {/* 13. ROTATING QUOTES WITH FADE & SPACE MONO COUNTER */}
-          <div className="mt-2 flex items-center gap-3 rounded-md bg-[#EDE6D3]/60 px-4 py-2.5 border border-[#2E4F42]/12 w-fit min-h-[44px]">
-            <span className="text-[#C4952A] text-sm shrink-0">✎</span>
+          {/* 13. ROTATING QUOTES WITH FADE & MONO COUNTER */}
+          <div className="mt-1 flex items-center gap-3 rounded-xl bg-[#EDE6D3]/60 px-4 py-2 border border-[#2E4F42]/10 w-fit min-h-[40px]">
+            <span className="text-[#C4952A] text-sm shrink-0">✦</span>
             <div className="flex items-center gap-2">
               <span
-                className={`font-['Kalam'] text-sm sm:text-base text-[#1B332C] font-semibold transition-opacity duration-300 ${
+                className={`font-sans text-xs sm:text-sm text-[#1B332C] font-medium italic transition-opacity duration-300 ${
                   fadeState ? "opacity-100" : "opacity-0"
                 }`}
               >
                 "{activeQuotes[currentQuoteIndex]}"
               </span>
-              <span className="font-['Space_Mono'] text-[10px] font-bold text-[#5B6B5F] bg-[#FBF8F0] px-1.5 py-0.5 rounded border border-[#2E4F42]/10 shrink-0 ml-1">
-                {String(currentQuoteIndex + 1).padStart(2, "0")} / {String(activeQuotes.length).padStart(2, "0")}
+              <span className="font-mono text-[10px] font-semibold text-[#5B6B5F] bg-[#FBF8F0] px-2 py-0.5 rounded-md border border-[#2E4F42]/10 shrink-0 ml-1">
+                {String(currentQuoteIndex + 1).padStart(2, "0")}/{String(activeQuotes.length).padStart(2, "0")}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Right Streak Badge with Hover Effect */}
-        <div className="flex shrink-0 items-center">
-          <div className="flex items-center gap-3.5 rounded-md bg-[#1B332C] px-5 py-3.5 text-[#FBF8F0] shadow-md border border-[#C4952A]/30 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-0.5 transition-all duration-300 group cursor-default">
-            <span className="text-2xl group-hover:scale-110 transition-transform duration-200">🔥</span>
+        {/* Right Actions & Streak Badge */}
+        <div className="flex shrink-0 flex-wrap items-center gap-3">
+          <Link
+            to="/assessment"
+            className="inline-flex items-center gap-2 rounded-2xl bg-[#1B332C] px-5 py-3 text-xs font-bold text-[#E8C547] border border-[#C4952A]/40 shadow-md hover:bg-[#2E4F42] hover:text-white hover:-translate-y-0.5 transition-all duration-300 group"
+          >
+            <span className="text-base group-hover:scale-110 transition-transform">⚡</span>
+            <span>Take Assessment</span>
+            <span>→</span>
+          </Link>
+
+          <div className="flex items-center gap-3 rounded-2xl bg-[#EDE6D3] px-4 py-3 text-[#1B332C] border border-[#2E4F42]/15 shadow-2xs hover:-translate-y-0.5 transition-all duration-300 group cursor-default">
+            <span className="text-xl group-hover:scale-110 transition-transform duration-200">🔥</span>
             <div className="flex flex-col">
-              <span className="font-['Space_Mono'] text-xs uppercase tracking-widest text-[#E8C547] font-bold">
+              <span className="font-mono text-xs uppercase tracking-wider text-[#1B332C] font-bold">
                 {streak} DAY STREAK
               </span>
-              <span className="font-['Space_Mono'] text-[11px] text-[#8B9690] mt-0.5">
+              <span className="font-mono text-[10px] text-[#5B6B5F]">
                 Consistency Multiplier 1.4x
               </span>
             </div>

@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Assessment from "../models/Assessment.js";
 import AttemptResult from "../models/AttemptResult.js";
 import { generatePersonalizedRoadmap } from "./analyticsController.js";
+import { generateQuestions } from "../services/geminiService.js";
 
 // Active in-memory attempt sessions cache for server-side evaluation
 const activeAttemptSessions = new Map();
@@ -27,7 +28,7 @@ const serialize = (assessment, includeAnswers = false) => {
 };
 
 export async function listPublished(req, res) {
-  const assessments = await Assessment.find({ status: "published" }).sort({ publishedAt: -1, createdAt: -1 });
+  const assessments = await Assessment.find({ status: "published", isAiGenerated: { $ne: true } }).sort({ publishedAt: -1, createdAt: -1 });
   res.json({ success: true, assessments: assessments.map((a) => serialize(a, false)) });
 }
 
@@ -54,6 +55,10 @@ export async function getPublished(req, res) {
     return res.status(404).json({ success: false, message: "Assessment not found." });
   }
 
+  if (assessment.isAiGenerated && (!req.user || String(assessment.userId) !== String(req.user._id))) {
+    return res.status(403).json({ success: false, message: "You do not have permission to view this assessment." });
+  }
+
   res.json({ success: true, assessment: serialize(assessment, false) });
 }
 
@@ -74,6 +79,14 @@ export async function startAttempt(req, res) {
       ],
       status: "published",
     });
+  }
+
+  if (!assessment) {
+    return res.status(404).json({ success: false, message: "Assessment not found." });
+  }
+
+  if (assessment.isAiGenerated && (!req.user || String(assessment.userId) !== String(req.user._id))) {
+    return res.status(403).json({ success: false, message: "You do not have permission to start this assessment." });
   }
 
   const attemptId = `att_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
@@ -651,4 +664,258 @@ export async function removeAssessment(req, res) {
   const assessment = await Assessment.findByIdAndDelete(req.params.id);
   if (!assessment) return res.status(404).json({ success: false, message: "Assessment not found." });
   res.json({ success: true, message: "Assessment deleted." });
+}
+
+/**
+ * FEATURE 1 & 2: GENERATE AND SAVE AI ASSESSMENT
+ */
+export async function generateAIAssessment(req, res) {
+  try {
+    const { field, topic, difficulty, count } = req.body;
+    
+    if (!field || !topic || !difficulty || !count) {
+      return res.status(400).json({ success: false, message: "Missing required fields" });
+    }
+
+    const questionCount = parseInt(count, 10);
+    if (isNaN(questionCount) || questionCount < 1 || questionCount > 20) {
+      return res.status(400).json({ success: false, message: "Count must be a number between 1 and 20" });
+    }
+
+    // Call Gemini API
+    const generatedData = await generateQuestions(field, topic, difficulty, questionCount);
+    
+    if (!generatedData || !generatedData.questions || !Array.isArray(generatedData.questions) || generatedData.questions.length === 0) {
+      return res.status(500).json({ success: false, message: "AI returned invalid format." });
+    }
+
+    // Map AI questions to our Assessment schema
+    const formattedQuestions = generatedData.questions.map((q) => {
+      // Ensure all required fields exist
+      const qDifficulty = q.difficulty || difficulty;
+      const qTopic = q.topic || topic;
+      return {
+        type: "mcq",
+        difficulty: ["Easy", "Medium", "Hard"].includes(qDifficulty) ? qDifficulty : "Medium",
+        concept: qTopic,
+        question: q.question,
+        options: q.options,
+        answer: q.correctAnswer,
+        context: q.explanation || "",
+      };
+    });
+
+    // Create and save new assessment
+    const assessment = new Assessment({
+      title: `${topic} (${difficulty})`,
+      description: `AI-generated assessment for ${field} focusing on ${topic}.`,
+      field: field,
+      category: topic,
+      difficulty: difficulty,
+      duration: questionCount * 2, // 2 mins per question approx
+      status: "published",
+      isAiGenerated: true,
+      userId: req.user._id,
+      createdBy: req.user._id,
+      questions: formattedQuestions,
+    });
+
+    await assessment.save();
+
+    res.json({ success: true, assessmentId: assessment._id });
+  } catch (error) {
+    console.error("Generate AI Assessment Error:", error);
+    res.status(500).json({ success: false, message: error.message || "Failed to generate AI assessment" });
+  }
+}
+
+/**
+ * FEATURE 4 & 6: PERSONALIZED ASSESSMENTS DASHBOARD
+ */
+export async function getPersonalizedAssessments(req, res) {
+  try {
+    const userId = req.user._id;
+    const userField = req.user.selectedField || "Software Development";
+
+    // 1. Get user's past attempts
+    const attempts = await AttemptResult.find({ userId }).sort({ completedAt: -1 }).lean();
+    
+    // 2. Identify weak topics (average score < 60%)
+    const topicScores = {};
+    attempts.forEach(attempt => {
+      const cat = attempt.assessmentCategory || "General";
+      if (!topicScores[cat]) {
+        topicScores[cat] = { total: 0, count: 0 };
+      }
+      topicScores[cat].total += attempt.scorePercent;
+      topicScores[cat].count += 1;
+    });
+
+    const weakTopics = [];
+    for (const [topic, data] of Object.entries(topicScores)) {
+      const avg = data.total / data.count;
+      if (avg < 60) weakTopics.push(topic);
+    }
+
+    // 3. Find relevant published assessments (excluding AI generated ones for other users)
+    const baseQuery = { 
+      status: "published",
+      $or: [
+        { isAiGenerated: false },
+        { isAiGenerated: true, userId: userId }
+      ]
+    };
+
+    // First try to find assessments matching user's field OR weak topics
+    const queryConds = [{ field: new RegExp(userField, "i") }];
+    if (weakTopics.length > 0) {
+      queryConds.push({ category: { $in: weakTopics.map(t => new RegExp(t, "i")) } });
+    }
+
+    let recommended = await Assessment.find({
+      ...baseQuery,
+      $or: queryConds
+    }).limit(6).lean();
+
+    // If not enough recommendations, fallback to general ones in the field
+    if (recommended.length < 3) {
+      const additional = await Assessment.find({
+        ...baseQuery,
+        field: new RegExp(userField, "i"),
+        _id: { $nin: recommended.map(r => r._id) }
+      }).limit(6 - recommended.length).lean();
+      recommended = [...recommended, ...additional];
+    }
+
+    // 4. Attach recommendation reasons
+    const formattedRecommendations = recommended.map(assessment => {
+      let reason = `Recommended based on your field: ${userField}`;
+      const isWeak = weakTopics.some(wt => 
+        new RegExp(wt, "i").test(assessment.category) || 
+        new RegExp(wt, "i").test(assessment.title)
+      );
+      
+      if (isWeak) {
+        reason = `Recommended because ${assessment.category} is one of your weak areas.`;
+      } else if (assessment.isAiGenerated) {
+        reason = `Your generated AI assessment.`;
+      }
+
+      return {
+        ...serialize(assessment, false),
+        recommendationReason: reason
+      };
+    });
+
+    res.json({
+      success: true,
+      assessments: formattedRecommendations,
+      weakTopics
+    });
+  } catch (error) {
+    console.error("Personalized Assessments Error:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch personalized assessments" });
+  }
+}
+
+export async function generateDailyAIAssessment(req, res) {
+  try {
+    const userId = req.user._id;
+    const userField = req.user.selectedField || "Software Development";
+    
+    // Calculate today's string
+    const todayStr = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+    const dailyCategory = `DailyChallenge-${todayStr}`;
+
+    // 1. Check if one already exists for today
+    const existing = await Assessment.findOne({
+      userId,
+      isAiGenerated: true,
+      category: dailyCategory
+    });
+
+    if (existing) {
+      return res.json({ success: true, assessmentId: existing._id });
+    }
+
+    // 2. We need to generate one. Let's find weak topics to focus on.
+    const attempts = await AttemptResult.find({ userId }).lean();
+    const topicScores = {};
+    attempts.forEach(attempt => {
+      const cat = attempt.assessmentCategory || "General";
+      if (!topicScores[cat]) topicScores[cat] = { total: 0, count: 0 };
+      topicScores[cat].total += attempt.scorePercent;
+      topicScores[cat].count += 1;
+    });
+
+    const weakTopics = [];
+    for (const [topic, data] of Object.entries(topicScores)) {
+      if ((data.total / data.count) < 60) weakTopics.push(topic);
+    }
+    
+    const targetTopic = weakTopics.length > 0 ? weakTopics[0] : userField;
+
+    // 3. Generate 5 questions
+    const generatedData = await generateQuestions(userField, targetTopic, "Medium", 5);
+    
+    if (!generatedData || !generatedData.questions || !Array.isArray(generatedData.questions) || generatedData.questions.length === 0) {
+      return res.status(500).json({ success: false, message: "AI returned invalid format." });
+    }
+
+    const formattedQuestions = generatedData.questions.map((q) => {
+      return {
+        type: "mcq",
+        difficulty: ["Easy", "Medium", "Hard"].includes(q.difficulty) ? q.difficulty : "Medium",
+        concept: q.topic || targetTopic,
+        question: q.question,
+        options: q.options,
+        answer: q.correctAnswer,
+        context: q.explanation || "",
+      };
+    });
+
+    // 4. Save
+    const assessment = new Assessment({
+      title: `Daily Challenge - ${todayStr}`,
+      description: `Your personalized daily challenge for ${targetTopic}.`,
+      field: userField,
+      category: dailyCategory,
+      difficulty: "Mixed",
+      duration: 10,
+      status: "published",
+      isAiGenerated: true,
+      userId: userId,
+      createdBy: userId,
+      questions: formattedQuestions,
+    });
+
+    await assessment.save();
+
+    return res.json({ success: true, assessmentId: assessment._id });
+  } catch (error) {
+    console.error("Generate Daily AI Error:", error);
+    res.status(500).json({ success: false, message: error.message || "Failed to generate daily AI assessment" });
+  }
+}
+
+export async function getDailyAssessmentStatus(req, res) {
+  try {
+    const userId = req.user._id;
+    
+    // Find all attempt results that are daily challenges
+    const attempts = await AttemptResult.find({
+      userId,
+      assessmentCategory: { $regex: /^DailyChallenge-/ }
+    }).lean();
+
+    const completedDates = attempts.map(a => {
+      // Extract YYYY-MM-DD from "DailyChallenge-YYYY-MM-DD"
+      return a.assessmentCategory.replace("DailyChallenge-", "");
+    });
+
+    return res.json({ success: true, completedDates: [...new Set(completedDates)] });
+  } catch (error) {
+    console.error("Daily Status Error:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch daily status" });
+  }
 }

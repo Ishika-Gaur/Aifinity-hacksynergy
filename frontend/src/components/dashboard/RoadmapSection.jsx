@@ -41,7 +41,7 @@ export default function RoadmapSection({ roadmap }) {
   };
 
   return (
-    <div className="rounded-md bg-[#FBF8F0] p-6 sm:p-8 border border-[#2E4F42]/12 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 flex flex-col gap-6">
+    <div className="rounded-2xl bg-[#FBF8F0] p-6 sm:p-8 border border-[#2E4F42]/12 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="font-sans text-xl sm:text-2xl font-bold text-[#1B332C]">
@@ -54,7 +54,7 @@ export default function RoadmapSection({ roadmap }) {
 
         <Link
           to={roadmap?.href || "/roadmap"}
-          className="inline-flex items-center justify-center gap-2 rounded-md font-medium transition-all duration-200 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none bg-[var(--color-primary-600)] text-white border border-[var(--color-primary-600)] hover:bg-[var(--color-primary-700)] hover:border-[var(--color-primary-700)] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] px-3.5 py-1.5 text-sm hover:scale-105 transition-transform shrink-0"
+          className="inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200 bg-[#1B332C] text-[#E8C547] hover:bg-[#2E4F42] hover:text-white px-4 py-2 text-xs shadow-xs hover:scale-105 transition-transform shrink-0"
         >
           {roadmap?.cta || "Continue Roadmap"} →
         </Link>
@@ -83,7 +83,7 @@ export default function RoadmapSection({ roadmap }) {
                 {/* Status Dot / Emblem */}
                 <div className="relative z-10 flex items-center justify-start sm:justify-center">
                   <div
-                    className={`flex h-9 w-9 items-center justify-center rounded-full font-['Space_Mono'] font-bold text-sm border transition-transform duration-200 group-hover:scale-110 ${meta.circleBg}`}
+                    className={`flex h-9 w-9 items-center justify-center rounded-full font-mono font-bold text-sm border transition-transform duration-200 group-hover:scale-110 shadow-2xs ${meta.circleBg}`}
                   >
                     {meta.icon}
                   </div>
@@ -91,16 +91,16 @@ export default function RoadmapSection({ roadmap }) {
 
                 {/* Step Information Card with Hover Feedback */}
                 <div
-                  className={`rounded p-4 border transition-all duration-200 ${meta.cardBg}`}
+                  className={`rounded-xl p-4 border transition-all duration-200 ${meta.cardBg}`}
                 >
-                  <span className="font-['Space_Mono'] text-[10px] uppercase tracking-wider font-bold block mb-1">
+                  <span className="font-mono text-[10px] uppercase tracking-wider font-bold block mb-1 opacity-80">
                     Step 0{idx + 1}
                   </span>
-                  <h4 className="font-sans text-base font-bold leading-tight">
+                  <h4 className="font-sans text-sm sm:text-base font-bold leading-tight">
                     {item.title}
                   </h4>
                   <span
-                    className={`inline-block font-['Space_Mono'] text-xs font-semibold mt-2 ${meta.textColor}`}
+                    className={`inline-block font-mono text-xs font-semibold mt-2 ${meta.textColor}`}
                   >
                     {meta.label}
                   </span>

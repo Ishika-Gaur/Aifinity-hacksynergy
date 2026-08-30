@@ -122,6 +122,10 @@ export const assessmentApi = {
   create: (assessment) => request("/assessments/admin", { method: "POST", body: JSON.stringify(assessment) }),
   update: (id, assessment) => request(`/assessments/admin/${id}`, { method: "PUT", body: JSON.stringify(assessment) }),
   remove: (id) => request(`/assessments/admin/${id}`, { method: "DELETE" }),
+  getPersonalized: () => request("/assessments/personalized"),
+  generateAI: (payload) => request("/assessments/generate-ai", { method: "POST", body: JSON.stringify(payload) }),
+  generateDailyAI: () => request("/assessments/daily-generate", { method: "POST" }),
+  getDailyStatus: () => request("/assessments/daily-status"),
 };
 
 export const analyticsApi = {

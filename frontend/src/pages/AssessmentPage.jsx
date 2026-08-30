@@ -3,13 +3,14 @@ import { Link } from "react-router-dom";
 import Section from "../components/Section";
 import SectionHeading from "../components/SectionHeading";
 import Button from "../components/Button";
+import Calendar from "../components/Calendar";
 import { ArrowRight } from "lucide-react";
 import {
   TYPE_FILTERS,
   DIFFICULTY_FILTERS,
   getUserProfile,
   formatType,
-} from "../data/assessments";
+} from "../utils/constants";
 import { assessmentApi, dashboardApi } from "../services/api";
 
 const ITEMS_PER_PAGE = 6;
@@ -170,7 +171,7 @@ function AssessmentProgressCard({ completedCount, availableCount, inProgressCoun
       </span>
 
       <div className="flex flex-col items-center gap-1">
-        <span className="font-['Kalam'] text-4xl sm:text-5xl font-bold text-[#1B332C]">
+        <span className="font-sans text-4xl sm:text-5xl font-extrabold text-[#1B332C]">
           {loading ? "..." : completedCount}
         </span>
         <span className="text-xs font-semibold uppercase tracking-wider text-[#5B6B5F]">
@@ -246,6 +247,11 @@ function AssessmentCard({ assessment }) {
         <p className="line-clamp-2 text-sm leading-relaxed text-[var(--color-text-muted)]">
           {assessment.description}
         </p>
+        {assessment.recommendationReason && (
+          <p className="mt-2 text-xs font-semibold text-[var(--color-primary-600)]">
+            {assessment.recommendationReason}
+          </p>
+        )}
         <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[var(--color-text-muted)]">
           <span>{assessment.questions.length} questions</span>
           <span>·</span>
@@ -484,7 +490,19 @@ export default function AssessmentPage() {
   const [activeSection, setActiveSection] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [assessments, setAssessments] = useState([]);
+  const [recommended, setRecommended] = useState([]);
+  const [weakTopics, setWeakTopics] = useState([]);
+  const [completedDailyDates, setCompletedDailyDates] = useState([]);
   const [loadError, setLoadError] = useState("");
+
+  // AI Generation State
+  const [isAIGenerating, setIsAIGenerating] = useState(false);
+  const [aiField, setAiField] = useState("");
+  const [aiTopic, setAiTopic] = useState("");
+  const [aiDifficulty, setAiDifficulty] = useState("Medium");
+  const [aiCount, setAiCount] = useState(5);
+  const [aiError, setAiError] = useState("");
+  const [isGeneratingDaily, setIsGeneratingDaily] = useState(false);
 
   const [userStats, setUserStats] = useState({
     completedCount: 0,
@@ -502,6 +520,19 @@ export default function AssessmentPage() {
       if (!isMounted) return;
       if (result.success) setAssessments(result.assessments);
       else setLoadError(result.error || "Assessments could not be loaded.");
+    });
+
+    assessmentApi.getDailyStatus().then((result) => {
+      if (!isMounted) return;
+      if (result.success) setCompletedDailyDates(result.completedDates || []);
+    });
+
+    assessmentApi.getPersonalized().then((result) => {
+      if (!isMounted) return;
+      if (result.success) {
+        setRecommended(result.assessments || []);
+        setWeakTopics(result.weakTopics || []);
+      }
     });
 
     return () => {
@@ -568,16 +599,81 @@ export default function AssessmentPage() {
   }, []);
 
   const categories = useMemo(() => ["All", ...new Set(assessments.map((assessment) => assessment.category))], [assessments]);
-  const recommended = useMemo(() => {
-    const fieldMatches = assessments.filter((assessment) => assessment.field === profile.field);
-    return (fieldMatches.length ? fieldMatches : assessments).slice(0, 6);
-  }, [assessments, profile]);
-  const dailyAssessments = useMemo(() => assessments.map((assessment, index) => ({
-    ...assessment,
-    day: index + 1,
-    isToday: index === 0,
-    status: "Available",
-  })), [assessments]);
+  
+  // Removed static recommended logic since we fetch it from backend now
+
+  const handleGenerateAI = async (e) => {
+    e.preventDefault();
+    if (!aiField || !aiTopic) {
+      setAiError("Please fill out Field and Topic.");
+      return;
+    }
+    setIsAIGenerating(true);
+    setAiError("");
+    
+    try {
+      const res = await assessmentApi.generateAI({
+        field: aiField,
+        topic: aiTopic,
+        difficulty: aiDifficulty,
+        count: aiCount
+      });
+      if (res.success && res.assessmentId) {
+        window.location.href = `/assessment/${res.assessmentId}`;
+      } else {
+        setAiError(res.error || res.message || "Failed to generate assessment.");
+      }
+    } catch (err) {
+      setAiError("An error occurred. Please try again.");
+    } finally {
+      setIsAIGenerating(false);
+    }
+  };
+
+  const handleCategorySelect = (c) => {
+    setAiField(profile.field || "Software Development");
+    setAiTopic(c);
+    const el = document.getElementById("generate-ai");
+    if (el) el.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleGenerateDaily = async () => {
+    setIsGeneratingDaily(true);
+    try {
+      const res = await assessmentApi.generateDailyAI();
+      if (res.success && res.assessmentId) {
+        window.location.href = `/assessment/${res.assessmentId}`;
+      } else {
+        alert(res.error || res.message || "Failed to start daily challenge");
+      }
+    } catch (err) {
+      alert("Error starting daily challenge");
+    } finally {
+      setIsGeneratingDaily(false);
+    }
+  };
+
+  // Build a full-month day array so the Calendar sidebar shows every day, not just 3 assessments
+  const dailyAssessments = useMemo(() => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const today = now.getDate();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    return Array.from({ length: daysInMonth }, (_, i) => {
+      const day = i + 1;
+      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const isCompleted = completedDailyDates.includes(dateStr);
+      return {
+        id: `day-${day}`,
+        day,
+        isToday: day === today,
+        title: `Day ${day}`,
+        status: isCompleted ? "Completed" : day === today ? "Available" : day < today ? "Locked" : "Available",
+      };
+    });
+  }, [completedDailyDates]);
 
   const completedDays = dailyAssessments.filter((d) => d.status === "Completed").length;
   const todayDay = new Date().getDate();
@@ -586,6 +682,7 @@ export default function AssessmentPage() {
     () => dailyAssessments.find((d) => d.isToday),
     [dailyAssessments]
   );
+
 
   // Generate actual calendar for current month
   const monthlyCalendar = useMemo(() => {
@@ -703,7 +800,7 @@ export default function AssessmentPage() {
 
                   {/* Main Heading */}
                   <div>
-                    <h1 className="font-['Kalam'] text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#1B332C] leading-[1.15]">
+                    <h1 className="font-sans text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#1B332C] leading-[1.15]">
                       Test Your Skills. <br className="hidden sm:inline" />
                       <span className="text-[#C4952A]">Discover Your Strengths.</span>
                     </h1>
@@ -764,7 +861,7 @@ export default function AssessmentPage() {
                     category={c}
                     count={count}
                     index={i}
-                    onSelect={setCategory}
+                    onSelect={() => handleCategorySelect(c)}
                   />
                 );
               })}
@@ -775,7 +872,8 @@ export default function AssessmentPage() {
           <div className="mb-10 xl:hidden">
             <Calendar
               profile={profile}
-              attempts={userStats.history}
+              dailyAssessments={dailyAssessments}
+              completedDays={completedDays}
             />
           </div>
 
@@ -785,6 +883,70 @@ export default function AssessmentPage() {
             </div>
           )}
 
+          {/* GENERATE AI ASSESSMENT */}
+          <Section id="generate-ai" className="scroll-mt-24 mb-10">
+            <SectionHeading
+              title="Generate AI Assessment"
+              subtitle="Generate customized multiple-choice questions on any topic using Gemini AI."
+            />
+            <div className="mt-6 rounded-2xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
+              <form onSubmit={handleGenerateAI} className="grid gap-6 sm:grid-cols-2">
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-[var(--color-text-h)]">Field</label>
+                  <input
+                    type="text"
+                    required
+                    value={aiField}
+                    onChange={(e) => setAiField(e.target.value)}
+                    placeholder="e.g., Backend Development"
+                    className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-[var(--color-primary-500)] focus:ring-1 focus:ring-[var(--color-primary-500)]"
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-[var(--color-text-h)]">Topic / Technology</label>
+                  <input
+                    type="text"
+                    required
+                    value={aiTopic}
+                    onChange={(e) => setAiTopic(e.target.value)}
+                    placeholder="e.g., Node.js"
+                    className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-[var(--color-primary-500)] focus:ring-1 focus:ring-[var(--color-primary-500)]"
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-[var(--color-text-h)]">Difficulty</label>
+                  <select
+                    value={aiDifficulty}
+                    onChange={(e) => setAiDifficulty(e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-[var(--color-primary-500)] focus:ring-1 focus:ring-[var(--color-primary-500)]"
+                  >
+                    <option value="Easy">Easy</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Hard">Hard</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-[var(--color-text-h)]">Number of Questions</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="20"
+                    required
+                    value={aiCount}
+                    onChange={(e) => setAiCount(parseInt(e.target.value))}
+                    className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-[var(--color-primary-500)] focus:ring-1 focus:ring-[var(--color-primary-500)]"
+                  />
+                </div>
+                <div className="col-span-full mt-2">
+                  {aiError && <p className="mb-4 text-sm text-rose-600">{aiError}</p>}
+                  <Button type="submit" disabled={isAIGenerating} className="w-full sm:w-auto">
+                    {isAIGenerating ? "Generating with Gemini..." : "Generate AI Assessment"}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </Section>
+
           {/* RECOMMENDED FOR YOU */}
           <Section id="recommended" className="scroll-mt-24">
             <SectionHeading
@@ -792,10 +954,20 @@ export default function AssessmentPage() {
               subtitle={`Recommended for your ${profile.careerGoal || "goal"} — based on your field (${profile.field || "Not set"}) and skills: ${profile.skills.join(", ")}.`}
             />
             <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+              {weakTopics.map((topic) => (
+                <div key={`weak-${topic}`} className="group flex flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-amber-50 shadow-sm transition-shadow hover:shadow-md p-5">
+                  <span className="text-[11px] font-semibold uppercase tracking-wide text-amber-700">Needs Improvement</span>
+                  <h3 className="mt-1 text-lg font-bold leading-snug text-amber-900">{topic}</h3>
+                  <p className="mt-2 text-sm text-amber-800/80 mb-4">Your recent scores in this topic are below average. Practice with AI to improve.</p>
+                  <Button onClick={() => handleCategorySelect(topic)} className="mt-auto w-full" variant="outline">
+                    Generate AI Assessment &rarr;
+                  </Button>
+                </div>
+              ))}
               {recommended.map((assessment) => (
                 <AssessmentCard key={assessment.id} assessment={assessment} />
               ))}
-              {recommended.length === 0 && (
+              {recommended.length === 0 && weakTopics.length === 0 && (
                 <p className="col-span-full text-center text-sm text-[var(--color-text-muted)]">
                   No recommendations yet — complete onboarding to get personalized picks.
                 </p>
@@ -822,12 +994,12 @@ export default function AssessmentPage() {
                     Keep your streak alive — finish today's challenge before it locks tomorrow.
                   </p>
                   <Button
-                    as={Link}
-                    to={`/assessment/${todayAssessment.id}`}
+                    onClick={handleGenerateDaily}
+                    disabled={isGeneratingDaily}
                     size="sm"
                     className="mt-6 !bg-white !text-[var(--color-text-h)] hover:!bg-white/90"
                   >
-                    Start Today's Challenge
+                    {isGeneratingDaily ? "Generating..." : "Start Today's Challenge"}
                   </Button>
                 </div>
               ) : (
@@ -959,9 +1131,13 @@ export default function AssessmentPage() {
                 <AssessmentCard key={assessment.id} assessment={assessment} />
               ))}
               {paginatedList.length === 0 && (
-                <p className="col-span-full text-center text-sm text-[var(--color-text-muted)]">
-                  No assessments match these filters yet.
-                </p>
+                <div className="col-span-full rounded-2xl border border-dashed border-[var(--color-border)] p-10 text-center">
+                  <p className="text-sm font-medium text-[var(--color-text-h)]">No public assessments match these filters yet.</p>
+                  <p className="mt-1 text-sm text-[var(--color-text-muted)]">Use the AI Generator above to create a customized assessment!</p>
+                  <Button onClick={() => handleCategorySelect(category === "All" ? "Node.js" : category)} className="mt-6" variant="outline">
+                    Generate AI Assessment
+                  </Button>
+                </div>
               )}
             </div>
 
@@ -988,9 +1164,10 @@ export default function AssessmentPage() {
 
         {/* ---------------- RIGHT SIDEBAR (streak calendar) ---------------- */}
         <aside className="sticky top-20 hidden h-fit w-64 shrink-0 self-start pt-14 xl:block">
-          <StreakSidebar
+          <Calendar
             profile={profile}
-            attempts={userStats.history}
+            dailyAssessments={dailyAssessments}
+            completedDays={completedDays}
           />
         </aside>
       </div>

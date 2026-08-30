@@ -51,7 +51,7 @@ export default function LearningProgressChart({ seriesData }) {
   const maxItem = [...data].sort((a, b) => b.score - a.score)[0];
 
   return (
-    <div className="rounded-md bg-[#FBF8F0] p-6 border border-[#2E4F42]/12 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 flex flex-col gap-6">
+    <div className="rounded-2xl bg-[#FBF8F0] p-6 sm:p-8 border border-[#2E4F42]/12 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 flex flex-col gap-6">
       {/* Chart Top Header & Timeframe Switcher */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -63,8 +63,8 @@ export default function LearningProgressChart({ seriesData }) {
           </p>
         </div>
 
-        {/* Timeframe selector (Space Mono) */}
-        <div className="flex items-center gap-1 rounded bg-[#EDE6D3] p-1 border border-[#2E4F42]/10 w-fit">
+        {/* Timeframe selector */}
+        <div className="flex items-center gap-1 rounded-xl bg-[#EDE6D3] p-1 border border-[#2E4F42]/10 w-fit">
           {[
             { id: "7D", label: "7 DAYS" },
             { id: "30D", label: "30 DAYS" },
@@ -76,7 +76,7 @@ export default function LearningProgressChart({ seriesData }) {
                 setTimeframe(tf.id);
                 setActivePoint(null);
               }}
-              className={`rounded px-3 py-1 text-xs font-['Space_Mono'] font-bold transition-all duration-200 cursor-pointer ${
+              className={`rounded-lg px-3 py-1 text-xs font-mono font-bold transition-all duration-200 cursor-pointer ${
                 timeframe === tf.id
                   ? "bg-[#1B332C] text-[#E8C547] shadow-xs"
                   : "text-[#5B6B5F] hover:text-[#1B332C] hover:bg-[#F1EDE1]"
@@ -89,27 +89,27 @@ export default function LearningProgressChart({ seriesData }) {
       </div>
 
       {/* Visual Chart Canvas */}
-      <div className="relative w-full overflow-visible rounded bg-[#F1EDE1]/50 p-4 border border-[#2E4F42]/08">
+      <div className="relative w-full overflow-visible rounded-xl bg-[#F1EDE1]/50 p-4 border border-[#2E4F42]/08">
         {/* Floating Tooltip when point is hovered */}
         {activePoint && (
           <div
-            className="absolute z-30 pointer-events-none rounded bg-[#1B332C] px-3 py-1.5 text-white shadow-md border border-[#E8C547]/40 -translate-x-1/2 -translate-y-full transition-all duration-150"
+            className="absolute z-30 pointer-events-none rounded-xl bg-[#1B332C] px-3.5 py-2 text-white shadow-md border border-[#E8C547]/40 -translate-x-1/2 -translate-y-full transition-all duration-150"
             style={{
               left: `${(activePoint.x / chartWidth) * 100}%`,
               top: `${(activePoint.y / chartHeight) * 100 - 8}%`,
             }}
           >
-            <div className="font-['Space_Mono'] text-[10px] uppercase text-[#E8C547]">
+            <div className="font-mono text-[10px] uppercase text-[#E8C547]">
               {activePoint.label}
             </div>
-            <div className="font-['Kalam'] text-sm font-bold text-white">
+            <div className="font-sans text-sm font-bold text-white">
               {activePoint.score}% Accuracy
             </div>
           </div>
         )}
 
         {/* Y-Axis Label Indicators */}
-        <div className="absolute left-2 top-4 bottom-8 flex flex-col justify-between text-[10px] font-['Space_Mono'] text-[#8B9690] pointer-events-none">
+        <div className="absolute left-2 top-4 bottom-8 flex flex-col justify-between text-[10px] font-mono text-[#8B9690] pointer-events-none">
           <span>100%</span>
           <span>75%</span>
           <span>50%</span>

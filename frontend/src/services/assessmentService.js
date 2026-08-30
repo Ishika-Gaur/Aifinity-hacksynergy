@@ -1,4 +1,3 @@
-import { ASSESSMENTS } from "../data/assessments";
 import { assessmentApi } from "./api";
 
 // Private closure cache for offline / fallback attempt sessions
@@ -269,26 +268,8 @@ export async function createAttemptSession(assessmentId) {
     }
   } catch (_) {}
 
-  // 2. Robust Local Fallback Resolution
-  const sId = String(assessmentId || "").toLowerCase().trim();
-  let rawAssessment = ASSESSMENTS.find((a) => {
-    const aId = String(a.id || a._id || "").toLowerCase().trim();
-    return aId === sId || aId.includes(sId) || sId.includes(aId);
-  });
-
-  // Fallback by title or category if exact ID match is not found
-  if (!rawAssessment) {
-    rawAssessment = ASSESSMENTS.find((a) => {
-      const title = String(a.title || "").toLowerCase();
-      const field = String(a.field || "").toLowerCase();
-      return title.includes(sId) || field.includes(sId);
-    });
-  }
-
-  // Guaranteed fallback to default assessment so questions ALWAYS render smoothly
-  if (!rawAssessment) {
-    rawAssessment = ASSESSMENTS[0];
-  }
+// Fallback removed. If backend fails, throw error.
+  throw new Error("Failed to start assessment from server.");
 
   const attemptId = `att_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   const answersMap = new Map();
@@ -341,18 +322,9 @@ export async function createAttemptSession(assessmentId) {
  * Validates and submits assessment answers server-side (or via session validator).
  */
 export async function submitAttemptSession(assessmentId, attemptId, responses, elapsedSeconds, violations = []) {
-  const sId = String(assessmentId || "").toLowerCase().trim();
-  let rawAssessment = ASSESSMENTS.find((a) => {
-    const aId = String(a.id || a._id || "").toLowerCase().trim();
-    return aId === sId || aId.includes(sId) || sId.includes(aId);
-  });
-  if (!rawAssessment) {
-    rawAssessment = ASSESSMENTS[0];
-  }
-
-  const title = rawAssessment?.title || "Assessment Attempt";
-  const category = rawAssessment?.category || rawAssessment?.field || "General";
-  const field = rawAssessment?.field || "";
+  const title = "Assessment Attempt";
+  const category = "General";
+  const field = "";
 
   // 1. Try backend API first if available
   try {
@@ -372,7 +344,7 @@ export async function submitAttemptSession(assessmentId, attemptId, responses, e
 
   // 2. Fallback: Validate against private closure session cache
   const session = attemptSessionCache.get(attemptId);
-  const questions = session ? session.questions : (rawAssessment ? rawAssessment.questions : []);
+  const questions = session ? session.questions : [];
   const answersMap = session ? session.answersMap : null;
 
   const questionResults = [];

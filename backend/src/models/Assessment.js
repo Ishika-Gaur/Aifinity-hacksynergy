@@ -24,6 +24,8 @@ const assessmentSchema = new mongoose.Schema(
     duration: { type: Number, required: true, min: 1 },
     icon: { type: String, default: "◆" },
     status: { type: String, enum: ["draft", "published"], default: "draft", index: true },
+    isAiGenerated: { type: Boolean, default: false },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: false },
     questions: { type: [questionSchema], validate: [(v) => v.length > 0, "At least one question is required"] },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     publishedAt: Date,

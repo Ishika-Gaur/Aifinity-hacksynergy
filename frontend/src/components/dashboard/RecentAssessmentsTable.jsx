@@ -5,37 +5,46 @@ export default function RecentAssessmentsTable({ assessments }) {
   const items = Array.isArray(assessments) ? assessments : [];
 
   return (
-    <div className="rounded-md bg-[#FBF8F0] p-6 sm:p-8 border border-[#2E4F42]/12 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 flex flex-col gap-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <h2 className="font-sans text-xl sm:text-2xl font-bold text-[#1B332C]">
-          RECENT ASSESSMENTS
-        </h2>
-        <span className="font-['Space_Mono'] text-xs text-[#5B6B5F]">
-          {items.length > 0 ? `Last ${items.length} evaluated session${items.length !== 1 ? "s" : ""}` : "No sessions yet"}
-        </span>
+    <div className="rounded-2xl bg-[#FBF8F0] p-6 sm:p-8 border border-[#2E4F42]/12 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 flex flex-col gap-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="font-sans text-xl sm:text-2xl font-bold text-[#1B332C]">
+            RECENT ASSESSMENTS
+          </h2>
+          <p className="font-mono text-xs text-[#5B6B5F] mt-0.5">
+            {items.length > 0 ? `Last ${items.length} evaluated session${items.length !== 1 ? "s" : ""}` : "No sessions yet"}
+          </p>
+        </div>
+        <Link
+          to="/assessment"
+          className="inline-flex items-center gap-1.5 rounded-xl bg-[#1B332C] px-4 py-2 text-xs font-bold text-[#E8C547] hover:bg-[#2E4F42] hover:text-white shadow-xs transition-all duration-200 shrink-0"
+        >
+          <span>⚡ Take Assessment</span>
+          <span>→</span>
+        </Link>
       </div>
 
       {items.length === 0 ? (
         /* Empty state */
-        <div className="flex flex-col items-center justify-center rounded border border-[#2E4F42]/10 bg-[#F1EDE1]/40 p-10 gap-3 text-center">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-[#2E4F42]/10 bg-[#F1EDE1]/40 p-10 gap-3 text-center">
           <span className="text-3xl">📝</span>
-          <p className="font-['Kalam'] text-lg text-[#1B332C]">No assessments completed yet.</p>
+          <p className="font-sans text-lg font-bold text-[#1B332C]">No assessments completed yet.</p>
           <p className="text-sm text-[#5B6B5F] max-w-xs">
             Take your first assessment to start building your learning profile.
           </p>
           <Link
             to="/assessment"
-            className="mt-2 inline-flex items-center gap-2 font-['Space_Mono'] text-xs font-bold text-[#1B332C] hover:text-[#C4952A] transition-colors"
+            className="mt-2 inline-flex items-center gap-2 font-mono text-xs font-bold text-[#1B332C] hover:text-[#C4952A] transition-colors"
           >
             Browse Assessments →
           </Link>
         </div>
       ) : (
         /* Table Container with Responsive Horizontal Scroll */
-        <div className="w-full overflow-x-auto rounded border border-[#2E4F42]/10 bg-[#F1EDE1]/40">
+        <div className="w-full overflow-x-auto rounded-xl border border-[#2E4F42]/10 bg-[#F1EDE1]/40">
           <table className="w-full text-left border-collapse text-sm min-w-[500px]">
             <thead>
-              <tr className="border-b border-[#2E4F42]/15 bg-[#EDE6D3] font-['Space_Mono'] text-xs font-bold text-[#1B332C]">
+              <tr className="border-b border-[#2E4F42]/15 bg-[#EDE6D3] font-mono text-xs font-bold text-[#1B332C]">
                 <th className="py-3 px-4 uppercase tracking-wider">ASSESSMENT</th>
                 <th className="py-3 px-4 uppercase tracking-wider text-center">SCORE</th>
                 <th className="py-3 px-4 uppercase tracking-wider text-center">DATE</th>
@@ -56,15 +65,15 @@ export default function RecentAssessmentsTable({ assessments }) {
                         {row.name}
                       </Link>
                     </td>
-                    <td className="py-3.5 px-4 text-center font-['Kalam'] font-bold text-lg text-[#1B332C]">
+                    <td className="py-3.5 px-4 text-center font-sans font-bold text-base text-[#1B332C]">
                       {row.score}
                     </td>
-                    <td className="py-3.5 px-4 text-center font-['Space_Mono'] text-xs text-[#5B6B5F]">
+                    <td className="py-3.5 px-4 text-center font-mono text-xs text-[#5B6B5F]">
                       {row.date}
                     </td>
                     <td className="py-3.5 px-4 text-right">
                       <span
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-['Space_Mono'] font-bold border transition-transform duration-200 group-hover:scale-105 ${
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold border transition-transform duration-200 group-hover:scale-105 ${
                           isCompleted
                             ? "bg-[#2E4F42]/10 text-[#2E4F42] border-[#2E4F42]/30"
                             : "bg-[#C1443C]/10 text-[#C1443C] border-[#C1443C]/30"
@@ -89,7 +98,7 @@ export default function RecentAssessmentsTable({ assessments }) {
       <div className="pt-2 text-right">
         <Link
           to="/assessment"
-          className="inline-flex items-center gap-1 font-['Space_Mono'] text-xs font-bold text-[#1B332C] hover:text-[#C4952A] hover:translate-x-1 transition-all duration-200"
+          className="inline-flex items-center gap-1 font-mono text-xs font-bold text-[#1B332C] hover:text-[#C4952A] hover:translate-x-1 transition-all duration-200"
         >
           <span>View All Assessments</span>
           <span>→</span>

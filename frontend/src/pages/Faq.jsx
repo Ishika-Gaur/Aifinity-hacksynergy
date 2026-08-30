@@ -212,7 +212,7 @@ export default function FAQ() {
           <span className="inline-block rounded-full bg-[#1B332C]/5 px-4 py-1.5 font-['Space_Mono'] text-[10px] font-bold uppercase tracking-widest text-[#C4952A] border border-[#C4952A]/30">
             FAQ
           </span>
-          <h1 className="mt-5 font-['Kalam'] text-3xl sm:text-4xl font-bold text-[#1B332C] leading-tight">
+          <h1 className="mt-5 font-sans text-3xl sm:text-4xl font-extrabold text-[#1B332C] leading-tight tracking-tight">
             AI That Turns Struggles into Strengths
           </h1>
           <p className="mt-4 text-sm sm:text-base leading-6 text-[#4A5A52] font-sans">

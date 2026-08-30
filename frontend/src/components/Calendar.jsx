@@ -40,11 +40,16 @@ function DayCell({ daily }) {
     return content;
   }
 
-  return (
-    <Link to={`/assessment/${daily.id}`} className="block" title={daily.title}>
-      {content}
-    </Link>
-  );
+  // Only link if there's a real assessment slug (not a generic day-N id)
+  if (daily.slug) {
+    return (
+      <Link to={`/assessment/${daily.slug}`} className="block" title={daily.title}>
+        {content}
+      </Link>
+    );
+  }
+
+  return <div className="block" title={daily.title}>{content}</div>;
 }
 
 /* Streak flame icon — used in the calendar card. */

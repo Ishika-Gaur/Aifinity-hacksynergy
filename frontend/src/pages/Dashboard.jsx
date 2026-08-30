@@ -11,7 +11,7 @@ import NextStepsCard from "../components/dashboard/NextStepsCard";
 import CareerGoalCard from "../components/dashboard/CareerGoalCard";
 import FloatingAIAssistant from "../components/FloatingAIAssistant";
 import { Link } from "react-router-dom";
-import { dashboardApi } from "../services/api";
+import { dashboardApi, assessmentApi } from "../services/api";
 
 // ─────────────────────────────────────────────────────────────────
 // Loading Skeleton — shown while the dashboard API call is in flight.
@@ -21,38 +21,38 @@ function DashboardSkeleton() {
   return (
     <div className="flex flex-col gap-8 animate-pulse">
       {/* Header skeleton */}
-      <div className="rounded-md bg-[#FBF8F0] border border-[#2E4F42]/15 p-8 h-36" />
+      <div className="rounded-2xl bg-[#FBF8F0] border border-[#2E4F42]/15 p-8 h-36" />
 
       {/* Stat cards skeleton */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="rounded-md bg-[#FBF8F0] border border-[#2E4F42]/15 p-6 h-32" />
+          <div key={i} className="rounded-2xl bg-[#FBF8F0] border border-[#2E4F42]/15 p-6 h-32" />
         ))}
       </div>
 
       {/* Chart + insight skeleton */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 rounded-md bg-[#FBF8F0] border border-[#2E4F42]/15 p-6 h-72" />
-        <div className="lg:col-span-1 rounded-md bg-[#1B332C]/80 border border-[#C4952A]/20 p-6 h-72" />
+        <div className="lg:col-span-2 rounded-2xl bg-[#FBF8F0] border border-[#2E4F42]/15 p-6 h-72" />
+        <div className="lg:col-span-1 rounded-2xl bg-[#1B332C]/80 border border-[#C4952A]/20 p-6 h-72" />
       </div>
 
       {/* Modules skeleton */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="rounded-md bg-[#FBF8F0] border border-[#2E4F42]/15 p-6 h-64" />
+          <div key={i} className="rounded-2xl bg-[#FBF8F0] border border-[#2E4F42]/15 p-6 h-64" />
         ))}
       </div>
 
       {/* Roadmap skeleton */}
-      <div className="rounded-md bg-[#FBF8F0] border border-[#2E4F42]/15 p-8 h-52" />
+      <div className="rounded-2xl bg-[#FBF8F0] border border-[#2E4F42]/15 p-8 h-52" />
 
       {/* Assessments table skeleton */}
-      <div className="rounded-md bg-[#FBF8F0] border border-[#2E4F42]/15 p-8 h-48" />
+      <div className="rounded-2xl bg-[#FBF8F0] border border-[#2E4F42]/15 p-8 h-48" />
 
       {/* Bottom row skeleton */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 rounded-md bg-[#FBF8F0] border border-[#2E4F42]/15 p-6 h-48" />
-        <div className="lg:col-span-1 rounded-md bg-[#FBF8F0] border border-[#2E4F42]/15 p-6 h-48" />
+        <div className="lg:col-span-2 rounded-2xl bg-[#FBF8F0] border border-[#2E4F42]/15 p-6 h-48" />
+        <div className="lg:col-span-1 rounded-2xl bg-[#FBF8F0] border border-[#2E4F42]/15 p-6 h-48" />
       </div>
     </div>
   );
@@ -64,9 +64,9 @@ function DashboardSkeleton() {
 function DashboardError({ onRetry }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[50vh] gap-6">
-      <div className="rounded-md bg-[#FBF8F0] border border-[#C1443C]/30 p-8 text-center max-w-md shadow-[var(--shadow-card)]">
+      <div className="rounded-2xl bg-[#FBF8F0] border border-[#C1443C]/30 p-8 text-center max-w-md shadow-[var(--shadow-card)]">
         <span className="text-4xl">⚠️</span>
-        <h2 className="mt-4 font-['Kalam'] text-2xl font-bold text-[#1B332C]">
+        <h2 className="mt-4 font-sans text-2xl font-bold text-[#1B332C]">
           Unable to load your dashboard.
         </h2>
         <p className="mt-2 text-sm text-[#5B6B5F]">
@@ -74,7 +74,7 @@ function DashboardError({ onRetry }) {
         </p>
         <button
           onClick={onRetry}
-          className="mt-6 inline-flex items-center gap-2 rounded-md bg-[#1B332C] px-5 py-2.5 text-sm font-semibold text-[#E8C547] border border-[#C4952A]/40 hover:bg-[#2E4F42] transition-colors cursor-pointer"
+          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#1B332C] px-5 py-2.5 text-sm font-semibold text-[#E8C547] border border-[#C4952A]/40 hover:bg-[#2E4F42] transition-colors cursor-pointer"
         >
           Try Again →
         </button>
@@ -89,7 +89,7 @@ function DashboardError({ onRetry }) {
 // ─────────────────────────────────────────────────────────────────
 function EmptyProgressChart() {
   return (
-    <div className="rounded-md bg-[#FBF8F0] p-6 border border-[#2E4F42]/12 shadow-[var(--shadow-card)] flex flex-col gap-4">
+    <div className="rounded-2xl bg-[#FBF8F0] p-6 border border-[#2E4F42]/12 shadow-[var(--shadow-card)] flex flex-col gap-4">
       <div>
         <h2 className="font-sans text-xl sm:text-2xl font-bold text-[#1B332C]">
           YOUR LEARNING PROGRESS
@@ -98,9 +98,9 @@ function EmptyProgressChart() {
           Accuracy & performance evolution over time
         </p>
       </div>
-      <div className="flex flex-col items-center justify-center rounded bg-[#F1EDE1]/50 border border-[#2E4F42]/08 p-10 gap-3 min-h-[200px]">
+      <div className="flex flex-col items-center justify-center rounded-xl bg-[#F1EDE1]/50 border border-[#2E4F42]/08 p-10 gap-3 min-h-[200px]">
         <span className="text-4xl">📊</span>
-        <p className="font-['Kalam'] text-xl text-[#1B332C] text-center">
+        <p className="font-sans text-lg font-bold text-[#1B332C] text-center">
           No assessment history yet.
         </p>
         <p className="text-sm text-[#5B6B5F] text-center max-w-xs">
@@ -108,7 +108,7 @@ function EmptyProgressChart() {
         </p>
         <a
           href="/assessment"
-          className="mt-2 inline-flex items-center gap-2 rounded-md bg-[#1B332C] px-4 py-2 text-sm font-semibold text-[#E8C547] border border-[#C4952A]/40 hover:bg-[#2E4F42] transition-colors"
+          className="mt-2 inline-flex items-center gap-2 rounded-xl bg-[#1B332C] px-4 py-2 text-sm font-semibold text-[#E8C547] border border-[#C4952A]/40 hover:bg-[#2E4F42] transition-colors"
         >
           Browse Assessments →
         </a>
@@ -124,16 +124,23 @@ export default function Dashboard() {
   const [dashData, setDashData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [recommended, setRecommended] = useState([]);
 
   const fetchDashboard = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const res = await dashboardApi.get();
+      const personalizedRes = await assessmentApi.getPersonalized();
+      
       if (res.success && res.data) {
         setDashData(res.data);
       } else {
         setError(res.error || "Failed to load dashboard data.");
+      }
+
+      if (personalizedRes.success) {
+        setRecommended(personalizedRes.assessments || []);
       }
     } catch (err) {
       setError("Failed to load dashboard data.");
@@ -280,6 +287,39 @@ export default function Dashboard() {
               <AIInsightCard aiInsight={aiInsight} />
             </div>
           </div>
+
+          {/* AI RECOMMENDED ASSESSMENTS */}
+          {recommended && recommended.length > 0 && (
+            <div className="flex flex-col gap-6">
+              <h2 className="font-sans text-2xl font-bold text-[#1B332C]">Recommended for You</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {recommended.slice(0, 3).map((assessment) => (
+                  <div key={assessment.id} className="flex flex-col rounded-2xl bg-[#FBF8F0] p-6 border border-[#2E4F42]/12 shadow-sm">
+                    <div className="flex justify-between items-start mb-3">
+                      <span className="text-xs font-semibold uppercase text-[var(--color-primary-600)] bg-[var(--color-primary-50)] px-2 py-1 rounded-md">
+                        {assessment.category}
+                      </span>
+                      <span className="text-xs font-medium text-[var(--color-text-muted)]">
+                        {assessment.difficulty}
+                      </span>
+                    </div>
+                    <h3 className="font-sans text-lg font-bold text-[#1B332C] mb-2">{assessment.title}</h3>
+                    <p className="text-sm text-[var(--color-text-muted)] mb-4 flex-1">{assessment.description}</p>
+                    
+                    {assessment.recommendationReason && (
+                      <div className="text-xs font-medium text-[#C4952A] bg-[#EDE6D3] p-2 rounded-lg mb-4">
+                        💡 {assessment.recommendationReason}
+                      </div>
+                    )}
+                    
+                    <Link to={`/assessment/${assessment.id}`} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#1B332C] px-4 py-2.5 text-sm font-semibold text-[#E8C547] hover:bg-[#2E4F42] transition-colors w-full">
+                      Start Assessment
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* 5. COGNIFY AI MODULES (ConceptRoot, MistakeMap, SkillGap) */}
           <div>

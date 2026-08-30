@@ -58,16 +58,16 @@ export default function DashboardLogo({ size = "md", className = "" }) {
       </div>
 
       <div className="flex flex-col">
-        <div className="flex items-center gap-1.5">
-          <span className="font-['Kalam'] text-xl font-bold tracking-tight text-[#1B332C] leading-none">
+        <div className="flex items-center gap-2">
+          <span className="font-sans text-xl font-extrabold tracking-tight text-[#1B332C] leading-none">
             AIFinity
           </span>
-          <span className="rounded px-1.5 py-0.5 text-[10px] font-['Space_Mono'] font-bold uppercase tracking-wider bg-[#1B332C] text-[#E8C547]">
+          <span className="rounded-md px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider bg-[#1B332C] text-[#E8C547]">
             AI Studio
           </span>
         </div>
-        <span className="text-[10px] font-['Space_Mono'] uppercase tracking-widest text-[#5B6B5F] mt-0.5">
-          Smart Learning Dashboard
+        <span className="text-[11px] font-medium tracking-wide text-[#5B6B5F] mt-1">
+          Smart Learning Analytics
         </span>
       </div>
     </div>
