@@ -230,6 +230,9 @@ export default function AssessmentAttemptPage() {
     if (res.success) {
       setAssessment(res.assessment);
       setAttemptId(res.attemptId);
+      if (typeof window !== "undefined" && window.sessionStorage) {
+        window.sessionStorage.setItem(`aifinity_active_attempt_${id}`, "true");
+      }
     } else {
       setAssessment(null);
     }
@@ -266,6 +269,10 @@ export default function AssessmentAttemptPage() {
 
       if (document.fullscreenElement) {
         document.exitFullscreen().catch(() => {});
+      }
+
+      if (typeof window !== "undefined" && window.sessionStorage) {
+        window.sessionStorage.removeItem(`aifinity_active_attempt_${id}`);
       }
 
       setResultData(result);

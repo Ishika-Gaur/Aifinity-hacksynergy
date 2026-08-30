@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import Section from "../components/Section";
 import SectionHeading from "../components/SectionHeading";
 import Button from "../components/Button";
-import Calendar from "../components/Calendar";
 import { ArrowRight } from "lucide-react";
 import {
   TYPE_FILTERS,
@@ -11,7 +10,7 @@ import {
   getUserProfile,
   formatType,
 } from "../data/assessments";
-import { assessmentApi } from "../services/api";
+import { assessmentApi, dashboardApi } from "../services/api";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -156,45 +155,52 @@ function SidebarNav({ active, open, onToggle }) {
   );
 }
 
-/* ---------------- Hero signature visual: one clean skill-score ring ----------------
-   Deliberately minimal — a single ring is the "characteristic thing" for an
-   assessment tool (a score), so it carries the whole visual instead of
-   stacking a card, a question, options, a meter, and a floating pill. */
-function AssessmentHeroVisual({ className = "" }) {
-  const pct = 88;
-  const circumference = 2 * Math.PI * 54;
-  const dash = (pct / 100) * circumference;
+/* ---------------- Assessment Progress Card ----------------
+   Replaces the hardcoded 88% Mastery Skill Snapshot visual with real,
+   data-driven user metrics from the backend. */
+function AssessmentProgressCard({ completedCount, availableCount, inProgressCount, loading, className = "" }) {
+  const hasCompleted = completedCount > 0;
 
   return (
     <div
-      className={`relative flex flex-col items-center gap-4 rounded-2xl border border-[#2E4F42]/15 bg-[#FBF8F0] px-8 py-9 text-center shadow-[var(--shadow-card)] ${className}`}
+      className={`relative flex flex-col items-center gap-5 rounded-2xl border border-[#2E4F42]/15 bg-[#FBF8F0] px-6 py-7 text-center shadow-[var(--shadow-card)] ${className}`}
     >
       <span className="font-['Space_Mono'] text-[10px] font-bold uppercase tracking-[0.15em] text-[#C4952A]">
-        Skill Snapshot
+        Assessment Progress
       </span>
 
-      <div className="relative flex h-32 w-32 items-center justify-center">
-        <svg viewBox="0 0 120 120" className="h-32 w-32 -rotate-90">
-          <circle cx="60" cy="60" r="54" fill="none" stroke="#1B332C1A" strokeWidth="8" />
-          <circle
-            cx="60"
-            cy="60"
-            r="54"
-            fill="none"
-            stroke="#D9A62B"
-            strokeWidth="8"
-            strokeLinecap="round"
-            strokeDasharray={`${dash} ${circumference}`}
-          />
-        </svg>
-        <div className="absolute flex flex-col items-center">
-          <span className="text-3xl font-bold text-[#1B332C]">{pct}%</span>
-          <span className="text-[10px] text-[#5B6B5F]">Mastery</span>
+      <div className="flex flex-col items-center gap-1">
+        <span className="font-['Kalam'] text-4xl sm:text-5xl font-bold text-[#1B332C]">
+          {loading ? "..." : completedCount}
+        </span>
+        <span className="text-xs font-semibold uppercase tracking-wider text-[#5B6B5F]">
+          Assessments Completed
+        </span>
+      </div>
+
+      <div className="grid w-full grid-cols-3 gap-2 border-y border-[#2E4F42]/10 py-4">
+        <div className="flex flex-col items-center rounded-xl bg-[#F1EDE1]/60 p-2.5">
+          <span className="text-xl font-bold text-[#1B332C]">{loading ? "-" : completedCount}</span>
+          <span className="text-[10px] font-medium text-[#5B6B5F]">Completed</span>
+        </div>
+
+        <div className="flex flex-col items-center rounded-xl bg-[#F1EDE1]/60 p-2.5">
+          <span className="text-xl font-bold text-[#1B332C]">{loading ? "-" : availableCount}</span>
+          <span className="text-[10px] font-medium text-[#5B6B5F]">Available</span>
+        </div>
+
+        <div className="flex flex-col items-center rounded-xl bg-[#F1EDE1]/60 p-2.5">
+          <span className={`text-xl font-bold ${inProgressCount > 0 ? "text-[#C4952A]" : "text-[#1B332C]"}`}>
+            {loading ? "-" : inProgressCount}
+          </span>
+          <span className="text-[10px] font-medium text-[#5B6B5F]">In Progress</span>
         </div>
       </div>
 
-      <p className="max-w-[220px] text-sm text-[#24413A]">
-        Your average score across completed assessments this month.
+      <p className="max-w-[260px] text-xs leading-relaxed text-[#24413A]">
+        {!hasCompleted
+          ? "Complete an assessment to see your skill insights."
+          : `Great progress! You have completed ${completedCount} unique assessment${completedCount === 1 ? "" : "s"}.`}
       </p>
     </div>
   );
@@ -304,6 +310,171 @@ function CategoryTile({ category, count, index, onSelect }) {
   );
 }
 
+/* ---------------- Daily calendar (LeetCode-style) ---------------- */
+
+/* Single day cell — number in a circle, tiny activity dot below.
+   Today gets a filled circle; locked days are dimmed and inert. */
+function DayCell({ daily }) {
+  const isLocked = daily.status === "Locked";
+  const hasActivity = !isLocked;
+
+  const content = (
+    <div className="flex flex-col items-center justify-center gap-0.5 py-0.5">
+      <span
+        className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium transition-colors ${daily.isToday
+          ? "bg-[var(--color-primary-600)] text-white"
+          : isLocked
+            ? "text-[var(--color-text-light)]"
+            : "text-[var(--color-text-h)] hover:bg-[var(--color-surface-secondary)]"
+          }`}
+      >
+        {daily.day}
+      </span>
+      <span
+        className={`h-1 w-1 rounded-full ${!hasActivity
+          ? "bg-transparent"
+          : daily.status === "Completed"
+            ? "bg-green-500"
+            : "bg-[var(--color-primary-600)]"
+          }`}
+      />
+    </div>
+  );
+
+  if (isLocked) {
+    return content;
+  }
+
+  return (
+    <Link to={`/assessment/${daily.id}`} className="block" title={daily.title}>
+      {content}
+    </Link>
+  );
+}
+
+const WEEKDAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
+const MONTH_LABELS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+/* Streak flame icon — used in the sidebar streak card. */
+function FlameIcon({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className}>
+      <path
+        d="M12 2c1 3-2.5 4.2-2.5 7.2 0 1.4 1 2.3 2 2.3.4-1.6-.4-2-.1-3.2C12.9 10 15 11.6 15 14.3c0 2.9-2.2 5.2-5 5.7-3.4-.4-6-3-6-6.3C4 9.9 7.3 7 9.2 5c-.4 1.3-.2 2 .5 2.5C9.4 5.6 10.3 3.6 12 2z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+/* ---------------- Right sidebar: streak calendar + stats ---------------- */
+
+function StreakSidebar({ profile, dailyAssessments, completedDays }) {
+  const now = new Date();
+  const monthLabel = `${MONTH_LABELS[now.getMonth()]} ${now.getFullYear()}`;
+  const firstWeekdayOffset = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
+
+  const currentStreak = useMemo(() => {
+    let streak = 0;
+    for (let i = dailyAssessments.length - 1; i >= 0; i--) {
+      const d = dailyAssessments[i];
+      if (d.status === "Completed") streak++;
+      else if (d.isToday) continue;
+      else break;
+    }
+    return streak;
+  }, [dailyAssessments]);
+
+  const completionPct = dailyAssessments.length
+    ? Math.round((completedDays / dailyAssessments.length) * 100)
+    : 0;
+
+  return (
+    <div className="flex flex-col gap-4">
+      {/* Streak calendar card */}
+      <div className="p-0">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <FlameIcon className="h-5 w-5 text-amber-500" />
+            <span className="text-lg font-bold text-[var(--color-text-h)]">
+              {currentStreak} day{currentStreak === 1 ? "" : "s"}
+            </span>
+          </div>
+          <span className="rounded-full border border-[var(--color-primary-100)] bg-[var(--color-primary-50)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-primary-600)]">
+            {profile.field || "Not set"}
+          </span>
+        </div>
+        <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
+          {monthLabel} · {completedDays}/{dailyAssessments.length} days completed
+        </p>
+
+        {/* Weekday header */}
+        <div className="mt-4 grid grid-cols-7 text-center text-[11px] font-medium text-[var(--color-text-light)]">
+          {WEEKDAY_LABELS.map((d, i) => (
+            <span key={i}>{d}</span>
+          ))}
+        </div>
+
+        {/* Day grid — leading blanks align "Day 1" to its real weekday */}
+        <div className="mt-2 grid grid-cols-7 gap-y-2 text-center">
+          {Array.from({ length: firstWeekdayOffset }).map((_, i) => (
+            <div key={`pad-${i}`} />
+          ))}
+          {dailyAssessments.map((daily) => (
+            <DayCell key={daily.id} daily={daily} />
+          ))}
+        </div>
+
+        {/* Legend */}
+        <div className="mt-4 flex flex-wrap gap-4 border-t border-[var(--color-border)] pt-3 text-[11px] text-[var(--color-text-muted)]">
+          <span className="flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-primary-600)]" /> Available
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-green-500" /> Completed
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-text-light)]" /> Locked
+          </span>
+        </div>
+      </div>
+
+      {/* Progress card */}
+      <div className="border-t border-[var(--color-border)] pt-5">
+        <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-light)]">
+          This month
+        </span>
+        <div className="mt-3 flex items-center gap-4">
+          <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-full">
+            <svg viewBox="0 0 36 36" className="h-16 w-16 -rotate-90">
+              <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--color-border)" strokeWidth="3" />
+              <circle
+                cx="18"
+                cy="18"
+                r="15.5"
+                fill="none"
+                stroke="var(--color-primary-600)"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeDasharray={`${(completionPct / 100) * 97.4} 97.4`}
+              />
+            </svg>
+            <span className="absolute text-sm font-bold text-[var(--color-text-h)]">
+              {completionPct}%
+            </span>
+          </div>
+          <div className="text-sm text-[var(--color-text-muted)]">
+            <p className="font-semibold text-[var(--color-text-h)]">{profile.careerGoal || "Not set"}</p>
+            <p className="mt-0.5">{profile.skills.length} tracked skills</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function AssessmentPage() {
   const [category, setCategory] = useState("All");
@@ -315,7 +486,15 @@ export default function AssessmentPage() {
   const [assessments, setAssessments] = useState([]);
   const [loadError, setLoadError] = useState("");
 
+  const [userStats, setUserStats] = useState({
+    completedCount: 0,
+    inProgressCount: 0,
+    history: [],
+    loading: true,
+  });
+
   const profile = useMemo(() => getUserProfile(), []);
+
   useEffect(() => {
     let isMounted = true;
 
@@ -329,6 +508,65 @@ export default function AssessmentPage() {
       isMounted = false;
     };
   }, []);
+
+  // Fetch real user assessment metrics from backend
+  useEffect(() => {
+    let isMounted = true;
+
+    const getInProgressCount = () => {
+      if (typeof window === "undefined" || !window.sessionStorage) return 0;
+      let count = 0;
+      for (let i = 0; i < window.sessionStorage.length; i++) {
+        const key = window.sessionStorage.key(i);
+        if (key && key.startsWith("aifinity_active_attempt_")) {
+          count++;
+        }
+      }
+      return count;
+    };
+
+    const inProgress = getInProgressCount();
+
+    dashboardApi
+      .get()
+      .then((res) => {
+        if (!isMounted) return;
+        if (res && res.success && res.data) {
+          const history = res.data.analytics?.assessments?.history || res.data.assessments || [];
+          const uniqueCompleted = new Set(
+            history.map((a) => String(a.assessmentId || a.id || a.name || a.title))
+          );
+          setUserStats({
+            completedCount: uniqueCompleted.size,
+            inProgressCount: inProgress,
+            history,
+            loading: false,
+          });
+        } else {
+          setUserStats({
+            completedCount: 0,
+            inProgressCount: inProgress,
+            history: [],
+            loading: false,
+          });
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setUserStats({
+            completedCount: 0,
+            inProgressCount: inProgress,
+            history: [],
+            loading: false,
+          });
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const categories = useMemo(() => ["All", ...new Set(assessments.map((assessment) => assessment.category))], [assessments]);
   const recommended = useMemo(() => {
     const fieldMatches = assessments.filter((assessment) => assessment.field === profile.field);
@@ -344,9 +582,6 @@ export default function AssessmentPage() {
   const completedDays = dailyAssessments.filter((d) => d.status === "Completed").length;
   const todayDay = new Date().getDate();
 
-  // Today's featured challenge + a Mon–Sun strip for the week it falls in,
-  // so the Daily Assessment section has real content of its own instead of
-  // just pointing at the calendar in the sidebar.
   const todayAssessment = useMemo(
     () => dailyAssessments.find((d) => d.isToday),
     [dailyAssessments]
@@ -392,8 +627,6 @@ export default function AssessmentPage() {
     return assessments.filter((a) => {
       if (category !== "All" && a.category !== category) return false;
       if (difficulty !== "All") {
-        // Exact match for single-difficulty assessments, or "contains a
-        // question of this difficulty" for Mixed ones.
         const matches = a.difficulty === difficulty || a.questions.some((q) => q.difficulty === difficulty);
         if (!matches) return false;
       }
@@ -402,12 +635,10 @@ export default function AssessmentPage() {
     });
   }, [assessments, category, difficulty, type]);
 
-  // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [category, difficulty, type]);
 
-  // Paginated explore list
   const paginatedList = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     const end = start + ITEMS_PER_PAGE;
@@ -416,7 +647,6 @@ export default function AssessmentPage() {
 
   const totalPages = Math.ceil(exploreList.length / ITEMS_PER_PAGE);
 
-  // Scroll-spy: highlight the sidebar nav item for the section in view.
   useEffect(() => {
     const sectionEls = NAV_ITEMS.map((item) => document.getElementById(item.id)).filter(Boolean);
     if (!sectionEls.length) return;
@@ -446,10 +676,10 @@ export default function AssessmentPage() {
         backgroundSize: "24px 24px",
       }}
     >
-      <div className="mx-auto flex max-w-[1400px] gap-6 px-4 pb-16 lg:px-8">
+      <div className="mx-auto flex items-start max-w-[1400px] gap-6 px-4 pb-16 lg:px-8">
         {/* ---------------- LEFT SIDEBAR ---------------- */}
         <aside
-          className={`sticky top-20 hidden h-fit shrink-0 self-start pt-14 transition-all duration-200 md:block ${sidebarOpen ? "w-44" : "w-12"
+          className={`sticky top-[100px] hidden h-fit shrink-0 self-start pt-8 transition-all duration-200 md:block ${sidebarOpen ? "w-44" : "w-12"
             }`}
         >
           <SidebarNav active={activeSection} open={sidebarOpen} onToggle={() => setSidebarOpen((v) => !v)} />
@@ -508,7 +738,12 @@ export default function AssessmentPage() {
 
                 {/* Right Column: Assessment Diagnostic Preview Visual */}
                 <div className="lg:col-span-5 w-full">
-                  <AssessmentHeroVisual />
+                  <AssessmentProgressCard
+                    completedCount={userStats.completedCount}
+                    availableCount={assessments.length}
+                    inProgressCount={userStats.inProgressCount}
+                    loading={userStats.loading}
+                  />
                 </div>
               </div>
             </div>
@@ -540,8 +775,7 @@ export default function AssessmentPage() {
           <div className="mb-10 xl:hidden">
             <Calendar
               profile={profile}
-              dailyAssessments={dailyAssessments}
-              completedDays={completedDays}
+              attempts={userStats.history}
             />
           </div>
 
@@ -754,10 +988,9 @@ export default function AssessmentPage() {
 
         {/* ---------------- RIGHT SIDEBAR (streak calendar) ---------------- */}
         <aside className="sticky top-20 hidden h-fit w-64 shrink-0 self-start pt-14 xl:block">
-          <Calendar
+          <StreakSidebar
             profile={profile}
-            dailyAssessments={dailyAssessments}
-            completedDays={completedDays}
+            attempts={userStats.history}
           />
         </aside>
       </div>

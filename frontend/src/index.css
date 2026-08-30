@@ -96,7 +96,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
   color-scheme: light;
   color: var(--color-text-body);
-  overflow-x: hidden;
+  overflow-x: clip;
+  max-width: 100%;
 
   background-color: var(--color-bg);
   background-image:

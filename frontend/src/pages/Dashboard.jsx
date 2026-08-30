@@ -9,6 +9,8 @@ import RoadmapSection from "../components/dashboard/RoadmapSection";
 import RecentAssessmentsTable from "../components/dashboard/RecentAssessmentsTable";
 import NextStepsCard from "../components/dashboard/NextStepsCard";
 import CareerGoalCard from "../components/dashboard/CareerGoalCard";
+import FloatingAIAssistant from "../components/FloatingAIAssistant";
+import { Link } from "react-router-dom";
 import { dashboardApi } from "../services/api";
 
 // ─────────────────────────────────────────────────────────────────
@@ -300,7 +302,30 @@ export default function Dashboard() {
 
           {/* 8. RECOMMENDED NEXT STEPS & 9. CAREER GOAL */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 flex flex-col gap-8">
+              <div className="rounded-md bg-[#1B332C] p-6 sm:p-8 shadow-[var(--shadow-card)] text-[#FBF8F0] relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-[#C4952A] rounded-full mix-blend-multiply filter blur-3xl opacity-20 group-hover:opacity-30 transition-opacity"></div>
+                <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                  <div>
+                    <h3 className="font-sans text-2xl font-bold text-[#E8C547] flex items-center gap-2">
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                      </svg>
+                      Personal Intelligence
+                    </h3>
+                    <p className="mt-2 text-sm text-[#FBF8F0]/80 max-w-md">
+                      Your AI-powered learning companion. Get personalized advice, ask questions about your mistakes, and plan your next steps based on your actual performance data.
+                    </p>
+                  </div>
+                  <Link
+                    to="/personal-intelligence"
+                    className="shrink-0 inline-flex items-center gap-2 rounded-md bg-[#E8C547] px-6 py-3 text-sm font-bold text-[#1B332C] hover:bg-[#C4952A] hover:text-white transition-all shadow-md hover:shadow-lg"
+                  >
+                    Talk to AI →
+                  </Link>
+                </div>
+              </div>
+
               <NextStepsCard recommendations={recommendations} />
             </div>
             <div className="lg:col-span-1">
@@ -312,6 +337,7 @@ export default function Dashboard() {
           </div>
         </div>
       </Container>
+      <FloatingAIAssistant />
     </div>
   );
 }

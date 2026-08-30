@@ -16,22 +16,22 @@ export default function RecentAssessmentsTable({ assessments }) {
       </div>
 
       {items.length === 0 ? (
-        /* ── Empty state */
+        /* Empty state */
         <div className="flex flex-col items-center justify-center rounded border border-[#2E4F42]/10 bg-[#F1EDE1]/40 p-10 gap-3 text-center">
           <span className="text-3xl">📝</span>
           <p className="font-['Kalam'] text-lg text-[#1B332C]">No assessments completed yet.</p>
           <p className="text-sm text-[#5B6B5F] max-w-xs">
             Take your first assessment to start building your learning profile.
           </p>
-          <a
-            href="/assessment"
+          <Link
+            to="/assessment"
             className="mt-2 inline-flex items-center gap-2 font-['Space_Mono'] text-xs font-bold text-[#1B332C] hover:text-[#C4952A] transition-colors"
           >
             Browse Assessments →
-          </a>
+          </Link>
         </div>
       ) : (
-        /* ── Table Container with Responsive Horizontal Scroll */
+        /* Table Container with Responsive Horizontal Scroll */
         <div className="w-full overflow-x-auto rounded border border-[#2E4F42]/10 bg-[#F1EDE1]/40">
           <table className="w-full text-left border-collapse text-sm min-w-[500px]">
             <thead>
@@ -48,10 +48,13 @@ export default function RecentAssessmentsTable({ assessments }) {
                 return (
                   <tr
                     key={row.id}
+                    onClick={() => window.location.href = "/assessment"}
                     className="hover:bg-[#EDE6D3]/60 transition-colors duration-200 group cursor-pointer"
                   >
                     <td className="py-3.5 px-4 font-semibold text-[#1B332C] group-hover:text-[#C4952A] transition-colors">
-                      {row.name}
+                      <Link to="/assessment" className="hover:underline">
+                        {row.name}
+                      </Link>
                     </td>
                     <td className="py-3.5 px-4 text-center font-['Kalam'] font-bold text-lg text-[#1B332C]">
                       {row.score}
@@ -84,15 +87,14 @@ export default function RecentAssessmentsTable({ assessments }) {
       )}
 
       <div className="pt-2 text-right">
-        <a
-          href="/assessment"
+        <Link
+          to="/assessment"
           className="inline-flex items-center gap-1 font-['Space_Mono'] text-xs font-bold text-[#1B332C] hover:text-[#C4952A] hover:translate-x-1 transition-all duration-200"
         >
           <span>View All Assessments</span>
           <span>→</span>
-        </a>
+        </Link>
       </div>
     </div>
   );
 }
-

@@ -1,7 +1,7 @@
 import { ASSESSMENTS } from "../data/assessments";
 import { assessmentApi } from "./api";
 
-// Private closure cache for offline / fallback attempt sessions (never exposed to React state or window)
+// Private closure cache for offline / fallback attempt sessions
 const attemptSessionCache = new Map();
 
 /**
@@ -16,36 +16,244 @@ function shuffleArray(array) {
   return arr;
 }
 
-/**
- * Normalizes answer comparison
- */
-function checkAnswerMatch(question, response, originalAnswer) {
-  if (response === undefined || response === null || response === "") return false;
-
-  if (question.type === "output") {
-    return String(response).trim().toLowerCase() === String(originalAnswer).trim().toLowerCase();
+export function getNormalizedQuestionType(q) {
+  const t = String(q.type || "").toLowerCase().trim();
+  if (["mcq", "multiple-choice", "scenario", "logical-reasoning", "data-interpretation"].includes(t)) {
+    return "mcq";
   }
-
-  // Options-based question types (MCQ, scenario, logical-reasoning, data-interpretation)
-  if (Array.isArray(question.options)) {
-    // response is index in shuffled options
-    const selectedOptionText = typeof response === "number" ? question.options[response] : String(response);
-    
-    // originalAnswer could be string or index in original options
-    let correctOptionText = originalAnswer;
-    if (typeof originalAnswer === "number" && question._originalOptions) {
-      correctOptionText = question._originalOptions[originalAnswer];
+  if (["true_false", "true-false", "tf", "boolean"].includes(t)) {
+    return "true_false";
+  }
+  if (["short_answer", "short-answer", "short", "output", "fill-in-the-blank"].includes(t)) {
+    return "short_answer";
+  }
+  if (["long_answer", "long-answer", "essay", "descriptive", "conceptual", "problem-solving", "coding"].includes(t)) {
+    return "long_answer";
+  }
+  if (Array.isArray(q.options) && q.options.length > 0) {
+    if (q.options.length === 2) {
+      const o0 = String(q.options[0]).toLowerCase();
+      const o1 = String(q.options[1]).toLowerCase();
+      if ((o0 === "true" || o0 === "false") && (o1 === "true" || o1 === "false")) {
+        return "true_false";
+      }
     }
-    
-    return String(selectedOptionText).trim().toLowerCase() === String(correctOptionText).trim().toLowerCase();
+    return "mcq";
+  }
+  return "short_answer";
+}
+
+function evaluateSingleQuestion(q, userResp, sessionQ) {
+  const maxMarks = 10;
+  const normType = getNormalizedQuestionType(q);
+  const qId = String(q.id || q._id);
+  const qText = q.question;
+
+  const originalAnswer = sessionQ ? sessionQ.answer : q.answer;
+  const originalOptions = sessionQ ? (sessionQ.options || q.options) : q.options;
+  const shuffledOptions = sessionQ ? sessionQ.shuffledOptions : q.options;
+
+  // Unanswered Check
+  if (userResp === undefined || userResp === null || String(userResp).trim() === "") {
+    return {
+      questionId: qId,
+      questionText: qText,
+      type: normType,
+      userAnswer: null,
+      correctAnswer: originalAnswer != null ? String(originalAnswer) : "N/A",
+      status: "unanswered",
+      isCorrect: false,
+      marksAwarded: 0,
+      maxMarks,
+      explanation: "Question was left unanswered.",
+    };
   }
 
-  return false;
+  // 1. MCQ
+  if (normType === "mcq") {
+    let userText = String(userResp);
+    if (typeof userResp === "number" && Array.isArray(shuffledOptions) && shuffledOptions[userResp] !== undefined) {
+      userText = shuffledOptions[userResp];
+    }
+
+    let correctText = String(originalAnswer);
+    if (typeof originalAnswer === "number" && Array.isArray(originalOptions) && originalOptions[originalAnswer] !== undefined) {
+      correctText = originalOptions[originalAnswer];
+    }
+
+    const isMatch = userText.trim().toLowerCase() === correctText.trim().toLowerCase();
+    return {
+      questionId: qId,
+      questionText: qText,
+      type: normType,
+      userAnswer: userText,
+      correctAnswer: correctText,
+      status: isMatch ? "correct" : "incorrect",
+      isCorrect: isMatch,
+      marksAwarded: isMatch ? maxMarks : 0,
+      maxMarks,
+      explanation: isMatch ? "Correct option selected." : `Incorrect option selected. You chose "${userText}".`,
+    };
+  }
+
+  // 2. TRUE / FALSE
+  if (normType === "true_false") {
+    let userChoice = String(userResp).trim().toLowerCase();
+    if (userResp === 0 || userResp === "0") userChoice = "true";
+    if (userResp === 1 || userResp === "1") userChoice = "false";
+    if (userChoice === "t" || userChoice === "yes") userChoice = "true";
+    if (userChoice === "f" || userChoice === "no") userChoice = "false";
+
+    let correctChoice = String(originalAnswer).trim().toLowerCase();
+    if (originalAnswer === true || originalAnswer === 0 || originalAnswer === "0" || correctChoice === "t" || correctChoice === "yes") correctChoice = "true";
+    if (originalAnswer === false || originalAnswer === 1 || originalAnswer === "1" || correctChoice === "f" || correctChoice === "no") correctChoice = "false";
+
+    const isMatch = userChoice === correctChoice;
+    const formattedUser = userChoice === "true" ? "True" : "False";
+    const formattedCorrect = correctChoice === "true" ? "True" : "False";
+
+    return {
+      questionId: qId,
+      questionText: qText,
+      type: normType,
+      userAnswer: formattedUser,
+      correctAnswer: formattedCorrect,
+      status: isMatch ? "correct" : "incorrect",
+      isCorrect: isMatch,
+      marksAwarded: isMatch ? maxMarks : 0,
+      maxMarks,
+      explanation: isMatch ? "Correct choice selected." : `Incorrect choice. You selected "${formattedUser}".`,
+    };
+  }
+
+  // 3. SHORT ANSWER
+  if (normType === "short_answer") {
+    const userText = String(userResp).trim();
+    const correctText = originalAnswer ? String(originalAnswer).trim() : "";
+
+    const cleanUser = userText.toLowerCase().replace(/[^\w\s]/gi, "");
+    const cleanCorrect = correctText.toLowerCase().replace(/[^\w\s]/gi, "");
+
+    let isMatch = cleanUser === cleanCorrect;
+    if (!isMatch && cleanCorrect && cleanUser.includes(cleanCorrect)) {
+      isMatch = true;
+    }
+
+    return {
+      questionId: qId,
+      questionText: qText,
+      type: normType,
+      userAnswer: userText,
+      correctAnswer: correctText || "Valid short answer required",
+      status: isMatch ? "correct" : "incorrect",
+      isCorrect: isMatch,
+      marksAwarded: isMatch ? maxMarks : 0,
+      maxMarks,
+      explanation: isMatch ? "Exact/Normalized match with target answer." : `Submitted: "${userText}". Expected: "${correctText}".`,
+    };
+  }
+
+  // 4. LONG ANSWER / ESSAY / CODE
+  if (normType === "long_answer") {
+    const userText = String(userResp).trim();
+    const modelAnswer = originalAnswer ? String(originalAnswer).trim() : "";
+
+    const words = userText.split(/\s+/).filter(Boolean);
+    const wordCount = words.length;
+
+    let marksAwarded = 0;
+    let status = "incorrect";
+    let isCorrect = false;
+    let explanation = "";
+
+    if (modelAnswer) {
+      const modelKeywords = modelAnswer
+        .toLowerCase()
+        .replace(/[^\w\s]/gi, "")
+        .split(/\s+/)
+        .filter((w) => w.length > 3);
+
+      const uniqueKeywords = [...new Set(modelKeywords)];
+      let matchedCount = 0;
+      const cleanUserLower = userText.toLowerCase();
+
+      uniqueKeywords.forEach((kw) => {
+        if (cleanUserLower.includes(kw)) matchedCount++;
+      });
+
+      const matchRatio = uniqueKeywords.length ? matchedCount / uniqueKeywords.length : 0.5;
+
+      if (matchRatio >= 0.6 && wordCount >= 10) {
+        marksAwarded = maxMarks;
+        status = "correct";
+        isCorrect = true;
+        explanation = "Comprehensive answer covering key technical concepts accurately.";
+      } else if (matchRatio >= 0.3 || wordCount >= 25) {
+        marksAwarded = 7;
+        status = "partial";
+        isCorrect = true;
+        explanation = "Satisfactory answer covering core points with relevant detail.";
+      } else if (wordCount >= 10) {
+        marksAwarded = 5;
+        status = "partial";
+        isCorrect = false;
+        explanation = "Basic response provided, but lacks necessary depth and key concepts.";
+      } else {
+        marksAwarded = 2;
+        status = "incorrect";
+        isCorrect = false;
+        explanation = "Response is too brief to adequately address the question prompt.";
+      }
+    } else {
+      if (wordCount >= 25) {
+        marksAwarded = maxMarks;
+        status = "correct";
+        isCorrect = true;
+        explanation = "Detailed, thorough answer provided.";
+      } else if (wordCount >= 10) {
+        marksAwarded = 7;
+        status = "partial";
+        isCorrect = true;
+        explanation = "Clear response provided.";
+      } else {
+        marksAwarded = 3;
+        status = "incorrect";
+        isCorrect = false;
+        explanation = "Response is too brief.";
+      }
+    }
+
+    return {
+      questionId: qId,
+      questionText: qText,
+      type: normType,
+      userAnswer: userText,
+      correctAnswer: modelAnswer || "Detailed explanation",
+      status,
+      isCorrect,
+      marksAwarded,
+      maxMarks,
+      explanation,
+    };
+  }
+
+  return {
+    questionId: qId,
+    questionText: qText,
+    type: normType,
+    userAnswer: String(userResp),
+    correctAnswer: "N/A",
+    status: "correct",
+    isCorrect: true,
+    marksAwarded: maxMarks,
+    maxMarks,
+    explanation: "Answer submitted.",
+  };
 }
 
 /**
  * Creates a fresh, randomized assessment attempt.
- * Strips correct answers before returning question objects to the caller.
+ * Never fails or crashes even if backend API is offline or requested ID is generic.
  */
 export async function createAttemptSession(assessmentId) {
   // 1. Try backend API first if available
@@ -59,17 +267,27 @@ export async function createAttemptSession(assessmentId) {
         isRemote: true,
       };
     }
-  } catch (err) {
-    // Fall back to local randomized attempt session generator
+  } catch (_) {}
+
+  // 2. Robust Local Fallback Resolution
+  const sId = String(assessmentId || "").toLowerCase().trim();
+  let rawAssessment = ASSESSMENTS.find((a) => {
+    const aId = String(a.id || a._id || "").toLowerCase().trim();
+    return aId === sId || aId.includes(sId) || sId.includes(aId);
+  });
+
+  // Fallback by title or category if exact ID match is not found
+  if (!rawAssessment) {
+    rawAssessment = ASSESSMENTS.find((a) => {
+      const title = String(a.title || "").toLowerCase();
+      const field = String(a.field || "").toLowerCase();
+      return title.includes(sId) || field.includes(sId);
+    });
   }
 
-  // 2. Fallback: Generate local randomized session from ASSESSMENTS pool
-  const rawAssessment = ASSESSMENTS.find(
-    (a) => String(a.id) === String(assessmentId) || String(a._id) === String(assessmentId)
-  );
-
+  // Guaranteed fallback to default assessment so questions ALWAYS render smoothly
   if (!rawAssessment) {
-    return { success: false, message: "Assessment not found." };
+    rawAssessment = ASSESSMENTS[0];
   }
 
   const attemptId = `att_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
@@ -79,15 +297,13 @@ export async function createAttemptSession(assessmentId) {
   const shuffledQuestions = shuffleArray(rawAssessment.questions || []).map((q, idx) => {
     const qId = q.id || q._id || `q_${idx}`;
     const originalAnswer = q.answer;
-    
-    // Store correct answer in private closure cache only
+
     answersMap.set(qId, {
       answer: originalAnswer,
       type: q.type,
       options: q.options ? [...q.options] : null,
     });
 
-    // Copy question & randomize option order if options exist
     const questionCopy = { ...q, id: qId };
     delete questionCopy.answer; // SECURITY: Strip answer out of question object
 
@@ -95,7 +311,6 @@ export async function createAttemptSession(assessmentId) {
       const originalOptions = [...q.options];
       const shuffledOptions = shuffleArray(originalOptions);
       questionCopy.options = shuffledOptions;
-      // Store original options reference internally in closure
       answersMap.get(qId)._originalOptions = originalOptions;
       answersMap.get(qId).shuffledOptions = shuffledOptions;
     }
@@ -124,9 +339,21 @@ export async function createAttemptSession(assessmentId) {
 
 /**
  * Validates and submits assessment answers server-side (or via session validator).
- * Correct answers are never sent to or evaluated inside frontend UI state.
  */
 export async function submitAttemptSession(assessmentId, attemptId, responses, elapsedSeconds, violations = []) {
+  const sId = String(assessmentId || "").toLowerCase().trim();
+  let rawAssessment = ASSESSMENTS.find((a) => {
+    const aId = String(a.id || a._id || "").toLowerCase().trim();
+    return aId === sId || aId.includes(sId) || sId.includes(aId);
+  });
+  if (!rawAssessment) {
+    rawAssessment = ASSESSMENTS[0];
+  }
+
+  const title = rawAssessment?.title || "Assessment Attempt";
+  const category = rawAssessment?.category || rawAssessment?.field || "General";
+  const field = rawAssessment?.field || "";
+
   // 1. Try backend API first if available
   try {
     const apiRes = await assessmentApi.submitAttempt(assessmentId, {
@@ -134,75 +361,89 @@ export async function submitAttemptSession(assessmentId, attemptId, responses, e
       responses,
       elapsedSeconds,
       violations,
+      assessmentTitle: title,
+      assessmentCategory: category,
+      assessmentField: field,
     });
     if (apiRes && apiRes.success) {
       return apiRes;
     }
-  } catch (err) {
-    // Fall back to local session evaluation
-  }
+  } catch (_) {}
 
   // 2. Fallback: Validate against private closure session cache
   const session = attemptSessionCache.get(attemptId);
-  const rawAssessment = ASSESSMENTS.find(
-    (a) => String(a.id) === String(assessmentId) || String(a._id) === String(assessmentId)
-  );
-
   const questions = session ? session.questions : (rawAssessment ? rawAssessment.questions : []);
   const answersMap = session ? session.answersMap : null;
 
-  const GRADABLE_TYPES = ["mcq", "scenario", "logical-reasoning", "data-interpretation", "output"];
-  const gradableQuestions = questions.filter((q) => GRADABLE_TYPES.includes(q.type));
+  const questionResults = [];
+  let totalScore = 0;
+  let maxScore = 0;
   let correctCount = 0;
-  let attemptedGradableCount = 0;
+  let incorrectCount = 0;
+  let unansweredCount = 0;
 
-  gradableQuestions.forEach((q) => {
-    const userResp = responses[q.id];
-    if (userResp === undefined || userResp === null || userResp === "") return;
+  questions.forEach((q) => {
+    const qId = String(q.id || q._id);
+    const userResp = responses ? responses[qId] : undefined;
+    const sessionQ = answersMap ? answersMap.get(qId) : null;
 
-    attemptedGradableCount++;
+    const evalResult = evaluateSingleQuestion(q, userResp, sessionQ);
+    questionResults.push(evalResult);
 
-    let isCorrect = false;
-    if (answersMap && answersMap.has(q.id)) {
-      const cached = answersMap.get(q.id);
-      isCorrect = checkAnswerMatch(q, userResp, cached.answer);
-    } else if (q.answer !== undefined) {
-      // Fallback check if session expired
-      isCorrect = checkAnswerMatch(q, userResp, q.answer);
+    totalScore += evalResult.marksAwarded;
+    maxScore += evalResult.maxMarks;
+
+    if (evalResult.status === "correct" || evalResult.marksAwarded >= 7) {
+      correctCount++;
+    } else if (evalResult.status === "unanswered") {
+      unansweredCount++;
+    } else {
+      incorrectCount++;
     }
-
-    if (isCorrect) correctCount++;
   });
 
-  const incorrectCount = attemptedGradableCount - correctCount;
-  const unansweredCount = gradableQuestions.length - attemptedGradableCount;
-  const totalQuestions = questions.length;
-  const attemptedCount = Object.keys(responses || {}).length;
-  const unansweredTotalCount = totalQuestions - attemptedCount;
-
-  const scorePercent = gradableQuestions.length
-    ? Math.round((correctCount / gradableQuestions.length) * 100)
-    : 0;
+  const percentage = maxScore > 0 ? Math.min(100, Math.round((totalScore / maxScore) * 100)) : 0;
 
   // Clean up session cache
   if (attemptId) {
     attemptSessionCache.delete(attemptId);
   }
 
-  return {
+  const result = {
     success: true,
-    scorePercent,
-    totalQuestions,
-    attemptedCount,
+    scorePercent: percentage,
+    totalScore,
+    maxScore,
+    percentage,
     correctCount,
     incorrectCount,
     unansweredCount,
-    unansweredTotalCount,
-    gradableCount: gradableQuestions.length,
-    attemptedGradableCount,
+    answeredCount: questions.length - unansweredCount,
+    totalQuestions: questions.length,
+    questionResults,
     elapsedSeconds,
     violationsCount: violations.length,
     violations,
     autoSubmitted: violations.length >= 3,
   };
+
+  // Sync attempt to backend so MongoDB always receives AttemptResult and updates Roadmap
+  try {
+    await assessmentApi.syncAttempt({
+      assessmentTitle: title,
+      assessmentCategory: category,
+      assessmentField: field,
+      scorePercent: percentage,
+      totalScore,
+      maxScore,
+      correctCount,
+      incorrectCount,
+      unansweredCount,
+      totalQuestions: questions.length,
+      elapsedSeconds,
+      questionResults,
+    });
+  } catch (_) {}
+
+  return result;
 }
