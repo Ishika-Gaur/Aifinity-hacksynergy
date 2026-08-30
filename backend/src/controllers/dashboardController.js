@@ -245,13 +245,35 @@ function buildAnalyticsDetails(attempts, avgScore, currentStreak, categoryStats,
     : null;
 
   const activityDates = new Set(attempts.map((attempt) => getDateKey(attempt.completedAt)));
-  const activityCalendar = Array.from({ length: 42 }, (_, index) => {
-    const date = new Date();
-    date.setHours(0, 0, 0, 0);
-    date.setDate(date.getDate() - (41 - index));
+  
+  // Build monthly calendar for current month
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth();
+  
+  const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
+  const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
+  const daysInMonth = lastDayOfMonth.getDate();
+  const startDayOfWeek = firstDayOfMonth.getDay(); // 0 = Sunday, 1 = Monday, etc.
+  
+  const monthlyCalendar = [];
+  
+  // Add empty cells for days before the first day of the month
+  for (let i = 0; i < startDayOfWeek; i++) {
+    monthlyCalendar.push({ date: null, day: null, active: false, isPadding: true });
+  }
+  
+  // Add all days of the month
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = new Date(currentYear, currentMonth, day);
     const key = getDateKey(date);
-    return { date: key, active: activityDates.has(key) };
-  });
+    monthlyCalendar.push({
+      date: key,
+      day: day,
+      active: activityDates.has(key),
+      isPadding: false
+    });
+  }
 
   const assessmentHistory = attempts.map((attempt) => ({
     id: String(attempt._id),
@@ -289,7 +311,8 @@ function buildAnalyticsDetails(attempts, avgScore, currentStreak, categoryStats,
       current: currentStreak,
       longest: computeLongestStreak(attempts),
       activeDays: activityDates.size,
-      calendar: activityCalendar,
+      calendar: monthlyCalendar,
+      month: now.toLocaleString('default', { month: 'long', year: 'numeric' }),
       recentActivity: assessmentHistory.slice(0, 5),
     },
     skills: {

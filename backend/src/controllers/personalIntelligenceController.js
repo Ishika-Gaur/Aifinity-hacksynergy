@@ -1,7 +1,7 @@
 import AttemptResult from "../models/AttemptResult.js";
 import UserRoadmap from "../models/UserRoadmap.js";
 import User from "../models/User.js";
-import { chatCompletion } from "../services/groqService.js";
+import { chatCompletion } from "../services/geminiService.js";
 
 function getCategoryStats(attempts) {
   const map = {};
@@ -101,14 +101,8 @@ Instructions:
 
 6. Keep the entire response between 100-150 words maximum. Do NOT generate long study plans, tables, or essays. Do not use excessive emojis. Make it extremely easy to scan in 10 seconds.`;
 
-    // 3. Format messages for Groq
-    const groqMessages = [
-      { role: "system", content: systemPrompt },
-      ...messages.map(m => ({ role: m.role, content: m.content }))
-    ];
-
-    // 4. Call Groq
-    const aiResponse = await chatCompletion(groqMessages);
+    // 4. Call Gemini
+    const aiResponse = await chatCompletion(systemPrompt, messages.map(m => ({ role: m.role, content: m.content })));
 
     return res.json({
       success: true,

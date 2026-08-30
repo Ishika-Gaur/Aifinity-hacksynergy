@@ -6,7 +6,9 @@ import { authApi } from "../services/api";
 
 const NAV_LINKS = [
   { label: "Home", href: "/" },
+  { label: "Roadmap", href: "/roadmap" },
   { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
   { label: "FAQS", href: "/faq" },
 ];
 
@@ -94,7 +96,7 @@ export default function Navbar() {
               <li key={link.href}>
                 <a
                   href={link.href}
-                  className={`rounded-md px-3.5 py-2 text-xs font-sans font-semibold transition-all duration-200 ${
+                  className={`rounded-lg px-3.5 py-2 text-xs font-sans font-semibold transition-all duration-200 ${
                     isActive
                       ? "bg-[#1B332C] text-[#E8C547] font-bold shadow-xs border border-[#C4952A]/30"
                       : "text-[#24413A] hover:bg-[#EDE6D3]/60 hover:text-[#1B332C]"
@@ -111,10 +113,16 @@ export default function Navbar() {
         <div className="hidden items-center gap-3 md:flex relative">
           {user ? (
             <>
-              <div className="flex items-center gap-2 mr-2">
+              {/* User avatar + name → clicks to dashboard */}
+              <a
+                href="/dashboard"
+                className="flex items-center gap-2 mr-1 rounded-xl px-2 py-1 hover:bg-[#EDE6D3]/60 transition-colors cursor-pointer"
+                title="Go to Dashboard"
+              >
                 <a
                   href="/personal-intelligence"
-                  className="flex items-center justify-center h-9 w-9 rounded-full bg-[#E8C547] text-[#1B332C] hover:bg-[#C4952A] hover:text-white transition-colors shadow-sm mr-2 cursor-pointer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex items-center justify-center h-9 w-9 rounded-full bg-[#E8C547] text-[#1B332C] hover:bg-[#C4952A] hover:text-white transition-colors shadow-sm mr-1 cursor-pointer"
                   title="Personal Intelligence"
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -124,15 +132,15 @@ export default function Navbar() {
                 <div className="flex items-center justify-center h-9 w-9 rounded-full bg-[#1B332C] text-[#E8C547] font-bold text-xs shadow-sm">
                   {getInitials(user.name)}
                 </div>
-                <span className="text-sm font-sans font-semibold text-[#1B332C] hidden lg:block">
+                <span className="text-sm font-sans font-semibold text-[#1B332C] hidden xl:block">
                   {user.name || "User"}
                 </span>
-              </div>
+              </a>
               <a
-                href="/dashboard"
-                className="px-3 py-1.5 text-xs font-sans font-semibold text-[#1B332C] hover:text-[#C4952A] transition-colors"
+                href="/assessment"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-[#1B332C] px-3.5 py-1.5 text-xs font-bold text-[#E8C547] border border-[#C4952A]/40 shadow-xs hover:bg-[#2E4F42] hover:text-white transition-all duration-200"
               >
-                Dashboard
+                <span>⚡ Take Assessment</span>
               </a>
               <Button
                 onClick={handleLogout}
@@ -144,6 +152,12 @@ export default function Navbar() {
             </>
           ) : (
             <>
+              <a
+                href="/assessment"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-[#1B332C] px-3.5 py-1.5 text-xs font-bold text-[#E8C547] border border-[#C4952A]/40 shadow-xs hover:bg-[#2E4F42] hover:text-white transition-all duration-200"
+              >
+                <span>⚡ Take Assessment</span>
+              </a>
               <a
                 href="/login"
                 className="px-3 py-1.5 text-xs font-sans font-semibold text-[#1B332C] hover:text-[#C4952A] transition-colors"
@@ -204,9 +218,16 @@ export default function Navbar() {
               );
             })}
             <li className="pt-3 border-t border-[#2E4F42]/10 flex flex-col gap-2">
+              <a
+                href="/assessment"
+                className="w-full text-center py-2.5 text-sm font-sans font-bold text-[#E8C547] bg-[#1B332C] rounded-xl shadow-xs border border-[#C4952A]/40 transition-colors"
+                onClick={() => setOpen(false)}
+              >
+                ⚡ Take Assessment
+              </a>
               {user ? (
                 <>
-                  <div className="px-4 py-3 mb-1 bg-white/50 rounded-lg border border-[#2E4F42]/5 flex items-center gap-3">
+                  <div className="px-4 py-3 mb-1 bg-white/50 rounded-xl border border-[#2E4F42]/5 flex items-center gap-3">
                     <div className="flex shrink-0 items-center justify-center h-10 w-10 rounded-full bg-[#1B332C] text-[#E8C547] font-bold text-sm shadow-sm">
                       {getInitials(user.name)}
                     </div>
@@ -217,7 +238,7 @@ export default function Navbar() {
                   </div>
                   <a
                     href="/personal-intelligence"
-                    className="w-full text-center py-2 text-sm font-sans font-bold text-[#D9A62B] hover:text-[#1B332C] bg-[#1B332C] rounded-md transition-colors"
+                    className="w-full text-center py-2 text-sm font-sans font-bold text-[#D9A62B] hover:text-[#1B332C] bg-[#EDE6D3] rounded-xl transition-colors"
                     onClick={() => setOpen(false)}
                   >
                     ✦ Personal Intelligence
@@ -227,7 +248,7 @@ export default function Navbar() {
                     className="w-full text-center py-2 text-sm font-sans font-semibold text-[#1B332C] hover:text-[#C4952A]"
                     onClick={() => setOpen(false)}
                   >
-                    Dashboard
+                    📊 Dashboard
                   </a>
                   <Button 
                     onClick={() => {

@@ -19,10 +19,10 @@ export default function CognifyModules({ conceptRoot, mistakeMap, skillGap }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {/* Module 1: ConceptRoot AI */}
-      <div className="flex flex-col justify-between rounded-md bg-[#FBF8F0] p-6 border border-[#2E4F42]/12 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] hover:border-[#C4952A]/40 hover:-translate-y-1 transition-all duration-300 group">
+      <div className="flex flex-col justify-between rounded-2xl bg-[#FBF8F0] p-6 sm:p-7 border border-[#2E4F42]/12 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] hover:border-[#C4952A]/40 hover:-translate-y-1 transition-all duration-300 group">
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <span className="font-['Space_Mono'] text-xs font-bold uppercase tracking-wider text-[#C4952A] bg-[#EDE6D3] px-2.5 py-0.5 rounded">
+            <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#C4952A] bg-[#EDE6D3] px-2.5 py-0.5 rounded-md">
               ROOT CAUSE
             </span>
             <span className="text-xl group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">🌳</span>
@@ -38,22 +38,22 @@ export default function CognifyModules({ conceptRoot, mistakeMap, skillGap }) {
           </div>
 
           {/* Stats Bar */}
-          <div className="grid grid-cols-3 gap-2 rounded bg-[#F1EDE1] p-3 border border-[#2E4F42]/08 text-center font-['Space_Mono']">
+          <div className="grid grid-cols-3 gap-2 rounded-xl bg-[#F1EDE1] p-3 border border-[#2E4F42]/08 text-center font-mono">
             <div>
-              <span className="block text-[10px] text-[#8B9690] uppercase">Analyzed</span>
-              <span className="text-sm font-bold text-[#1B332C]">
+              <span className="block text-[10px] text-[#8B9690] uppercase font-semibold">Analyzed</span>
+              <span className="text-base font-extrabold text-[#1B332C]">
                 {conceptRoot?.metrics?.analyzed || 24}
               </span>
             </div>
             <div>
-              <span className="block text-[10px] text-[#2E4F42] uppercase">Strong</span>
-              <span className="text-sm font-bold text-[#2E4F42]">
+              <span className="block text-[10px] text-[#2E4F42] uppercase font-semibold">Strong</span>
+              <span className="text-base font-extrabold text-[#2E4F42]">
                 {conceptRoot?.metrics?.strong || 16}
               </span>
             </div>
             <div>
-              <span className="block text-[10px] text-[#C1443C] uppercase">Attention</span>
-              <span className="text-sm font-bold text-[#C1443C]">
+              <span className="block text-[10px] text-[#C1443C] uppercase font-semibold">Attention</span>
+              <span className="text-base font-extrabold text-[#C1443C]">
                 {conceptRoot?.metrics?.needsAttention || 5}
               </span>
             </div>
@@ -66,11 +66,11 @@ export default function CognifyModules({ conceptRoot, mistakeMap, skillGap }) {
               return (
                 <div
                   key={i}
-                  className="flex items-center justify-between text-xs py-1 border-b border-dashed border-[#2E4F42]/10 last:border-0"
+                  className="flex items-center justify-between text-xs py-1.5 border-b border-dashed border-[#2E4F42]/10 last:border-0"
                 >
                   <span className="font-medium text-[#24413A]">{c.name}</span>
                   <span
-                    className={`inline-flex items-center justify-center h-5 w-5 rounded-full font-['Space_Mono'] font-bold text-xs border ${badge.color}`}
+                    className={`inline-flex items-center justify-center h-5 w-5 rounded-full font-mono font-bold text-xs border ${badge.color}`}
                   >
                     {badge.icon}
                   </span>
@@ -83,7 +83,7 @@ export default function CognifyModules({ conceptRoot, mistakeMap, skillGap }) {
         <div className="pt-5 mt-4 border-t border-[#2E4F42]/10">
           <Link
             to={conceptRoot?.href || "/concept-root"}
-            className="inline-flex items-center justify-center gap-2 rounded-md font-medium transition-all duration-200 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none bg-[var(--color-surface)] text-[var(--color-primary-600)] border border-[var(--color-primary-600)] hover:bg-[var(--color-primary-50)] px-3.5 py-1.5 text-sm w-full justify-between group-hover:bg-[#1B332C] group-hover:text-[#E8C547] group-hover:border-[#1B332C] transition-all duration-200"
+            className="inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200 bg-[var(--color-surface)] text-[#1B332C] border border-[#2E4F42]/20 hover:bg-[#1B332C] hover:text-[#E8C547] hover:border-[#1B332C] px-4 py-2 text-xs w-full justify-between shadow-2xs"
           >
             <span>{conceptRoot?.cta || "Explore ConceptRoot"}</span>
             <span>→</span>
@@ -92,10 +92,10 @@ export default function CognifyModules({ conceptRoot, mistakeMap, skillGap }) {
       </div>
 
       {/* Module 2: MistakeMap AI */}
-      <div className="flex flex-col justify-between rounded-md bg-[#FBF8F0] p-6 border border-[#2E4F42]/12 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] hover:border-[#C1443C]/40 hover:-translate-y-1 transition-all duration-300 group">
+      <div className="flex flex-col justify-between rounded-2xl bg-[#FBF8F0] p-6 sm:p-7 border border-[#2E4F42]/12 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] hover:border-[#C1443C]/40 hover:-translate-y-1 transition-all duration-300 group">
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <span className="font-['Space_Mono'] text-xs font-bold uppercase tracking-wider text-[#C1443C] bg-[#C1443C]/10 px-2.5 py-0.5 rounded">
+            <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#C1443C] bg-[#C1443C]/10 px-2.5 py-0.5 rounded-md">
               PATTERN DETECTION
             </span>
             <span className="text-xl group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">🗺️</span>
@@ -111,15 +111,15 @@ export default function CognifyModules({ conceptRoot, mistakeMap, skillGap }) {
           </div>
 
           {/* Most Common Mistake Featured Card */}
-          <div className="rounded bg-[#F1EDE1] p-4 border border-[#2E4F42]/08 flex flex-col gap-3 group-hover:border-[#C1443C]/20 transition-colors">
-            <span className="font-['Space_Mono'] text-[10px] font-bold uppercase tracking-widest text-[#5B6B5F]">
+          <div className="rounded-xl bg-[#F1EDE1] p-4 border border-[#2E4F42]/08 flex flex-col gap-2.5 group-hover:border-[#C1443C]/20 transition-colors">
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-[#5B6B5F]">
               MOST COMMON MISTAKE
             </span>
-            <span className="font-['Kalam'] text-lg font-bold text-[#C1443C]">
+            <span className="font-sans text-base font-bold text-[#C1443C]">
               "{mistakeMap?.mostCommonMistake || "Off-by-one errors"}"
             </span>
 
-            <div className="flex items-center justify-between text-xs pt-2 border-t border-[#2E4F42]/10 font-['Space_Mono']">
+            <div className="flex items-center justify-between text-xs pt-2 border-t border-[#2E4F42]/10 font-mono">
               <span className="text-[#5B6B5F]">
                 {mistakeMap?.occurrences || 8} occurrences
               </span>
@@ -136,7 +136,7 @@ export default function CognifyModules({ conceptRoot, mistakeMap, skillGap }) {
         <div className="pt-5 mt-4 border-t border-[#2E4F42]/10">
           <Link
             to={mistakeMap?.href || "/mistake-map"}
-            className="inline-flex items-center justify-center gap-2 rounded-md font-medium transition-all duration-200 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none bg-[var(--color-surface)] text-[var(--color-primary-600)] border border-[var(--color-primary-600)] hover:bg-[var(--color-primary-50)] px-3.5 py-1.5 text-sm w-full justify-between group-hover:bg-[#1B332C] group-hover:text-[#E8C547] group-hover:border-[#1B332C] transition-all duration-200"
+            className="inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200 bg-[var(--color-surface)] text-[#1B332C] border border-[#2E4F42]/20 hover:bg-[#1B332C] hover:text-[#E8C547] hover:border-[#1B332C] px-4 py-2 text-xs w-full justify-between shadow-2xs"
           >
             <span>{mistakeMap?.cta || "View MistakeMap"}</span>
             <span>→</span>
@@ -145,10 +145,10 @@ export default function CognifyModules({ conceptRoot, mistakeMap, skillGap }) {
       </div>
 
       {/* Module 3: SkillGap AI */}
-      <div className="flex flex-col justify-between rounded-md bg-[#FBF8F0] p-6 border border-[#2E4F42]/12 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] hover:border-[#1B332C]/40 hover:-translate-y-1 transition-all duration-300 group">
+      <div className="flex flex-col justify-between rounded-2xl bg-[#FBF8F0] p-6 sm:p-7 border border-[#2E4F42]/12 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] hover:border-[#1B332C]/40 hover:-translate-y-1 transition-all duration-300 group">
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <span className="font-['Space_Mono'] text-xs font-bold uppercase tracking-wider text-[#2E4F42] bg-[#2E4F42]/10 px-2.5 py-0.5 rounded">
+            <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#2E4F42] bg-[#2E4F42]/10 px-2.5 py-0.5 rounded-md">
               CAREER READINESS
             </span>
             <span className="text-xl group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">🎯</span>
@@ -164,20 +164,20 @@ export default function CognifyModules({ conceptRoot, mistakeMap, skillGap }) {
           </div>
 
           {/* Target Career & Match % */}
-          <div className="rounded bg-[#1B332C] p-4 text-[#FBF8F0] flex items-center justify-between border border-[#C4952A]/30 shadow-xs">
+          <div className="rounded-xl bg-[#1B332C] p-4 text-[#FBF8F0] flex items-center justify-between border border-[#C4952A]/30 shadow-xs">
             <div>
-              <span className="font-['Space_Mono'] text-[10px] uppercase text-[#E8C547] block">
+              <span className="font-mono text-[10px] uppercase text-[#E8C547] block font-bold">
                 TARGET CAREER
               </span>
-              <span className="font-['Kalam'] text-base font-bold text-[#FBF8F0]">
+              <span className="font-sans text-sm font-bold text-[#FBF8F0] block mt-0.5">
                 {skillGap?.targetCareer || "Machine Learning Engineer"}
               </span>
             </div>
             <div className="text-right">
-              <span className="font-['Space_Mono'] text-[10px] uppercase text-[#8B9690] block">
+              <span className="font-mono text-[10px] uppercase text-[#8B9690] block font-bold">
                 MATCH
               </span>
-              <span className="font-['Kalam'] text-2xl font-bold text-[#E8C547]">
+              <span className="font-sans text-2xl font-extrabold text-[#E8C547]">
                 {skillGap?.matchPercentage || 78}%
               </span>
             </div>
@@ -190,11 +190,11 @@ export default function CognifyModules({ conceptRoot, mistakeMap, skillGap }) {
               return (
                 <div
                   key={i}
-                  className="flex items-center justify-between text-xs py-1 border-b border-dashed border-[#2E4F42]/10 last:border-0"
+                  className="flex items-center justify-between text-xs py-1.5 border-b border-dashed border-[#2E4F42]/10 last:border-0"
                 >
                   <span className="font-medium text-[#24413A]">{s.name}</span>
                   <span
-                    className={`inline-flex items-center justify-center h-5 w-5 rounded-full font-['Space_Mono'] font-bold text-xs border ${badge.color}`}
+                    className={`inline-flex items-center justify-center h-5 w-5 rounded-full font-mono font-bold text-xs border ${badge.color}`}
                   >
                     {badge.icon}
                   </span>
@@ -207,7 +207,7 @@ export default function CognifyModules({ conceptRoot, mistakeMap, skillGap }) {
         <div className="pt-5 mt-4 border-t border-[#2E4F42]/10">
           <Link
             to={skillGap?.href || "/skill-gap"}
-            className="inline-flex items-center justify-center gap-2 rounded-md font-medium transition-all duration-200 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none bg-[var(--color-surface)] text-[var(--color-primary-600)] border border-[var(--color-primary-600)] hover:bg-[var(--color-primary-50)] px-3.5 py-1.5 text-sm w-full justify-between group-hover:bg-[#1B332C] group-hover:text-[#E8C547] group-hover:border-[#1B332C] transition-all duration-200"
+            className="inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200 bg-[var(--color-surface)] text-[#1B332C] border border-[#2E4F42]/20 hover:bg-[#1B332C] hover:text-[#E8C547] hover:border-[#1B332C] px-4 py-2 text-xs w-full justify-between shadow-2xs"
           >
             <span>{skillGap?.cta || "View Skill Gap"}</span>
             <span>→</span>

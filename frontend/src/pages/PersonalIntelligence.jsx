@@ -30,11 +30,21 @@ export default function PersonalIntelligence() {
     scrollToBottom();
   }, [messages]);
 
-  const handleSend = async (e) => {
-    e?.preventDefault();
-    if (!input.trim()) return;
+  const handlePromptClick = (text) => {
+    setInput(text);
+    // Auto-send after a brief tick so state is updated
+    setTimeout(() => {
+      const fakeEvent = { preventDefault: () => {} };
+      // We'll trigger send manually with the text
+      sendMessage(text);
+    }, 50);
+  };
 
-    const userMessage = { role: "user", content: input.trim() };
+  const sendMessage = async (messageText) => {
+    const text = messageText || input;
+    if (!text.trim() || loading) return;
+
+    const userMessage = { role: "user", content: text.trim() };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setLoading(true);
@@ -52,10 +62,6 @@ export default function PersonalIntelligence() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handlePromptClick = (text) => {
-    setInput(text);
   };
 
   const SUGGESTED_PROMPTS = [
@@ -126,7 +132,7 @@ export default function PersonalIntelligence() {
               </button>
             ))}
           </div>
-          <form onSubmit={handleSend} className="flex gap-2">
+          <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }} className="flex gap-2">
             <input
               type="text"
               value={input}

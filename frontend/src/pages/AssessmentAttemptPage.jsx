@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import Section from "../components/Section";
 import Container from "../components/Container";
 import Button from "../components/Button";
-import { formatType } from "../data/assessments";
+import { formatType } from "../utils/constants";
 import { createAttemptSession, submitAttemptSession } from "../services/assessmentService";
 
 const CONFIDENCE_OPTIONS = ["Low Confidence", "Medium Confidence", "High Confidence"];

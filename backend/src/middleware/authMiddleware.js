@@ -45,6 +45,23 @@ export async function authenticate(req, res, next) {
   }
 }
 
+export async function optionalAuthenticate(req, res, next) {
+  try {
+    const token = req.cookies?.token;
+    if (!token) return next();
+
+    const jwtSecret = process.env.JWT_SECRET || "fallback_dev_secret_key_change_in_prod";
+    const decoded = jwt.verify(token, jwtSecret);
+
+    const user = await User.findById(decoded.id).select("-passwordHash");
+    if (user) req.user = user;
+    
+    next();
+  } catch (err) {
+    next();
+  }
+}
+
 /**
  * Admin Authorization Middleware:
  * Ensures authenticated user has role === 'admin'.

@@ -3,13 +3,14 @@ import { Link } from "react-router-dom";
 import Section from "../components/Section";
 import SectionHeading from "../components/SectionHeading";
 import Button from "../components/Button";
-import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import Calendar from "../components/Calendar";
+import { ArrowRight } from "lucide-react";
 import {
   TYPE_FILTERS,
   DIFFICULTY_FILTERS,
   getUserProfile,
   formatType,
-} from "../data/assessments";
+} from "../utils/constants";
 import { assessmentApi, dashboardApi } from "../services/api";
 
 const ITEMS_PER_PAGE = 6;
@@ -170,7 +171,7 @@ function AssessmentProgressCard({ completedCount, availableCount, inProgressCoun
       </span>
 
       <div className="flex flex-col items-center gap-1">
-        <span className="font-['Kalam'] text-4xl sm:text-5xl font-bold text-[#1B332C]">
+        <span className="font-sans text-4xl sm:text-5xl font-extrabold text-[#1B332C]">
           {loading ? "..." : completedCount}
         </span>
         <span className="text-xs font-semibold uppercase tracking-wider text-[#5B6B5F]">
@@ -246,6 +247,11 @@ function AssessmentCard({ assessment }) {
         <p className="line-clamp-2 text-sm leading-relaxed text-[var(--color-text-muted)]">
           {assessment.description}
         </p>
+        {assessment.recommendationReason && (
+          <p className="mt-2 text-xs font-semibold text-[var(--color-primary-600)]">
+            {assessment.recommendationReason}
+          </p>
+        )}
         <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[var(--color-text-muted)]">
           <span>{assessment.questions.length} questions</span>
           <span>·</span>
@@ -372,223 +378,102 @@ function FlameIcon({ className }) {
 
 /* ---------------- Right sidebar: streak calendar + stats ---------------- */
 
-/* ---------------- Right sidebar: dynamic streak calendar + stats ---------------- */
+function StreakSidebar({ profile, dailyAssessments, completedDays }) {
+  const now = new Date();
+  const monthLabel = `${MONTH_LABELS[now.getMonth()]} ${now.getFullYear()}`;
+  const firstWeekdayOffset = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
 
-function StreakSidebar({ profile, attempts = [] }) {
-  const [viewDate, setViewDate] = useState(() => new Date());
-  const now = useMemo(() => {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }, []);
-
-  const viewYear = viewDate.getFullYear();
-  const viewMonth = viewDate.getMonth();
-  const monthLabel = `${MONTH_LABELS[viewMonth]} ${viewYear}`;
-
-  const daysInViewMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
-  const firstWeekdayOffset = new Date(viewYear, viewMonth, 1).getDay();
-
-  // Extract set of unique YYYY-MM-DD date strings when user made an attempt
-  const attemptDatesSet = useMemo(() => {
-    const set = new Set();
-    if (!Array.isArray(attempts)) return set;
-    attempts.forEach((a) => {
-      if (!a.completedAt) return;
-      const d = new Date(a.completedAt);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-      set.add(key);
-    });
-    return set;
-  }, [attempts]);
-
-  // Compute current active streak (consecutive days with attempts ending today or yesterday)
   const currentStreak = useMemo(() => {
-    if (!attemptDatesSet.size) return 0;
     let streak = 0;
-    const checkDate = new Date();
-    checkDate.setHours(0, 0, 0, 0);
-
-    const todayKey = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, "0")}-${String(checkDate.getDate()).padStart(2, "0")}`;
-
-    if (!attemptDatesSet.has(todayKey)) {
-      checkDate.setDate(checkDate.getDate() - 1);
-    }
-
-    while (true) {
-      const key = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, "0")}-${String(checkDate.getDate()).padStart(2, "0")}`;
-      if (attemptDatesSet.has(key)) {
-        streak++;
-        checkDate.setDate(checkDate.getDate() - 1);
-      } else {
-        break;
-      }
+    for (let i = dailyAssessments.length - 1; i >= 0; i--) {
+      const d = dailyAssessments[i];
+      if (d.status === "Completed") streak++;
+      else if (d.isToday) continue;
+      else break;
     }
     return streak;
-  }, [attemptDatesSet]);
+  }, [dailyAssessments]);
 
-  // Count days in current view month that have at least one attempt
-  const monthAttemptedCount = useMemo(() => {
-    let count = 0;
-    for (let day = 1; day <= daysInViewMonth; day++) {
-      const dateKey = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-      if (attemptDatesSet.has(dateKey)) count++;
-    }
-    return count;
-  }, [viewYear, viewMonth, daysInViewMonth, attemptDatesSet]);
-
-  const handlePrevMonth = () => {
-    setViewDate((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
-  };
-
-  const handleNextMonth = () => {
-    setViewDate((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
-  };
-
-  const handleToday = () => {
-    setViewDate(new Date());
-  };
-
-  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const completionPct = dailyAssessments.length
+    ? Math.round((completedDays / dailyAssessments.length) * 100)
+    : 0;
 
   return (
-    <div className="flex flex-col gap-5">
-      {/* 1. Dynamic Streak & Month Calendar Card */}
-      <div className="rounded-2xl border border-[#2E4F42]/15 bg-[#FBF8F0] p-5 shadow-[var(--shadow-card)]">
-        {/* Header: Flame Icon & Current Streak */}
+    <div className="flex flex-col gap-4">
+      {/* Streak calendar card */}
+      <div className="p-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <FlameIcon className="h-5 w-5 text-[#D9A62B]" />
-            <span className="text-lg font-bold text-[#1B332C]">
-              {currentStreak} day{currentStreak === 1 ? "" : "s"} streak
+            <FlameIcon className="h-5 w-5 text-amber-500" />
+            <span className="text-lg font-bold text-[var(--color-text-h)]">
+              {currentStreak} day{currentStreak === 1 ? "" : "s"}
             </span>
           </div>
-          <span className="rounded-full border border-[#2E4F42]/15 bg-[#F1EDE1] px-2.5 py-1 text-[11px] font-semibold text-[#1B332C]">
+          <span className="rounded-full border border-[var(--color-primary-100)] bg-[var(--color-primary-50)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-primary-600)]">
             {profile.field || "Not set"}
           </span>
         </div>
-
-        {/* Subtitle: Monthly Progress */}
-        <p className="mt-1.5 text-xs font-medium text-[#5B6B5F]">
-          {monthAttemptedCount}/{daysInViewMonth} days attempted this month
+        <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
+          {monthLabel} · {completedDays}/{dailyAssessments.length} days completed
         </p>
 
-        {/* Month Navigation Bar */}
-        <div className="mt-4 flex items-center justify-between border-t border-[#2E4F42]/10 pt-3">
-          <span className="text-xs font-bold text-[#1B332C]">{monthLabel}</span>
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              onClick={handlePrevMonth}
-              className="rounded-lg p-1 text-[#5B6B5F] hover:bg-[#EDE6D3] hover:text-[#1B332C] transition-colors"
-              title="Previous Month"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              onClick={handleToday}
-              className="rounded-md border border-[#2E4F42]/15 bg-[#F1EDE1] px-2 py-0.5 text-[10px] font-semibold text-[#1B332C] hover:bg-[#EDE6D3] transition-colors"
-            >
-              Today
-            </button>
-            <button
-              type="button"
-              onClick={handleNextMonth}
-              className="rounded-lg p-1 text-[#5B6B5F] hover:bg-[#EDE6D3] hover:text-[#1B332C] transition-colors"
-              title="Next Month"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* Weekday Header */}
-        <div className="mt-3 grid grid-cols-7 text-center text-[11px] font-medium text-[#5B6B5F]">
+        {/* Weekday header */}
+        <div className="mt-4 grid grid-cols-7 text-center text-[11px] font-medium text-[var(--color-text-light)]">
           {WEEKDAY_LABELS.map((d, i) => (
             <span key={i}>{d}</span>
           ))}
         </div>
 
-        {/* Day Grid */}
-        <div className="mt-2 grid grid-cols-7 gap-1 text-center">
+        {/* Day grid — leading blanks align "Day 1" to its real weekday */}
+        <div className="mt-2 grid grid-cols-7 gap-y-2 text-center">
           {Array.from({ length: firstWeekdayOffset }).map((_, i) => (
-            <div key={`pad-${i}`} className="h-8 w-8" />
+            <div key={`pad-${i}`} />
           ))}
-
-          {Array.from({ length: daysInViewMonth }).map((_, idx) => {
-            const dayNum = idx + 1;
-            const dateKey = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(dayNum).padStart(2, "0")}`;
-            const cellDate = new Date(viewYear, viewMonth, dayNum);
-            const isTodayCell = dateKey === todayStr;
-            const isPastCell = cellDate < now;
-            const hasAttempt = attemptDatesSet.has(dateKey);
-
-            let cellStyle = "bg-[#1B332C]/10 text-[#1B332C] font-semibold"; // Default Dark Green = Available/Upcoming
-
-            if (hasAttempt) {
-              cellStyle = "bg-emerald-600 text-white font-bold shadow-xs"; // Green = Attempted/Completed
-            } else if (isPastCell) {
-              cellStyle = "bg-rose-100 text-rose-700 font-medium"; // Red = Missed past day
-            }
-
-            return (
-              <div
-                key={dayNum}
-                className={`relative flex h-8 w-8 items-center justify-center rounded-full text-xs transition-colors ${cellStyle} ${
-                  isTodayCell ? "ring-2 ring-[#D9A62B] ring-offset-1 font-bold" : ""
-                }`}
-                title={`${monthLabel} ${dayNum}${hasAttempt ? " - Assessment Attempted" : isPastCell ? " - Missed Day" : ""}`}
-              >
-                {dayNum}
-              </div>
-            );
-          })}
+          {dailyAssessments.map((daily) => (
+            <DayCell key={daily.id} daily={daily} />
+          ))}
         </div>
 
-        {/* Color Legend */}
-        <div className="mt-4 flex flex-wrap gap-x-3 gap-y-1.5 border-t border-[#2E4F42]/10 pt-3 text-[10px] text-[#5B6B5F]">
-          <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-emerald-600" /> Completed
+        {/* Legend */}
+        <div className="mt-4 flex flex-wrap gap-4 border-t border-[var(--color-border)] pt-3 text-[11px] text-[var(--color-text-muted)]">
+          <span className="flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-primary-600)]" /> Available
           </span>
-          <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-rose-500" /> Missed
+          <span className="flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-green-500" /> Completed
           </span>
-          <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-[#1B332C]" /> Available
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full border-2 border-[#D9A62B]" /> Today
+          <span className="flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-text-light)]" /> Locked
           </span>
         </div>
       </div>
 
-      {/* 2. This Month / Career Progress Card */}
-      <div className="rounded-2xl border border-[#2E4F42]/15 bg-[#FBF8F0] p-5 shadow-[var(--shadow-card)]">
-        <span className="text-xs font-semibold uppercase tracking-wide text-[#5B6B5F]">
+      {/* Progress card */}
+      <div className="border-t border-[var(--color-border)] pt-5">
+        <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-light)]">
           This month
         </span>
         <div className="mt-3 flex items-center gap-4">
           <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-full">
             <svg viewBox="0 0 36 36" className="h-16 w-16 -rotate-90">
-              <circle cx="18" cy="18" r="15.5" fill="none" stroke="#2E4F42" strokeOpacity="0.15" strokeWidth="3" />
+              <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--color-border)" strokeWidth="3" />
               <circle
                 cx="18"
                 cy="18"
                 r="15.5"
                 fill="none"
-                stroke="#C4952A"
+                stroke="var(--color-primary-600)"
                 strokeWidth="3"
                 strokeLinecap="round"
-                strokeDasharray={`${(monthAttemptedCount / daysInViewMonth) * 97.4} 97.4`}
+                strokeDasharray={`${(completionPct / 100) * 97.4} 97.4`}
               />
             </svg>
-            <span className="absolute text-xs font-bold text-[#1B332C]">
-              {Math.round((monthAttemptedCount / daysInViewMonth) * 100)}%
+            <span className="absolute text-sm font-bold text-[var(--color-text-h)]">
+              {completionPct}%
             </span>
           </div>
-          <div className="text-sm text-[#5B6B5F]">
-            <p className="font-semibold text-[#1B332C]">{profile.careerGoal || "Not set"}</p>
+          <div className="text-sm text-[var(--color-text-muted)]">
+            <p className="font-semibold text-[var(--color-text-h)]">{profile.careerGoal || "Not set"}</p>
             <p className="mt-0.5">{profile.skills.length} tracked skills</p>
           </div>
         </div>
@@ -605,7 +490,19 @@ export default function AssessmentPage() {
   const [activeSection, setActiveSection] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [assessments, setAssessments] = useState([]);
+  const [recommended, setRecommended] = useState([]);
+  const [weakTopics, setWeakTopics] = useState([]);
+  const [completedDailyDates, setCompletedDailyDates] = useState([]);
   const [loadError, setLoadError] = useState("");
+
+  // AI Generation State
+  const [isAIGenerating, setIsAIGenerating] = useState(false);
+  const [aiField, setAiField] = useState("");
+  const [aiTopic, setAiTopic] = useState("");
+  const [aiDifficulty, setAiDifficulty] = useState("Medium");
+  const [aiCount, setAiCount] = useState(5);
+  const [aiError, setAiError] = useState("");
+  const [isGeneratingDaily, setIsGeneratingDaily] = useState(false);
 
   const [userStats, setUserStats] = useState({
     completedCount: 0,
@@ -623,6 +520,19 @@ export default function AssessmentPage() {
       if (!isMounted) return;
       if (result.success) setAssessments(result.assessments);
       else setLoadError(result.error || "Assessments could not be loaded.");
+    });
+
+    assessmentApi.getDailyStatus().then((result) => {
+      if (!isMounted) return;
+      if (result.success) setCompletedDailyDates(result.completedDates || []);
+    });
+
+    assessmentApi.getPersonalized().then((result) => {
+      if (!isMounted) return;
+      if (result.success) {
+        setRecommended(result.assessments || []);
+        setWeakTopics(result.weakTopics || []);
+      }
     });
 
     return () => {
@@ -689,16 +599,81 @@ export default function AssessmentPage() {
   }, []);
 
   const categories = useMemo(() => ["All", ...new Set(assessments.map((assessment) => assessment.category))], [assessments]);
-  const recommended = useMemo(() => {
-    const fieldMatches = assessments.filter((assessment) => assessment.field === profile.field);
-    return (fieldMatches.length ? fieldMatches : assessments).slice(0, 6);
-  }, [assessments, profile]);
-  const dailyAssessments = useMemo(() => assessments.map((assessment, index) => ({
-    ...assessment,
-    day: index + 1,
-    isToday: index === 0,
-    status: "Available",
-  })), [assessments]);
+  
+  // Removed static recommended logic since we fetch it from backend now
+
+  const handleGenerateAI = async (e) => {
+    e.preventDefault();
+    if (!aiField || !aiTopic) {
+      setAiError("Please fill out Field and Topic.");
+      return;
+    }
+    setIsAIGenerating(true);
+    setAiError("");
+    
+    try {
+      const res = await assessmentApi.generateAI({
+        field: aiField,
+        topic: aiTopic,
+        difficulty: aiDifficulty,
+        count: aiCount
+      });
+      if (res.success && res.assessmentId) {
+        window.location.href = `/assessment/${res.assessmentId}`;
+      } else {
+        setAiError(res.error || res.message || "Failed to generate assessment.");
+      }
+    } catch (err) {
+      setAiError("An error occurred. Please try again.");
+    } finally {
+      setIsAIGenerating(false);
+    }
+  };
+
+  const handleCategorySelect = (c) => {
+    setAiField(profile.field || "Software Development");
+    setAiTopic(c);
+    const el = document.getElementById("generate-ai");
+    if (el) el.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleGenerateDaily = async () => {
+    setIsGeneratingDaily(true);
+    try {
+      const res = await assessmentApi.generateDailyAI();
+      if (res.success && res.assessmentId) {
+        window.location.href = `/assessment/${res.assessmentId}`;
+      } else {
+        alert(res.error || res.message || "Failed to start daily challenge");
+      }
+    } catch (err) {
+      alert("Error starting daily challenge");
+    } finally {
+      setIsGeneratingDaily(false);
+    }
+  };
+
+  // Build a full-month day array so the Calendar sidebar shows every day, not just 3 assessments
+  const dailyAssessments = useMemo(() => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const today = now.getDate();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    return Array.from({ length: daysInMonth }, (_, i) => {
+      const day = i + 1;
+      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const isCompleted = completedDailyDates.includes(dateStr);
+      return {
+        id: `day-${day}`,
+        day,
+        isToday: day === today,
+        title: `Day ${day}`,
+        status: isCompleted ? "Completed" : day === today ? "Available" : day < today ? "Locked" : "Available",
+      };
+    });
+  }, [completedDailyDates]);
 
   const completedDays = dailyAssessments.filter((d) => d.status === "Completed").length;
   const todayDay = new Date().getDate();
@@ -707,13 +682,43 @@ export default function AssessmentPage() {
     () => dailyAssessments.find((d) => d.isToday),
     [dailyAssessments]
   );
-  const weekDays = useMemo(() => {
+
+
+  // Generate actual calendar for current month
+  const monthlyCalendar = useMemo(() => {
     const now = new Date();
-    const todayIndex = dailyAssessments.findIndex((d) => d.isToday);
-    if (todayIndex === -1) return dailyAssessments.slice(0, 7);
-    const weekStart = Math.max(0, todayIndex - now.getDay());
-    return dailyAssessments.slice(weekStart, weekStart + 7);
-  }, [dailyAssessments]);
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+    const today = now.getDate();
+
+    const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
+    const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
+    const daysInMonth = lastDayOfMonth.getDate();
+    const startDayOfWeek = firstDayOfMonth.getDay(); // 0 = Sunday, 1 = Monday, etc.
+
+    const calendar = [];
+
+    // Add empty cells for days before the first day of the month
+    for (let i = 0; i < startDayOfWeek; i++) {
+      calendar.push({ day: null, isPadding: true, isToday: false, status: "Locked" });
+    }
+
+    // Add all days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const isToday = day === today;
+      // For now, mark days as Available (this could be enhanced with real assessment data)
+      calendar.push({
+        day,
+        isPadding: false,
+        isToday,
+        status: isToday ? "Available" : day < today ? "Locked" : "Available"
+      });
+    }
+
+    return calendar;
+  }, []);
+
+  const weekDays = monthlyCalendar;
 
   const exploreList = useMemo(() => {
     return assessments.filter((a) => {
@@ -795,7 +800,7 @@ export default function AssessmentPage() {
 
                   {/* Main Heading */}
                   <div>
-                    <h1 className="font-['Kalam'] text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#1B332C] leading-[1.15]">
+                    <h1 className="font-sans text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#1B332C] leading-[1.15]">
                       Test Your Skills. <br className="hidden sm:inline" />
                       <span className="text-[#C4952A]">Discover Your Strengths.</span>
                     </h1>
@@ -856,7 +861,7 @@ export default function AssessmentPage() {
                     category={c}
                     count={count}
                     index={i}
-                    onSelect={setCategory}
+                    onSelect={() => handleCategorySelect(c)}
                   />
                 );
               })}
@@ -865,9 +870,10 @@ export default function AssessmentPage() {
 
           {/* MOBILE-ONLY: streak card sits inline since the right rail is hidden below xl */}
           <div className="mb-10 xl:hidden">
-            <StreakSidebar
+            <Calendar
               profile={profile}
-              attempts={userStats.history}
+              dailyAssessments={dailyAssessments}
+              completedDays={completedDays}
             />
           </div>
 
@@ -877,6 +883,70 @@ export default function AssessmentPage() {
             </div>
           )}
 
+          {/* GENERATE AI ASSESSMENT */}
+          <Section id="generate-ai" className="scroll-mt-24 mb-10">
+            <SectionHeading
+              title="Generate AI Assessment"
+              subtitle="Generate customized multiple-choice questions on any topic using Gemini AI."
+            />
+            <div className="mt-6 rounded-2xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
+              <form onSubmit={handleGenerateAI} className="grid gap-6 sm:grid-cols-2">
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-[var(--color-text-h)]">Field</label>
+                  <input
+                    type="text"
+                    required
+                    value={aiField}
+                    onChange={(e) => setAiField(e.target.value)}
+                    placeholder="e.g., Backend Development"
+                    className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-[var(--color-primary-500)] focus:ring-1 focus:ring-[var(--color-primary-500)]"
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-[var(--color-text-h)]">Topic / Technology</label>
+                  <input
+                    type="text"
+                    required
+                    value={aiTopic}
+                    onChange={(e) => setAiTopic(e.target.value)}
+                    placeholder="e.g., Node.js"
+                    className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-[var(--color-primary-500)] focus:ring-1 focus:ring-[var(--color-primary-500)]"
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-[var(--color-text-h)]">Difficulty</label>
+                  <select
+                    value={aiDifficulty}
+                    onChange={(e) => setAiDifficulty(e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-[var(--color-primary-500)] focus:ring-1 focus:ring-[var(--color-primary-500)]"
+                  >
+                    <option value="Easy">Easy</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Hard">Hard</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-[var(--color-text-h)]">Number of Questions</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="20"
+                    required
+                    value={aiCount}
+                    onChange={(e) => setAiCount(parseInt(e.target.value))}
+                    className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-[var(--color-primary-500)] focus:ring-1 focus:ring-[var(--color-primary-500)]"
+                  />
+                </div>
+                <div className="col-span-full mt-2">
+                  {aiError && <p className="mb-4 text-sm text-rose-600">{aiError}</p>}
+                  <Button type="submit" disabled={isAIGenerating} className="w-full sm:w-auto">
+                    {isAIGenerating ? "Generating with Gemini..." : "Generate AI Assessment"}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </Section>
+
           {/* RECOMMENDED FOR YOU */}
           <Section id="recommended" className="scroll-mt-24">
             <SectionHeading
@@ -884,10 +954,20 @@ export default function AssessmentPage() {
               subtitle={`Recommended for your ${profile.careerGoal || "goal"} — based on your field (${profile.field || "Not set"}) and skills: ${profile.skills.join(", ")}.`}
             />
             <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+              {weakTopics.map((topic) => (
+                <div key={`weak-${topic}`} className="group flex flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-amber-50 shadow-sm transition-shadow hover:shadow-md p-5">
+                  <span className="text-[11px] font-semibold uppercase tracking-wide text-amber-700">Needs Improvement</span>
+                  <h3 className="mt-1 text-lg font-bold leading-snug text-amber-900">{topic}</h3>
+                  <p className="mt-2 text-sm text-amber-800/80 mb-4">Your recent scores in this topic are below average. Practice with AI to improve.</p>
+                  <Button onClick={() => handleCategorySelect(topic)} className="mt-auto w-full" variant="outline">
+                    Generate AI Assessment &rarr;
+                  </Button>
+                </div>
+              ))}
               {recommended.map((assessment) => (
                 <AssessmentCard key={assessment.id} assessment={assessment} />
               ))}
-              {recommended.length === 0 && (
+              {recommended.length === 0 && weakTopics.length === 0 && (
                 <p className="col-span-full text-center text-sm text-[var(--color-text-muted)]">
                   No recommendations yet — complete onboarding to get personalized picks.
                 </p>
@@ -914,12 +994,12 @@ export default function AssessmentPage() {
                     Keep your streak alive — finish today's challenge before it locks tomorrow.
                   </p>
                   <Button
-                    as={Link}
-                    to={`/assessment/${todayAssessment.id}`}
+                    onClick={handleGenerateDaily}
+                    disabled={isGeneratingDaily}
                     size="sm"
                     className="mt-6 !bg-white !text-[var(--color-text-h)] hover:!bg-white/90"
                   >
-                    Start Today's Challenge
+                    {isGeneratingDaily ? "Generating..." : "Start Today's Challenge"}
                   </Button>
                 </div>
               ) : (
@@ -928,39 +1008,44 @@ export default function AssessmentPage() {
                 </div>
               )}
 
-              {/* This week */}
+              {/* This month */}
               <div className="rounded-2xl border border-[var(--color-border)] p-6">
                 <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-light)]">
-                  This week
+                  {new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}
                 </span>
-                <div className="mt-4 grid grid-cols-7 gap-1.5 text-center">
-                  {weekDays.map((d) => (
-                    <div key={d.id} className="flex flex-col items-center gap-1">
-                      <span
-                        className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold ${d.isToday
-                          ? "bg-[var(--color-primary-600)] text-white"
-                          : d.status === "Completed"
-                            ? "bg-green-50 text-green-700"
-                            : d.status === "Locked"
-                              ? "text-[var(--color-text-light)]"
-                              : "text-[var(--color-text-h)]"
-                          }`}
-                      >
-                        {d.day}
-                      </span>
-                      <span
-                        className={`h-1 w-1 rounded-full ${d.status === "Completed" ? "bg-green-500" : d.status === "Locked" ? "bg-transparent" : "bg-[var(--color-primary-600)]"
-                          }`}
-                      />
-                    </div>
-                  ))}
+                <div className="mt-4">
+                  <div className="grid grid-cols-7 gap-1.5 mb-2 text-center">
+                    {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+                      <span key={day} className="text-xs font-semibold text-[var(--color-text-light)]">{day}</span>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-7 gap-1.5 text-center">
+                    {weekDays.map((d, index) => (
+                      <div key={index} className="flex flex-col items-center gap-1">
+                        <span
+                          className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold ${d.isPadding
+                            ? "invisible"
+                            : d.isToday
+                              ? "bg-[var(--color-primary-600)] text-white"
+                              : d.status === "Completed"
+                                ? "bg-green-50 text-green-700"
+                                : d.status === "Locked"
+                                  ? "text-[var(--color-text-light)]"
+                                  : "text-[var(--color-text-h)]"
+                            }`}
+                        >
+                          {d.day}
+                        </span>
+                        {!d.isPadding && (
+                          <span
+                            className={`h-1 w-1 rounded-full ${d.status === "Completed" ? "bg-green-500" : d.status === "Locked" ? "bg-transparent" : "bg-[var(--color-primary-600)]"
+                              }`}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <p className="mt-4 text-xs text-[var(--color-text-muted)] xl:hidden">
-                  Full calendar is above.
-                </p>
-                <p className="mt-4 hidden text-xs text-[var(--color-text-muted)] xl:block">
-                  Full calendar is pinned to the right.
-                </p>
               </div>
             </div>
           </Section>
@@ -1046,9 +1131,13 @@ export default function AssessmentPage() {
                 <AssessmentCard key={assessment.id} assessment={assessment} />
               ))}
               {paginatedList.length === 0 && (
-                <p className="col-span-full text-center text-sm text-[var(--color-text-muted)]">
-                  No assessments match these filters yet.
-                </p>
+                <div className="col-span-full rounded-2xl border border-dashed border-[var(--color-border)] p-10 text-center">
+                  <p className="text-sm font-medium text-[var(--color-text-h)]">No public assessments match these filters yet.</p>
+                  <p className="mt-1 text-sm text-[var(--color-text-muted)]">Use the AI Generator above to create a customized assessment!</p>
+                  <Button onClick={() => handleCategorySelect(category === "All" ? "Node.js" : category)} className="mt-6" variant="outline">
+                    Generate AI Assessment
+                  </Button>
+                </div>
               )}
             </div>
 
@@ -1074,10 +1163,11 @@ export default function AssessmentPage() {
         </div>
 
         {/* ---------------- RIGHT SIDEBAR (streak calendar) ---------------- */}
-        <aside className="sticky top-[100px] hidden h-fit w-80 shrink-0 self-start pt-8 xl:block">
-          <StreakSidebar
+        <aside className="sticky top-20 hidden h-fit w-64 shrink-0 self-start pt-14 xl:block">
+          <Calendar
             profile={profile}
-            attempts={userStats.history}
+            dailyAssessments={dailyAssessments}
+            completedDays={completedDays}
           />
         </aside>
       </div>

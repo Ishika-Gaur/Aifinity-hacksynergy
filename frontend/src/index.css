@@ -1,34 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
 @import "tailwindcss";
 
 /* ==========================================================================
-   Typography Scale
+   Typography Scale & Fonts
    ========================================================================== */
 @theme {
-  --text-xs: 0.875rem;
-  --text-xs--line-height: 1.3rem;
-  --text-sm: 1rem;
-  --text-sm--line-height: 1.5rem;
-  --text-base: 1.125rem;
-  --text-base--line-height: 1.75rem;
-  --text-lg: 1.25rem;
-  --text-lg--line-height: 1.85rem;
-  --text-xl: 1.4375rem;
-  --text-xl--line-height: 1.95rem;
-  --text-2xl: 1.6875rem;
-  --text-2xl--line-height: 2.1rem;
-  --text-3xl: 2.0625rem;
-  --text-3xl--line-height: 2.4rem;
-  --text-4xl: 2.5625rem;
-  --text-4xl--line-height: 2.8rem;
-  --text-5xl: 3.3125rem;
-  --text-5xl--line-height: 1.1;
-  --text-6xl: 4.0625rem;
-  --text-6xl--line-height: 1.05;
-
-  /* Display + mono now match HeroSection's chalk-handwriting identity */
-  --font-display: "Kalam", cursive;
-  --font-body: "Inter", sans-serif;
+  --font-display: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-body: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: "Space Mono", monospace;
 }
 
