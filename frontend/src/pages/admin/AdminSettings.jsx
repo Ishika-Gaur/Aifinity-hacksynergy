@@ -162,8 +162,7 @@ export default function AdminSettings() {
                 }
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 outline-none font-semibold text-slate-800"
               >
-                <option value="gemini-3.5-flash-latest">Gemini 3.5 Flash (Fast & Responsive)</option>
-                <option value="gemini-3.5-pro-latest">Gemini 3.5 Pro (Deep Reasoning)</option>
+                <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash Lite (Fast & Responsive)</option>
               </select>
             </div>
 

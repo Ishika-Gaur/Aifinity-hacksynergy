@@ -9,7 +9,7 @@ const adminSettingsSchema = new mongoose.Schema(
       publicRegistration: { type: Boolean, default: true },
     },
     ai: {
-      primaryModel: { type: String, default: "gemini-3.5-flash-latest" },
+      primaryModel: { type: String, default: "gemini-3.5-flash-lite" },
       maxTokensPerRequest: { type: Number, default: 4096 },
       temperature: { type: Number, default: 0.7 },
       dailyLimitPerUser: { type: Number, default: 100 },
