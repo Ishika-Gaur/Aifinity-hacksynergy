@@ -22,10 +22,14 @@ const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.01:27017/aifinity";
 const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
 
-// Middleware
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://aifinity-frontend.onrender.com",
+];
+
 app.use(
   cors({
-    origin: CLIENT_URL,
+    origin: allowedOrigins,
     credentials: true,
   })
 );

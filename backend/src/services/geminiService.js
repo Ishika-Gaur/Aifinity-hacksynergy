@@ -24,8 +24,8 @@ const getGenAI = () => {
 export const generateQuestions = async (field, topic, difficulty, count) => {
   try {
     const ai = getGenAI();
-    // Using gemini-3.6-flash as it's fast and good at JSON generation
-    const model = ai.getGenerativeModel({ model: "gemini-3.6-flash" });
+    // Using gemini-3.5-flash-lite as it's fast and good at JSON generation
+    const model = ai.getGenerativeModel({ model: "gemini-3.5-flash-lite" });
 
     const prompt = `You are an expert technical assessor. Generate exactly ${count} multiple-choice questions for an assessment.
     
@@ -83,7 +83,7 @@ export const chatCompletion = async (systemPrompt, messages) => {
   try {
     const ai = getGenAI();
     const model = ai.getGenerativeModel({
-      model: "gemini-3.6-flash",
+      model: "gemini-3.5-flash-lite",
       systemInstruction: systemPrompt,
     });
 
